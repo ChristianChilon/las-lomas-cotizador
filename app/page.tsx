@@ -404,6 +404,7 @@ export default function Home() {
       }}  
     >
       <div
+        className="logo-topbar"
         style={{
           position: "fixed",
 
@@ -440,6 +441,7 @@ export default function Home() {
       </div>
 
       <div
+        className="vista-switch-control"
         style={{
           position: "fixed",
 
@@ -477,6 +479,7 @@ export default function Home() {
         }}
       >
         <button
+          className="vista-switch-button"
           onClick={() =>
             setVista("mapa")
           }
@@ -484,9 +487,9 @@ export default function Home() {
             border: "none",
 
             padding:
-              "4px 18px",
+              "0px 18px",
           
-            height: 30,
+            height: 38,
 
             borderRadius: 999,
 
@@ -513,6 +516,7 @@ export default function Home() {
         </button>
 
         <button
+          className="vista-switch-button"
           onClick={() =>
             setVista("tabla")
           }
@@ -522,7 +526,7 @@ export default function Home() {
             padding:
               "0px 18px",
             
-            height: 28,
+            height: 38,
 
             borderRadius: 999,
 
@@ -595,6 +599,7 @@ export default function Home() {
             }}
           >
             <div
+              className="modo-toggle-control"
               onClick={() =>
                 setModoNoche(
                   !modoNoche
@@ -664,6 +669,7 @@ export default function Home() {
             </div>
 
             <button
+              className="asesor-login-button"
               type="button"
               onClick={() =>
                 window.alert(
@@ -672,8 +678,9 @@ export default function Home() {
               }
               style={{
                 height: 38,
-                minWidth: 70,
-                padding: "0 14px",
+                width: 38,
+                minWidth: 38,
+                padding: 0,
                 borderRadius: 999,
                 border:
                   "1px solid rgba(210,170,80,.35)",
@@ -681,14 +688,14 @@ export default function Home() {
                   "linear-gradient(180deg,#fff8e6,#f5e6b8)",
                 color: "#4f3d18",
                 cursor: "pointer",
-                fontSize: 13,
+                fontSize: 17,
                 fontWeight: 800,
                 letterSpacing: ".2px",
                 boxShadow:
                   "0 6px 18px rgba(0,0,0,.16)",
               }}
             >
-              Login
+              👤
             </button>
           </div>
     

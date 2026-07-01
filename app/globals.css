@@ -101,7 +101,58 @@ select {
   color: #edf4e9;
 }
 
+.asesor-login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.modo-toggle-control {
+  flex: 0 0 auto;
+}
+
 @media (max-width: 768px) {
+  .logo-topbar {
+    top: 5px !important;
+    left: 3px !important;
+  }
+
+  .vista-switch-control {
+    top: 8px !important;
+    padding: 5px !important;
+    gap: 4px !important;
+  }
+
+  .vista-switch-button {
+    min-width: 66px !important;
+    height: 38px !important;
+    padding: 0 14px !important;
+    font-size: 12px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .modo-mobile-ajuste {
+    top: 10px !important;
+    right: 10px !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 8px !important;
+  }
+
+  .asesor-login-button {
+    order: 1 !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    font-size: 17px !important;
+  }
+
+  .modo-toggle-control {
+    order: 2 !important;
+  }
+
   .modal-lote-panel {
     position: fixed !important;
     left: 12px !important;
@@ -195,8 +246,8 @@ select {
   }
 
   .logo-mobile-ajuste {
-    width: 106px !important;
-    height: 73px !important;
+    width: 82px !important;
+    height: 57px !important;
   }
 }
 .modo-mobile-ajuste {
