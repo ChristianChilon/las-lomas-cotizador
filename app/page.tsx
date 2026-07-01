@@ -41,6 +41,7 @@ type LoteRegistro = {
 };
 
 const TABLA_LOTES = "las_lomas_lotes";
+const ANCHO_PLANO = 999.809;
 
 const normalizarEstado = (
   estado: string | null
@@ -171,6 +172,55 @@ export default function Home() {
     loteUbicado,
     setLoteUbicado,
   ] = useState<LoteData | null>(null);
+
+  const [
+    escalaInicialPlano,
+    setEscalaInicialPlano,
+  ] = useState(0.92);
+
+  const [
+    zoomMovil,
+    setZoomMovil,
+  ] = useState(false);
+
+  useEffect(() => {
+    const actualizarZoomInicial = () => {
+      const esMovil =
+        window.innerWidth <= 768;
+
+      setZoomMovil(esMovil);
+
+      if (!esMovil) {
+        setEscalaInicialPlano(0.92);
+        return;
+      }
+
+      const margenLateral = 14;
+      const escalaEncuadre =
+        (window.innerWidth - margenLateral) /
+        ANCHO_PLANO;
+
+      setEscalaInicialPlano(
+        Math.max(
+          0.32,
+          Math.min(0.48, escalaEncuadre)
+        )
+      );
+    };
+
+    actualizarZoomInicial();
+
+    window.addEventListener(
+      "resize",
+      actualizarZoomInicial
+    );
+
+    return () =>
+      window.removeEventListener(
+        "resize",
+        actualizarZoomInicial
+      );
+  }, []);
 
   useEffect(() => {
     let activo = true;
@@ -554,16 +604,21 @@ export default function Home() {
       </div>
 
       <TransformWrapper
-        initialScale={0.92}
+        key={`plano-${zoomMovil ? "movil" : "desktop"}-${escalaInicialPlano.toFixed(3)}`}
+        initialScale={escalaInicialPlano}
         minScale={0.1}
         maxScale={40}
         centerOnInit
         limitToBounds={false}
         wheel={{
-          step: 0.008,
+          step: zoomMovil
+            ? 0.04
+            : 0.008,
         }}
         pinch={{
-          step: 1,
+          step: zoomMovil
+            ? 4
+            : 1,
         }}
         doubleClick={{
           disabled: true,
