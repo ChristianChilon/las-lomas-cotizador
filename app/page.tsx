@@ -1512,6 +1512,7 @@ export default function Home() {
         <ModalLote
           key={loteSeleccionado.nombre}
           lote={loteSeleccionado}
+          modoNoche={modoNoche}
           onClose={() =>
             setLoteSeleccionado(null)
           }

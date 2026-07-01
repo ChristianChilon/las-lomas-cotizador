@@ -13,12 +13,34 @@ type Props = {
   lote: LoteModal;
   onClose: () => void;
   onHablarAsesor: () => void;
+  modoNoche?: boolean;
 };
+
+const obtenerNumero = (
+  valor?: string | number
+) =>
+  Number(
+    String(valor || 0)
+      .replace("S/", "")
+      .replace("m2", "")
+      .replace("m²", "")
+      .replace(/,/g, "")
+      .trim()
+  );
+
+const formatearDecimal = (
+  valor: number
+) =>
+  valor.toLocaleString("es-PE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
 export default function ModalLote({
   lote,
   onClose,
   onHablarAsesor,
+  modoNoche = false,
 }: Props) {
   const [pos, setPos] = useState({
     x: 520,
@@ -43,14 +65,12 @@ export default function ModalLote({
   if (!lote) return null;
 
   const precioNumero =
-    Number(
-      String(
-        lote.precio || 0
-      )
-        .replace("S/", "")
-        .replace(/,/g, "")
-        .trim()
-    );
+    obtenerNumero(lote.precio);
+
+  const areaTexto =
+    `${formatearDecimal(
+      obtenerNumero(lote.area)
+    )} m2`;
 
   const saldo =
     Math.max(
@@ -383,7 +403,7 @@ export default function ModalLote({
                 fontWeight: 700,
               }}
             >
-              {lote.area}
+              {areaTexto}
             </div>
           </div>
 
@@ -426,12 +446,8 @@ export default function ModalLote({
               }}
             >
               S/
-              {precioNumero.toLocaleString(
-                "es-PE",
-                {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }
+              {formatearDecimal(
+                precioNumero
               )}
             </div>
           </div>
@@ -443,10 +459,14 @@ export default function ModalLote({
       <div
         style={{
           background:
-            "linear-gradient(135deg, rgba(255,255,120,.65), rgba(255, 217, 0, 0.12))",
+            modoNoche
+              ? "linear-gradient(135deg, rgba(42,54,66,.92), rgba(31,46,40,.88))"
+              : "linear-gradient(135deg, rgba(255,255,120,.65), rgba(255, 217, 0, 0.12))",
 
           border:
-            "1px solid rgba(251, 220, 126, 0.3)",
+            modoNoche
+              ? "1px solid rgba(126,168,77,.38)"
+              : "1px solid rgba(251, 220, 126, 0.3)",
 
           borderRadius: 18,
 
@@ -463,7 +483,9 @@ export default function ModalLote({
 
             fontWeight: 700,
 
-            color: "#7a4b00",
+            color: modoNoche
+              ? "#D9E7C2"
+              : "#7a4b00",
 
             marginBottom: 3,
 
@@ -483,7 +505,9 @@ export default function ModalLote({
 
             fontWeight: 900,
 
-            color: "#8B5E00",
+            color: modoNoche
+              ? "#F3D17C"
+              : "#8B5E00",
 
             lineHeight: 1,
           }}
@@ -505,7 +529,9 @@ export default function ModalLote({
             marginTop: 4,
             paddingTop: 6,
             borderTop:
-              "1px solid rgba(0,0,0,.08)",
+              modoNoche
+                ? "1px solid rgba(255,255,255,.12)"
+                : "1px solid rgba(0,0,0,.08)",
           }}
         >
           <div
@@ -517,7 +543,9 @@ export default function ModalLote({
             <div
               style={{
                 fontSize: 11,
-                color: "#666",
+                color: modoNoche
+                  ? "#B8C4B3"
+                  : "#666",
               }}
             >
               INICIAL
@@ -538,7 +566,9 @@ export default function ModalLote({
             style={{
               width: 1,
               background:
-                "rgba(0,0,0,.08)",
+                modoNoche
+                  ? "rgba(255,255,255,.12)"
+                  : "rgba(0,0,0,.08)",
             }}
           />
 
@@ -551,7 +581,9 @@ export default function ModalLote({
             <div
               style={{
                 fontSize: 11,
-                color: "#666",
+                color: modoNoche
+                  ? "#B8C4B3"
+                  : "#666",
               }}
             >
               MESES

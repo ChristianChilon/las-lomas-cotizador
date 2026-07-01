@@ -31,6 +31,14 @@ const PLANO_HEIGHT = "1394.93px";
 
 let tooltip: HTMLDivElement | null = null;
 
+const formatearDecimal = (
+  valor: number | string
+) =>
+  Number(valor).toLocaleString("es-PE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
 export default function PlanoSVG({
   lotes,
   loteUbicado,
@@ -258,13 +266,15 @@ export default function PlanoSVG({
             </div>
 
             <div>
-              ${lote.area} m2
+              ${formatearDecimal(
+                lote.area
+              )} m2
             </div>
 
             <div>
-              S/ ${Number(
-              lote.precio
-            ).toLocaleString("es-PE")}
+              S/ ${formatearDecimal(
+                lote.precio
+              )}
             </div>
 
             <div
@@ -434,10 +444,12 @@ export default function PlanoSVG({
 
             setLoteSeleccionado({
               nombre: `MZ ${lote.mz} - LOTE ${lote.lote}`,
-              area: `${lote.area} m2`,
-              precio: `S/ ${Number(
+              area: `${formatearDecimal(
+                lote.area
+              )} m2`,
+              precio: `S/ ${formatearDecimal(
                 lote.precio
-              ).toLocaleString("es-PE")}`,
+              )}`,
               estado: lote.estado,
             });
           };
