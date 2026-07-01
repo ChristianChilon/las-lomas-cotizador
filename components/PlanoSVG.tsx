@@ -135,6 +135,7 @@ export default function PlanoSVG({
 
         let loteActivo: HTMLElement | null = null;
         let loteClon: SVGElement | null = null;
+        let loteHoverClon: SVGElement | null = null;
 
         let inicioClickX = 0;
         let inicioClickY = 0;
@@ -191,6 +192,44 @@ export default function PlanoSVG({
             "0.9";
 
           path.style.filter = "";
+        };
+
+        const limpiarHover = () => {
+          if (loteHoverClon) {
+            loteHoverClon.remove();
+            loteHoverClon = null;
+          }
+        };
+
+        const resaltarHover = (
+          path: HTMLElement,
+          stroke: string
+        ) => {
+          const parent = path.parentNode;
+
+          if (!parent) return;
+
+          limpiarHover();
+
+          const clon =
+            path.cloneNode(true) as SVGElement;
+
+          clon.removeAttribute("id");
+          clon.style.pointerEvents =
+            "none";
+          clon.style.fill = "none";
+          clon.style.stroke = stroke;
+          clon.style.strokeWidth = "2.4";
+          clon.style.filter =
+            "drop-shadow(0px 0px 3px rgba(0,0,0,.22))";
+
+          clon.setAttribute(
+            "vector-effect",
+            "non-scaling-stroke"
+          );
+
+          parent.appendChild(clon);
+          loteHoverClon = clon;
         };
 
         lotes.forEach((lote) => {
@@ -325,8 +364,15 @@ export default function PlanoSVG({
 
             if (
               loteActivo === path
-            )
+            ) {
+              limpiarHover();
               return;
+            }
+
+            resaltarHover(
+              path,
+              estadoColor
+            );
 
             path.style.stroke =
               estadoColor;
@@ -346,6 +392,8 @@ export default function PlanoSVG({
               loteActivo === path
             )
               return;
+
+            limpiarHover();
 
             restaurarLote(
               path,
@@ -369,6 +417,8 @@ export default function PlanoSVG({
             ) {
               return;
             }
+
+            limpiarHover();
 
             if (loteActivo !== path) {
               if (loteClon) {
