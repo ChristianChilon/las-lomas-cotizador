@@ -354,8 +354,45 @@ export default function Home() {
     window.open(url, "_blank");
   };
 
+  const colorDivisorTabla = modoNoche
+    ? "1px solid rgba(216,229,203,.16)"
+    : "1px solid #e8e8e8";
+
+  const controlTabla = modoNoche
+    ? {
+        background: "rgba(255,255,255,.08)",
+        border:
+          "1px solid rgba(216,229,203,.24)",
+        color: "#f5f8ee",
+        colorScheme: "dark" as const,
+        boxShadow:
+          "inset 0 1px 0 rgba(255,255,255,.06)",
+      }
+    : {};
+
+  const thTabla = {
+    ...th,
+    background: modoNoche
+      ? "#172433"
+      : th.background,
+    color: modoNoche
+      ? "#dbeac7"
+      : th.color,
+    boxShadow: modoNoche
+      ? "0 2px 10px rgba(0,0,0,.28)"
+      : th.boxShadow,
+  };
+
+  const tdTabla = {
+    ...td,
+    color: modoNoche
+      ? "#edf4e9"
+      : "#111827",
+  };
+
   return (
     <main
+      className={modoNoche ? "modo-noche" : ""}
       style={{
         width: "100vw",
         height: "100vh",
@@ -382,8 +419,6 @@ export default function Home() {
           style={{
             width: 143,
             height: 98,
-            filter:
-              "drop-shadow(0 0 3px rgba(255,255,255,.95)) drop-shadow(0 0 9px rgba(255,255,255,.75)) drop-shadow(0 6px 10px rgba(0,0,0,.24))",
           }}
         >
           <Image
@@ -397,6 +432,8 @@ export default function Home() {
               height: "100%",
               objectFit: "contain",
               display: "block",
+              filter:
+                "drop-shadow(0 0 2px rgba(255,255,255,.82)) drop-shadow(0 0 6px rgba(255,255,255,.45)) drop-shadow(0 5px 8px rgba(0,0,0,.30))",
             }}
           />
         </div>
@@ -999,12 +1036,20 @@ export default function Home() {
 
                   overflowY: "auto",
 
-                  background: "white",
+                  background: modoNoche
+                    ? "#0b1421"
+                    : "white",
 
                   borderRadius: 20,
 
+                  border: modoNoche
+                    ? "1px solid rgba(216,229,203,.12)"
+                    : "none",
+
                   boxShadow:
-                    "0 10px 30px rgba(0,0,0,.06)",
+                    modoNoche
+                    ? "0 18px 42px rgba(0,0,0,.34)"
+                    : "0 10px 30px rgba(0,0,0,.06)",
                 }}
               >
 
@@ -1016,8 +1061,12 @@ export default function Home() {
                   zIndex: 2000,
                   width: "100%",
                   boxSizing: "border-box",
-                  background: "#fdf6e3",
-                  borderBottom: "1px solid #eadfbe",
+                  background: modoNoche
+                    ? "linear-gradient(180deg,#1d2b2f,#111d2c)"
+                    : "#fdf6e3",
+                  borderBottom: modoNoche
+                    ? "1px solid rgba(216,229,203,.16)"
+                    : "1px solid #eadfbe",
                   padding: "10px 22px",
                   display: "grid",
                   gridTemplateColumns:
@@ -1031,7 +1080,7 @@ export default function Home() {
                   style={{
                     minWidth: 0,
                     paddingRight: 24,
-                    borderRight: "1px solid #e8e8e8",
+                    borderRight: colorDivisorTabla,
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
@@ -1057,7 +1106,9 @@ export default function Home() {
                         top: "50%",
                         transform: "translateY(-50%)",
                         fontSize: 21,
-                        color: "#476f34",
+                        color: modoNoche
+                          ? "#b8d98e"
+                          : "#476f34",
                         pointerEvents: "none",
                       }}
                     >
@@ -1070,14 +1121,29 @@ export default function Home() {
                         setBusqueda(e.target.value)
                       }
                       placeholder="Buscar MZ o lote"
-                      style={inputBuscador}
+                      style={{
+                        ...inputBuscador,
+                        ...controlTabla,
+                      }}
                     />
                   </div>
                 </div>
 
                 {/* PRECIO */}
-                <div style={bloqueFiltro}>
-                  <div style={tituloFiltro}>
+                <div
+                  style={{
+                    ...bloqueFiltro,
+                    borderRight: colorDivisorTabla,
+                  }}
+                >
+                  <div
+                    style={{
+                      ...tituloFiltro,
+                      color: modoNoche
+                        ? "#dbeac7"
+                        : tituloFiltro.color,
+                    }}
+                  >
                     Precio (S/)
                   </div>
 
@@ -1089,10 +1155,20 @@ export default function Home() {
                         setPrecioMin(e.target.value)
                       }
                       placeholder="Mín."
-                      style={inputFiltro}
+                      style={{
+                        ...inputFiltro,
+                        ...controlTabla,
+                      }}
                     />
 
-                    <span style={separadorRango}>
+                    <span
+                      style={{
+                        ...separadorRango,
+                        color: modoNoche
+                          ? "#c5d1be"
+                          : separadorRango.color,
+                      }}
+                    >
                       −
                     </span>
 
@@ -1103,14 +1179,29 @@ export default function Home() {
                         setPrecioMax(e.target.value)
                       }
                       placeholder="Máx."
-                      style={inputFiltro}
+                      style={{
+                        ...inputFiltro,
+                        ...controlTabla,
+                      }}
                     />
                   </div>
                 </div>
 
                 {/* ÁREA */}
-                <div style={bloqueFiltro}>
-                  <div style={tituloFiltro}>
+                <div
+                  style={{
+                    ...bloqueFiltro,
+                    borderRight: colorDivisorTabla,
+                  }}
+                >
+                  <div
+                    style={{
+                      ...tituloFiltro,
+                      color: modoNoche
+                        ? "#dbeac7"
+                        : tituloFiltro.color,
+                    }}
+                  >
                     Área (m²)
                   </div>
 
@@ -1122,10 +1213,20 @@ export default function Home() {
                         setAreaMin(e.target.value)
                       }
                       placeholder="Mín."
-                      style={inputFiltro}
+                      style={{
+                        ...inputFiltro,
+                        ...controlTabla,
+                      }}
                     />
 
-                    <span style={separadorRango}>
+                    <span
+                      style={{
+                        ...separadorRango,
+                        color: modoNoche
+                          ? "#c5d1be"
+                          : separadorRango.color,
+                      }}
+                    >
                       −
                     </span>
 
@@ -1136,14 +1237,24 @@ export default function Home() {
                         setAreaMax(e.target.value)
                       }
                       placeholder="Máx."
-                      style={inputFiltro}
+                      style={{
+                        ...inputFiltro,
+                        ...controlTabla,
+                      }}
                     />
                   </div>
                 </div>
 
                 {/* ESTADO */}
                 <div style={bloqueEstado}>
-                  <div style={tituloFiltro}>
+                  <div
+                    style={{
+                      ...tituloFiltro,
+                      color: modoNoche
+                        ? "#dbeac7"
+                        : tituloFiltro.color,
+                    }}
+                  >
                     Estado
                   </div>
 
@@ -1154,6 +1265,7 @@ export default function Home() {
                     }
                     style={{
                       ...inputSelect,
+                      ...controlTabla,
                     }}
                   >
                     <option value="TODOS">
@@ -1181,7 +1293,21 @@ export default function Home() {
                 >
                   <button
                     onClick={limpiarFiltros}
-                    style={botonLimpiar}
+                    style={{
+                      ...botonLimpiar,
+                      border: modoNoche
+                        ? "1px solid rgba(184,217,142,.34)"
+                        : botonLimpiar.border,
+                      background: modoNoche
+                        ? "linear-gradient(180deg,#263c3f,#17283a)"
+                        : botonLimpiar.background,
+                      color: modoNoche
+                        ? "#dff5ca"
+                        : botonLimpiar.color,
+                      boxShadow: modoNoche
+                        ? "0 6px 18px rgba(0,0,0,.24)"
+                        : botonLimpiar.boxShadow,
+                    }}
                   >
                     ↻ Limpiar
                   </button>
@@ -1193,20 +1319,27 @@ export default function Home() {
                   style={{
                     width: "100%",
                     borderCollapse: "collapse",
-                    background: "white",
+                    background: modoNoche
+                      ? "#0b1421"
+                      : "white",
                     borderRadius: 12,
                     margin: 0,
+                    color: modoNoche
+                      ? "#edf4e9"
+                      : "#111827",
                   }}
                 >
                   <thead>
                     <tr
                       style={{
-                        background: "#f5f5f5",                 
+                        background: modoNoche
+                          ? "#172433"
+                          : "#f5f5f5",
                       }}
                     >
                       <th
                         style={{
-                          ...th,
+                          ...thTabla,
                           cursor: "pointer",
                         }}
                         onClick={() =>
@@ -1224,7 +1357,7 @@ export default function Home() {
 
                       <th
                         style={{
-                          ...th,
+                          ...thTabla,
                           cursor: "pointer",
                         }}
                         onClick={() =>
@@ -1242,7 +1375,7 @@ export default function Home() {
 
                       <th
                         style={{
-                          ...th,
+                          ...thTabla,
                           cursor: "pointer",
                         }}
                         onClick={() =>
@@ -1260,7 +1393,7 @@ export default function Home() {
 
                       <th
                         style={{
-                          ...th,
+                          ...thTabla,
                           cursor: "pointer",
                         }}
                         onClick={() =>
@@ -1276,7 +1409,7 @@ export default function Home() {
                           : " ⇅"}
                       </th>
 
-                      <th style={th}>
+                      <th style={thTabla}>
                         ESTADO
                       </th>
                     </tr>
@@ -1409,13 +1542,21 @@ export default function Home() {
                         style={{
                           background:
                             filaSeleccionada === lote.id
-                              ? "#e9f7d9"
+                              ? modoNoche
+                                ? "rgba(126,168,77,.24)"
+                                : "#e9f7d9"
                               : index % 2 === 0
-                                ? "#ffffff"
-                                : "#fafaf5",
+                                ? modoNoche
+                                  ? "#111b29"
+                                  : "#ffffff"
+                                : modoNoche
+                                  ? "#0d1724"
+                                  : "#fafaf5",
 
                           borderBottom:
-                            "1px solid #efefef",
+                            modoNoche
+                              ? "1px solid rgba(216,229,203,.08)"
+                              : "1px solid #efefef",
 
                           transition:
                             "all .20s ease",
@@ -1426,9 +1567,11 @@ export default function Home() {
 
                         <td
                           style={{
-                            ...td,
+                            ...tdTabla,
                             fontWeight: 700,
-                            color: "#1f2937",
+                            color: modoNoche
+                              ? "#f7fbff"
+                              : "#1f2937",
                           }}
                         >
                           {lote.mz}
@@ -1436,15 +1579,17 @@ export default function Home() {
 
                         <td
                           style={{
-                            ...td,
+                            ...tdTabla,
                             fontWeight: 700,
-                            color: "#1f2937",
+                            color: modoNoche
+                              ? "#f7fbff"
+                              : "#1f2937",
                           }}
                         >
                           {lote.lote}
                         </td>
 
-                        <td style={td}>
+                        <td style={tdTabla}>
                           {Number(
                             lote.area
                           ).toFixed(2)}{" "}
@@ -1453,7 +1598,7 @@ export default function Home() {
 
                         <td
                           style={{
-                            ...td,
+                            ...tdTabla,
                           }}
                         >
                           S/{" "}
@@ -1468,7 +1613,7 @@ export default function Home() {
                           )}
                         </td>
 
-                        <td style={td}>
+                        <td style={tdTabla}>
                           <span
                             style={{
                               padding: "6px 12px",
@@ -1480,18 +1625,34 @@ export default function Home() {
                               fontWeight: 700,
 
                               color:
-                                lote.estado === "DISPONIBLE"
-                                  ? "#2F6F43"
-                                  : lote.estado === "SEPARADO"
-                                  ? "#7B5A1D"
-                                  : "#8F2F27",
+                                modoNoche
+                                  ? lote.estado === "DISPONIBLE"
+                                    ? "#c7f2c5"
+                                    : lote.estado === "SEPARADO"
+                                    ? "#ffe0a6"
+                                    : "#ffc1b6"
+                                  : lote.estado === "DISPONIBLE"
+                                    ? "#2F6F43"
+                                    : lote.estado === "SEPARADO"
+                                    ? "#7B5A1D"
+                                    : "#8F2F27",
 
                               background:
-                                lote.estado === "DISPONIBLE"
-                                  ? "#E4F0E6"
-                                  : lote.estado === "SEPARADO"
-                                  ? "#F6E8CF"
-                                  : "#F4DDD9",
+                                modoNoche
+                                  ? lote.estado === "DISPONIBLE"
+                                    ? "rgba(59,143,82,.22)"
+                                    : lote.estado === "SEPARADO"
+                                    ? "rgba(182,126,42,.24)"
+                                    : "rgba(187,69,53,.24)"
+                                  : lote.estado === "DISPONIBLE"
+                                    ? "#E4F0E6"
+                                    : lote.estado === "SEPARADO"
+                                    ? "#F6E8CF"
+                                    : "#F4DDD9",
+
+                              border: modoNoche
+                                ? "1px solid rgba(255,255,255,.08)"
+                                : "none",
                             }}
                           >
                             {lote.estado}

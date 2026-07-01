@@ -78,6 +78,29 @@ select {
   color: #111827 !important;
   background-color: #ffffff !important;
 }
+
+.modo-noche .barra-filtros-tabla input,
+.modo-noche .barra-filtros-tabla select {
+  color: #f5f8ee !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(216, 229, 203, 0.24) !important;
+  color-scheme: dark !important;
+}
+
+.modo-noche .barra-filtros-tabla input::placeholder {
+  color: #aebcae !important;
+  opacity: 1 !important;
+}
+
+.modo-noche .tabla-lotes th {
+  background: #172433 !important;
+  color: #dbeac7 !important;
+}
+
+.modo-noche .tabla-lotes td {
+  color: #edf4e9;
+}
+
 @media (max-width: 768px) {
   .modal-lote-panel {
     position: fixed !important;
