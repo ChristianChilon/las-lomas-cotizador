@@ -72,45 +72,6 @@ export default function PlanoSVG({
         svgElement.style.display = "block";
         svgElement.style.overflow = "visible";
 
-        let capaHover =
-          svgElement.querySelector(
-            "#CAPA_HOVER"
-          ) as SVGGElement | null;
-
-        if (!capaHover) {
-          capaHover =
-            document.createElementNS(
-              "http://www.w3.org/2000/svg",
-              "g"
-            );
-
-          capaHover.id = "CAPA_HOVER";
-
-          svgElement.appendChild(
-            capaHover
-          );
-        }
-
-        let capaResaltado =
-          svgElement.querySelector(
-            "#CAPA_RESALTADO"
-          ) as SVGGElement | null;
-
-        if (!capaResaltado) {
-          capaResaltado =
-            document.createElementNS(
-              "http://www.w3.org/2000/svg",
-              "g"
-            );
-
-          capaResaltado.id =
-            "CAPA_RESALTADO";
-
-          svgElement.appendChild(
-            capaResaltado
-          );
-        }
-
         if (!tooltip) {
           tooltip = document.createElement("div");
 
@@ -214,9 +175,8 @@ export default function PlanoSVG({
           path.style.filter = "";
         };
 
-        const crearClonSuperior = (
+        const crearClonEnMismoPadre = (
           path: HTMLElement,
-          capa: SVGGElement,
           opciones: {
             fill: string;
             stroke: string;
@@ -224,6 +184,13 @@ export default function PlanoSVG({
             filter?: string;
           }
         ) => {
+          const parent =
+            path.parentNode;
+
+          if (!parent) {
+            return null;
+          }
+
           const clon =
             path.cloneNode(true) as SVGElement;
 
@@ -253,7 +220,8 @@ export default function PlanoSVG({
             "non-scaling-stroke"
           );
 
-          capa.appendChild(clon);
+          parent.appendChild(clon);
+          parent.appendChild(path);
 
           return clon;
         };
@@ -406,9 +374,8 @@ export default function PlanoSVG({
 
             loteHover = path;
             loteHoverClon =
-              crearClonSuperior(
+              crearClonEnMismoPadre(
                 path,
-                capaHover!,
                 {
                   fill:
                     "rgba(255,255,255,0.06)",
@@ -491,13 +458,9 @@ export default function PlanoSVG({
 
               loteActivo = path;
 
-              capaResaltado!.innerHTML =
-                "";
-
               loteClon =
-                crearClonSuperior(
+                crearClonEnMismoPadre(
                   path,
-                  capaResaltado!,
                   {
                     fill:
                       "rgba(255,255,255,0.10)",
