@@ -586,6 +586,12 @@ export default function Home() {
               right: 80,
 
               zIndex: 9999,
+
+              display: "flex",
+
+              alignItems: "center",
+
+              gap: 10,
             }}
           >
             <div
@@ -656,6 +662,34 @@ export default function Home() {
                   : "☀"}
               </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                window.alert(
+                  "El login de asesores se agregará en el siguiente paso."
+                )
+              }
+              style={{
+                height: 38,
+                minWidth: 70,
+                padding: "0 14px",
+                borderRadius: 999,
+                border:
+                  "1px solid rgba(210,170,80,.35)",
+                background:
+                  "linear-gradient(180deg,#fff8e6,#f5e6b8)",
+                color: "#4f3d18",
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: 800,
+                letterSpacing: ".2px",
+                boxShadow:
+                  "0 6px 18px rgba(0,0,0,.16)",
+              }}
+            >
+              Login
+            </button>
           </div>
     
           {vista === "mapa" &&
