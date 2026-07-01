@@ -72,6 +72,26 @@ export default function PlanoSVG({
         svgElement.style.display = "block";
         svgElement.style.overflow = "visible";
 
+        let capaResaltado =
+          svgElement.querySelector(
+            "#CAPA_RESALTADO"
+          ) as SVGGElement | null;
+
+        if (!capaResaltado) {
+          capaResaltado =
+            document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "g"
+            );
+
+          capaResaltado.id =
+            "CAPA_RESALTADO";
+
+          svgElement.appendChild(
+            capaResaltado
+          );
+        }
+
         if (!tooltip) {
           tooltip = document.createElement("div");
 
@@ -115,8 +135,6 @@ export default function PlanoSVG({
 
         let loteActivo: HTMLElement | null = null;
         let loteClon: SVGElement | null = null;
-        let loteHover: HTMLElement | null = null;
-        let loteHoverClon: SVGElement | null = null;
 
         let inicioClickX = 0;
         let inicioClickY = 0;
@@ -173,66 +191,6 @@ export default function PlanoSVG({
             "0.9";
 
           path.style.filter = "";
-        };
-
-        const crearClonEnMismoPadre = (
-          path: HTMLElement,
-          opciones: {
-            fill: string;
-            stroke: string;
-            strokeWidth: string;
-            filter?: string;
-          }
-        ) => {
-          const parent =
-            path.parentNode;
-
-          if (!parent) {
-            return null;
-          }
-
-          const clon =
-            path.cloneNode(true) as SVGElement;
-
-          clon.removeAttribute("id");
-          clon.setAttribute(
-            "data-source-id",
-            path.id
-          );
-
-          clon.style.pointerEvents =
-            "none";
-
-          clon.style.fill =
-            opciones.fill;
-
-          clon.style.stroke =
-            opciones.stroke;
-
-          clon.style.strokeWidth =
-            opciones.strokeWidth;
-
-          clon.style.filter =
-            opciones.filter || "";
-
-          clon.setAttribute(
-            "vector-effect",
-            "non-scaling-stroke"
-          );
-
-          parent.appendChild(clon);
-          parent.appendChild(path);
-
-          return clon;
-        };
-
-        const limpiarHover = () => {
-          if (loteHoverClon) {
-            loteHoverClon.remove();
-          }
-
-          loteHoverClon = null;
-          loteHover = null;
         };
 
         lotes.forEach((lote) => {
@@ -370,22 +328,6 @@ export default function PlanoSVG({
             )
               return;
 
-            limpiarHover();
-
-            loteHover = path;
-            loteHoverClon =
-              crearClonEnMismoPadre(
-                path,
-                {
-                  fill:
-                    "rgba(255,255,255,0.06)",
-                  stroke: estadoColor,
-                  strokeWidth: "2.4",
-                  filter:
-                    "drop-shadow(0px 0px 3px rgba(0,0,0,.25))",
-                }
-              );
-
             path.style.stroke =
               estadoColor;
 
@@ -404,10 +346,6 @@ export default function PlanoSVG({
               loteActivo === path
             )
               return;
-
-            if (loteHover === path) {
-              limpiarHover();
-            }
 
             restaurarLote(
               path,
@@ -431,8 +369,6 @@ export default function PlanoSVG({
             ) {
               return;
             }
-
-            limpiarHover();
 
             if (loteActivo !== path) {
               if (loteClon) {
@@ -458,16 +394,38 @@ export default function PlanoSVG({
 
               loteActivo = path;
 
-              loteClon =
-                crearClonEnMismoPadre(
-                  path,
-                  {
-                    fill:
-                      "rgba(255,255,255,0.10)",
-                    stroke: "#D8B56D",
-                    strokeWidth: "2",
-                  }
-                );
+              const clon =
+                path.cloneNode(true) as SVGElement;
+
+              clon.style.pointerEvents =
+                "none";
+
+              clon.style.fill =
+                "rgba(255,255,255,0.10)";
+
+              clon.style.stroke =
+                "#D8B56D";
+
+              clon.style.strokeWidth =
+                "2";
+
+              clon.setAttribute(
+                "vector-effect",
+                "non-scaling-stroke"
+              );
+
+              capaResaltado!.innerHTML =
+                "";
+
+              const parent =
+                path.parentNode;
+
+              if (parent) {
+                parent.appendChild(clon);
+                parent.appendChild(path);
+              }
+
+              loteClon = clon;
 
               path.style.stroke =
                 color.stroke;
