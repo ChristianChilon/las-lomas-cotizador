@@ -1,0 +1,1856 @@
+[
+  {
+    "id": 1,
+    "mz": "A",
+    "lote": 1,
+    "area": 110.86,
+    "precio": 27715,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19862"
+  },
+  {
+    "id": 2,
+    "mz": "A",
+    "lote": 2,
+    "area": 122.77,
+    "precio": 30692.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19828"
+  },
+  {
+    "id": 3,
+    "mz": "A",
+    "lote": 3,
+    "area": 121.27,
+    "precio": 30317.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19829"
+  },
+  {
+    "id": 4,
+    "mz": "A",
+    "lote": 4,
+    "area": 171.47,
+    "precio": 42867.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19830"
+  },
+  {
+    "id": 5,
+    "mz": "B",
+    "lote": 1,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19827"
+  },
+  {
+    "id": 6,
+    "mz": "B",
+    "lote": 2,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19826"
+  },
+  {
+    "id": 7,
+    "mz": "B",
+    "lote": 3,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19825"
+  },
+  {
+    "id": 8,
+    "mz": "B",
+    "lote": 4,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19824"
+  },
+  {
+    "id": 9,
+    "mz": "B",
+    "lote": 5,
+    "area": 117.87,
+    "precio": 29467.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19823"
+  },
+  {
+    "id": 10,
+    "mz": "B",
+    "lote": 6,
+    "area": 117.87,
+    "precio": 29467.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19822"
+  },
+  {
+    "id": 11,
+    "mz": "B",
+    "lote": 7,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19821"
+  },
+  {
+    "id": 12,
+    "mz": "B",
+    "lote": 8,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19820"
+  },
+  {
+    "id": 13,
+    "mz": "B",
+    "lote": 9,
+    "area": 199.24,
+    "precio": 49810,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19819"
+  },
+  {
+    "id": 14,
+    "mz": "C",
+    "lote": 1,
+    "area": 166.85,
+    "precio": 41712.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19817"
+  },
+  {
+    "id": 15,
+    "mz": "C",
+    "lote": 2,
+    "area": 134.95,
+    "precio": 33737.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19816"
+  },
+  {
+    "id": 16,
+    "mz": "C",
+    "lote": 3,
+    "area": 144.67,
+    "precio": 36167.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19818"
+  },
+  {
+    "id": 17,
+    "mz": "C",
+    "lote": 4,
+    "area": 136.76,
+    "precio": 34190,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19802"
+  },
+  {
+    "id": 18,
+    "mz": "C",
+    "lote": 5,
+    "area": 125.97,
+    "precio": 31492.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19803"
+  },
+  {
+    "id": 19,
+    "mz": "C",
+    "lote": 6,
+    "area": 131.85,
+    "precio": 32962.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19804"
+  },
+  {
+    "id": 20,
+    "mz": "C",
+    "lote": 7,
+    "area": 137.73,
+    "precio": 34432.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19805"
+  },
+  {
+    "id": 21,
+    "mz": "C",
+    "lote": 8,
+    "area": 143.62,
+    "precio": 35905,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19806"
+  },
+  {
+    "id": 22,
+    "mz": "C",
+    "lote": 9,
+    "area": 149.5,
+    "precio": 37375,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19807"
+  },
+  {
+    "id": 23,
+    "mz": "C",
+    "lote": 10,
+    "area": 155.38,
+    "precio": 38845,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19808"
+  },
+  {
+    "id": 24,
+    "mz": "C",
+    "lote": 11,
+    "area": 161.26,
+    "precio": 40315,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19809"
+  },
+  {
+    "id": 25,
+    "mz": "C",
+    "lote": 12,
+    "area": 167.14,
+    "precio": 41785,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19810"
+  },
+  {
+    "id": 26,
+    "mz": "C",
+    "lote": 13,
+    "area": 173.03,
+    "precio": 43257.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19811"
+  },
+  {
+    "id": 27,
+    "mz": "C",
+    "lote": 14,
+    "area": 178.91,
+    "precio": 44727.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19812"
+  },
+  {
+    "id": 28,
+    "mz": "C",
+    "lote": 15,
+    "area": 120.12,
+    "precio": 30030,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19813"
+  },
+  {
+    "id": 29,
+    "mz": "C",
+    "lote": 16,
+    "area": 119.51,
+    "precio": 29877.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19814"
+  },
+  {
+    "id": 30,
+    "mz": "C",
+    "lote": 17,
+    "area": 113.38,
+    "precio": 28345,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19815"
+  },
+  {
+    "id": 31,
+    "mz": "D",
+    "lote": 1,
+    "area": 119.57,
+    "precio": 29892.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19801"
+  },
+  {
+    "id": 32,
+    "mz": "D",
+    "lote": 2,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19800"
+  },
+  {
+    "id": 33,
+    "mz": "D",
+    "lote": 3,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19799"
+  },
+  {
+    "id": 34,
+    "mz": "D",
+    "lote": 4,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19798"
+  },
+  {
+    "id": 35,
+    "mz": "D",
+    "lote": 5,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19797"
+  },
+  {
+    "id": 36,
+    "mz": "D",
+    "lote": 6,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19796"
+  },
+  {
+    "id": 37,
+    "mz": "D",
+    "lote": 7,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19795"
+  },
+  {
+    "id": 38,
+    "mz": "D",
+    "lote": 8,
+    "area": 117.87,
+    "precio": 29467.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19794"
+  },
+  {
+    "id": 39,
+    "mz": "D",
+    "lote": 9,
+    "area": 117.87,
+    "precio": 29467.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19793"
+  },
+  {
+    "id": 40,
+    "mz": "D",
+    "lote": 10,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19792"
+  },
+  {
+    "id": 41,
+    "mz": "D",
+    "lote": 11,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19791"
+  },
+  {
+    "id": 42,
+    "mz": "D",
+    "lote": 12,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19790"
+  },
+  {
+    "id": 43,
+    "mz": "D",
+    "lote": 13,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19789"
+  },
+  {
+    "id": 44,
+    "mz": "D",
+    "lote": 14,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19788"
+  },
+  {
+    "id": 45,
+    "mz": "D",
+    "lote": 15,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19787"
+  },
+  {
+    "id": 46,
+    "mz": "D",
+    "lote": 16,
+    "area": 119.57,
+    "precio": 29892.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19786"
+  },
+  {
+    "id": 47,
+    "mz": "E",
+    "lote": 1,
+    "area": 119.57,
+    "precio": 29892.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19784"
+  },
+  {
+    "id": 48,
+    "mz": "E",
+    "lote": 2,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19783"
+  },
+  {
+    "id": 49,
+    "mz": "E",
+    "lote": 3,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19782"
+  },
+  {
+    "id": 50,
+    "mz": "E",
+    "lote": 4,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19781"
+  },
+  {
+    "id": 51,
+    "mz": "E",
+    "lote": 5,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19780"
+  },
+  {
+    "id": 52,
+    "mz": "E",
+    "lote": 6,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19779"
+  },
+  {
+    "id": 53,
+    "mz": "E",
+    "lote": 7,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19778"
+  },
+  {
+    "id": 54,
+    "mz": "E",
+    "lote": 8,
+    "area": 117.87,
+    "precio": 29467.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19777"
+  },
+  {
+    "id": 55,
+    "mz": "E",
+    "lote": 9,
+    "area": 117.87,
+    "precio": 29467.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19776"
+  },
+  {
+    "id": 56,
+    "mz": "E",
+    "lote": 10,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19775"
+  },
+  {
+    "id": 57,
+    "mz": "E",
+    "lote": 11,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19774"
+  },
+  {
+    "id": 58,
+    "mz": "E",
+    "lote": 12,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19773"
+  },
+  {
+    "id": 59,
+    "mz": "E",
+    "lote": 13,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19772"
+  },
+  {
+    "id": 60,
+    "mz": "E",
+    "lote": 14,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19771"
+  },
+  {
+    "id": 61,
+    "mz": "E",
+    "lote": 15,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19770"
+  },
+  {
+    "id": 62,
+    "mz": "E",
+    "lote": 16,
+    "area": 119.57,
+    "precio": 29892.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19785"
+  },
+  {
+    "id": 63,
+    "mz": "F",
+    "lote": 1,
+    "area": 142.15,
+    "precio": 35537.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19839"
+  },
+  {
+    "id": 64,
+    "mz": "F",
+    "lote": 2,
+    "area": 146.31,
+    "precio": 36577.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19838"
+  },
+  {
+    "id": 65,
+    "mz": "F",
+    "lote": 3,
+    "area": 126.88,
+    "precio": 31720,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19837"
+  },
+  {
+    "id": 66,
+    "mz": "F",
+    "lote": 4,
+    "area": 136.5,
+    "precio": 34125,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19836"
+  },
+  {
+    "id": 67,
+    "mz": "F",
+    "lote": 5,
+    "area": 142.89,
+    "precio": 35722.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19835"
+  },
+  {
+    "id": 68,
+    "mz": "F",
+    "lote": 6,
+    "area": 135.8,
+    "precio": 33950,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19834"
+  },
+  {
+    "id": 69,
+    "mz": "F",
+    "lote": 7,
+    "area": 135.8,
+    "precio": 33950,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19833"
+  },
+  {
+    "id": 70,
+    "mz": "F",
+    "lote": 8,
+    "area": 135.8,
+    "precio": 33950,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19832"
+  },
+  {
+    "id": 71,
+    "mz": "F",
+    "lote": 9,
+    "area": 135.8,
+    "precio": 33950,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19831"
+  },
+  {
+    "id": 72,
+    "mz": "F",
+    "lote": 10,
+    "area": 135.8,
+    "precio": 33950,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19846"
+  },
+  {
+    "id": 73,
+    "mz": "F",
+    "lote": 11,
+    "area": 135.8,
+    "precio": 33950,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19847"
+  },
+  {
+    "id": 74,
+    "mz": "F",
+    "lote": 12,
+    "area": 135.8,
+    "precio": 33950,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19848"
+  },
+  {
+    "id": 75,
+    "mz": "F",
+    "lote": 13,
+    "area": 135.8,
+    "precio": 33950,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19840"
+  },
+  {
+    "id": 76,
+    "mz": "F",
+    "lote": 14,
+    "area": 135.8,
+    "precio": 33950,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19841"
+  },
+  {
+    "id": 77,
+    "mz": "F",
+    "lote": 15,
+    "area": 135.8,
+    "precio": 33950,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19842"
+  },
+  {
+    "id": 78,
+    "mz": "F",
+    "lote": 16,
+    "area": 135.8,
+    "precio": 33950,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19843"
+  },
+  {
+    "id": 79,
+    "mz": "F",
+    "lote": 17,
+    "area": 135.8,
+    "precio": 33950,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19844"
+  },
+  {
+    "id": 80,
+    "mz": "F",
+    "lote": 18,
+    "area": 133.19,
+    "precio": 33297.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19845"
+  },
+  {
+    "id": 81,
+    "mz": "F",
+    "lote": 19,
+    "area": 190.42,
+    "precio": 47605,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19863"
+  },
+  {
+    "id": 82,
+    "mz": "G",
+    "lote": 1,
+    "area": 117.87,
+    "precio": 29467.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19855"
+  },
+  {
+    "id": 83,
+    "mz": "G",
+    "lote": 2,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19856"
+  },
+  {
+    "id": 84,
+    "mz": "G",
+    "lote": 3,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19857"
+  },
+  {
+    "id": 85,
+    "mz": "G",
+    "lote": 4,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19858"
+  },
+  {
+    "id": 86,
+    "mz": "G",
+    "lote": 5,
+    "area": 162.57,
+    "precio": 40642.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19859"
+  },
+  {
+    "id": 87,
+    "mz": "G",
+    "lote": 6,
+    "area": 135.87,
+    "precio": 33967.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19861"
+  },
+  {
+    "id": 88,
+    "mz": "G",
+    "lote": 7,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19849"
+  },
+  {
+    "id": 89,
+    "mz": "G",
+    "lote": 8,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19850"
+  },
+  {
+    "id": 90,
+    "mz": "G",
+    "lote": 9,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19851"
+  },
+  {
+    "id": 91,
+    "mz": "G",
+    "lote": 10,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19852"
+  },
+  {
+    "id": 92,
+    "mz": "G",
+    "lote": 11,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19853"
+  },
+  {
+    "id": 93,
+    "mz": "G",
+    "lote": 12,
+    "area": 117.87,
+    "precio": 29467.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19854"
+  },
+  {
+    "id": 94,
+    "mz": "H",
+    "lote": 1,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19768"
+  },
+  {
+    "id": 95,
+    "mz": "H",
+    "lote": 2,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19767"
+  },
+  {
+    "id": 96,
+    "mz": "H",
+    "lote": 3,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19765"
+  },
+  {
+    "id": 97,
+    "mz": "H",
+    "lote": 4,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19762"
+  },
+  {
+    "id": 98,
+    "mz": "H",
+    "lote": 5,
+    "area": 117.87,
+    "precio": 29467.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19761"
+  },
+  {
+    "id": 99,
+    "mz": "H",
+    "lote": 6,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19769"
+  },
+  {
+    "id": 100,
+    "mz": "H",
+    "lote": 7,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19766"
+  },
+  {
+    "id": 101,
+    "mz": "H",
+    "lote": 8,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19764"
+  },
+  {
+    "id": 102,
+    "mz": "H",
+    "lote": 9,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19763"
+  },
+  {
+    "id": 103,
+    "mz": "H",
+    "lote": 10,
+    "area": 117.87,
+    "precio": 29467.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19860"
+  },
+  {
+    "id": 104,
+    "mz": "I",
+    "lote": 1,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19755"
+  },
+  {
+    "id": 105,
+    "mz": "I",
+    "lote": 2,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19754"
+  },
+  {
+    "id": 106,
+    "mz": "I",
+    "lote": 3,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19753"
+  },
+  {
+    "id": 107,
+    "mz": "I",
+    "lote": 4,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19752"
+  },
+  {
+    "id": 108,
+    "mz": "I",
+    "lote": 5,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19741"
+  },
+  {
+    "id": 109,
+    "mz": "I",
+    "lote": 6,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19742"
+  },
+  {
+    "id": 110,
+    "mz": "I",
+    "lote": 7,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19745"
+  },
+  {
+    "id": 111,
+    "mz": "I",
+    "lote": 8,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19747"
+  },
+  {
+    "id": 112,
+    "mz": "I",
+    "lote": 9,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19749"
+  },
+  {
+    "id": 113,
+    "mz": "I",
+    "lote": 10,
+    "area": 117.86,
+    "precio": 29465,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19750"
+  },
+  {
+    "id": 114,
+    "mz": "I",
+    "lote": 11,
+    "area": 117.86,
+    "precio": 29465,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19751"
+  },
+  {
+    "id": 115,
+    "mz": "I",
+    "lote": 12,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19748"
+  },
+  {
+    "id": 116,
+    "mz": "I",
+    "lote": 13,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19746"
+  },
+  {
+    "id": 117,
+    "mz": "I",
+    "lote": 14,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19744"
+  },
+  {
+    "id": 118,
+    "mz": "I",
+    "lote": 15,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19743"
+  },
+  {
+    "id": 119,
+    "mz": "I",
+    "lote": 16,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19760"
+  },
+  {
+    "id": 120,
+    "mz": "I",
+    "lote": 17,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19759"
+  },
+  {
+    "id": 121,
+    "mz": "I",
+    "lote": 18,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19758"
+  },
+  {
+    "id": 122,
+    "mz": "I",
+    "lote": 19,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19757"
+  },
+  {
+    "id": 123,
+    "mz": "I",
+    "lote": 20,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19756"
+  },
+  {
+    "id": 124,
+    "mz": "J",
+    "lote": 1,
+    "area": 148.32,
+    "precio": 37080,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19736"
+  },
+  {
+    "id": 125,
+    "mz": "J",
+    "lote": 2,
+    "area": 127.5,
+    "precio": 31875,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19735"
+  },
+  {
+    "id": 126,
+    "mz": "J",
+    "lote": 3,
+    "area": 127.5,
+    "precio": 31875,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19734"
+  },
+  {
+    "id": 127,
+    "mz": "J",
+    "lote": 4,
+    "area": 127.5,
+    "precio": 31875,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19719"
+  },
+  {
+    "id": 128,
+    "mz": "J",
+    "lote": 5,
+    "area": 127.5,
+    "precio": 31875,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19721"
+  },
+  {
+    "id": 129,
+    "mz": "J",
+    "lote": 6,
+    "area": 127.5,
+    "precio": 31875,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19723"
+  },
+  {
+    "id": 130,
+    "mz": "J",
+    "lote": 7,
+    "area": 127.5,
+    "precio": 31875,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19725"
+  },
+  {
+    "id": 131,
+    "mz": "J",
+    "lote": 8,
+    "area": 127.5,
+    "precio": 31875,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19727"
+  },
+  {
+    "id": 132,
+    "mz": "J",
+    "lote": 9,
+    "area": 127.5,
+    "precio": 31875,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19729"
+  },
+  {
+    "id": 133,
+    "mz": "J",
+    "lote": 10,
+    "area": 127.5,
+    "precio": 31875,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19731"
+  },
+  {
+    "id": 134,
+    "mz": "J",
+    "lote": 11,
+    "area": 126.38,
+    "precio": 31595,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19732"
+  },
+  {
+    "id": 135,
+    "mz": "J",
+    "lote": 12,
+    "area": 142.67,
+    "precio": 35667.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19733"
+  },
+  {
+    "id": 136,
+    "mz": "J",
+    "lote": 13,
+    "area": 142.24,
+    "precio": 35560,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19730"
+  },
+  {
+    "id": 137,
+    "mz": "J",
+    "lote": 14,
+    "area": 140.69,
+    "precio": 35172.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19728"
+  },
+  {
+    "id": 138,
+    "mz": "J",
+    "lote": 15,
+    "area": 139.14,
+    "precio": 34785,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19726"
+  },
+  {
+    "id": 139,
+    "mz": "J",
+    "lote": 16,
+    "area": 137.22,
+    "precio": 34305,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19724"
+  },
+  {
+    "id": 140,
+    "mz": "J",
+    "lote": 17,
+    "area": 136.03,
+    "precio": 34007.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19722"
+  },
+  {
+    "id": 141,
+    "mz": "J",
+    "lote": 18,
+    "area": 134.48,
+    "precio": 33620,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19720"
+  },
+  {
+    "id": 142,
+    "mz": "J",
+    "lote": 19,
+    "area": 132.93,
+    "precio": 33232.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19740"
+  },
+  {
+    "id": 143,
+    "mz": "J",
+    "lote": 20,
+    "area": 131.38,
+    "precio": 32845,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19739"
+  },
+  {
+    "id": 144,
+    "mz": "J",
+    "lote": 21,
+    "area": 129.83,
+    "precio": 32457.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19738"
+  },
+  {
+    "id": 145,
+    "mz": "J",
+    "lote": 22,
+    "area": 127.15,
+    "precio": 31787.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19737"
+  },
+  {
+    "id": 146,
+    "mz": "K",
+    "lote": 1,
+    "area": 150.17,
+    "precio": 37542.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19678"
+  },
+  {
+    "id": 147,
+    "mz": "K",
+    "lote": 2,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19679"
+  },
+  {
+    "id": 148,
+    "mz": "K",
+    "lote": 3,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19658"
+  },
+  {
+    "id": 149,
+    "mz": "K",
+    "lote": 4,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19659"
+  },
+  {
+    "id": 150,
+    "mz": "K",
+    "lote": 5,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19660"
+  },
+  {
+    "id": 151,
+    "mz": "K",
+    "lote": 6,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19661"
+  },
+  {
+    "id": 152,
+    "mz": "K",
+    "lote": 7,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19662"
+  },
+  {
+    "id": 153,
+    "mz": "K",
+    "lote": 8,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19663"
+  },
+  {
+    "id": 154,
+    "mz": "K",
+    "lote": 9,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19664"
+  },
+  {
+    "id": 155,
+    "mz": "K",
+    "lote": 10,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19665"
+  },
+  {
+    "id": 156,
+    "mz": "K",
+    "lote": 11,
+    "area": 122.19,
+    "precio": 30547.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19666"
+  },
+  {
+    "id": 157,
+    "mz": "K",
+    "lote": 12,
+    "area": 130.84,
+    "precio": 32710,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19667"
+  },
+  {
+    "id": 158,
+    "mz": "K",
+    "lote": 13,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19675"
+  },
+  {
+    "id": 159,
+    "mz": "K",
+    "lote": 14,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19674"
+  },
+  {
+    "id": 160,
+    "mz": "K",
+    "lote": 15,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19673"
+  },
+  {
+    "id": 161,
+    "mz": "K",
+    "lote": 16,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19672"
+  },
+  {
+    "id": 162,
+    "mz": "K",
+    "lote": 17,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19671"
+  },
+  {
+    "id": 163,
+    "mz": "K",
+    "lote": 18,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19670"
+  },
+  {
+    "id": 164,
+    "mz": "K",
+    "lote": 19,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19669"
+  },
+  {
+    "id": 165,
+    "mz": "K",
+    "lote": 20,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19668"
+  },
+  {
+    "id": 166,
+    "mz": "K",
+    "lote": 21,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19676"
+  },
+  {
+    "id": 167,
+    "mz": "K",
+    "lote": 22,
+    "area": 150.17,
+    "precio": 37542.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19677"
+  },
+  {
+    "id": 168,
+    "mz": "L",
+    "lote": 1,
+    "area": 111.76,
+    "precio": 27940,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19696"
+  },
+  {
+    "id": 169,
+    "mz": "L",
+    "lote": 2,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19697"
+  },
+  {
+    "id": 170,
+    "mz": "L",
+    "lote": 3,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19698"
+  },
+  {
+    "id": 171,
+    "mz": "L",
+    "lote": 4,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19699"
+  },
+  {
+    "id": 172,
+    "mz": "L",
+    "lote": 5,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19700"
+  },
+  {
+    "id": 173,
+    "mz": "L",
+    "lote": 6,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19701"
+  },
+  {
+    "id": 174,
+    "mz": "L",
+    "lote": 7,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19702"
+  },
+  {
+    "id": 175,
+    "mz": "L",
+    "lote": 8,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19703"
+  },
+  {
+    "id": 176,
+    "mz": "L",
+    "lote": 9,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19704"
+  },
+  {
+    "id": 177,
+    "mz": "L",
+    "lote": 10,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19705"
+  },
+  {
+    "id": 178,
+    "mz": "L",
+    "lote": 11,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19706"
+  },
+  {
+    "id": 179,
+    "mz": "L",
+    "lote": 12,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19707"
+  },
+  {
+    "id": 180,
+    "mz": "L",
+    "lote": 13,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19708"
+  },
+  {
+    "id": 181,
+    "mz": "L",
+    "lote": 14,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19709"
+  },
+  {
+    "id": 182,
+    "mz": "L",
+    "lote": 15,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19710"
+  },
+  {
+    "id": 183,
+    "mz": "L",
+    "lote": 16,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19711"
+  },
+  {
+    "id": 184,
+    "mz": "L",
+    "lote": 17,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19712"
+  },
+  {
+    "id": 185,
+    "mz": "L",
+    "lote": 18,
+    "area": 117.87,
+    "precio": 29467.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19713"
+  },
+  {
+    "id": 186,
+    "mz": "L",
+    "lote": 19,
+    "area": 117.87,
+    "precio": 29467.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19694"
+  },
+  {
+    "id": 187,
+    "mz": "L",
+    "lote": 20,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19693"
+  },
+  {
+    "id": 188,
+    "mz": "L",
+    "lote": 21,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19692"
+  },
+  {
+    "id": 189,
+    "mz": "L",
+    "lote": 22,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19691"
+  },
+  {
+    "id": 190,
+    "mz": "L",
+    "lote": 23,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19690"
+  },
+  {
+    "id": 191,
+    "mz": "L",
+    "lote": 24,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19689"
+  },
+  {
+    "id": 192,
+    "mz": "L",
+    "lote": 25,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19688"
+  },
+  {
+    "id": 193,
+    "mz": "L",
+    "lote": 26,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19687"
+  },
+  {
+    "id": 194,
+    "mz": "L",
+    "lote": 27,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19686"
+  },
+  {
+    "id": 195,
+    "mz": "L",
+    "lote": 28,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19685"
+  },
+  {
+    "id": 196,
+    "mz": "L",
+    "lote": 29,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19684"
+  },
+  {
+    "id": 197,
+    "mz": "L",
+    "lote": 30,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19683"
+  },
+  {
+    "id": 198,
+    "mz": "L",
+    "lote": 31,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19682"
+  },
+  {
+    "id": 199,
+    "mz": "L",
+    "lote": 32,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19681"
+  },
+  {
+    "id": 200,
+    "mz": "L",
+    "lote": 33,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19680"
+  },
+  {
+    "id": 201,
+    "mz": "L",
+    "lote": 34,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19717"
+  },
+  {
+    "id": 202,
+    "mz": "L",
+    "lote": 35,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19718"
+  },
+  {
+    "id": 203,
+    "mz": "L",
+    "lote": 36,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19714"
+  },
+  {
+    "id": 204,
+    "mz": "L",
+    "lote": 37,
+    "area": 119,
+    "precio": 29750,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19715"
+  },
+  {
+    "id": 205,
+    "mz": "L",
+    "lote": 38,
+    "area": 207.32,
+    "precio": 51830,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19716"
+  },
+  {
+    "id": 206,
+    "mz": "L",
+    "lote": 39,
+    "area": 122.25,
+    "precio": 30562.5,
+    "estado": "DISPONIBLE",
+    "svg_id": "path19695"
+  }
+]
