@@ -726,11 +726,9 @@ export default function Home() {
             <button
               className="asesor-login-button"
               type="button"
-              onClick={() =>
-                window.alert(
-                  "El login de asesores se agregará en el siguiente paso."
-                )
-              }
+              onClick={() => {
+                window.location.href = "/login";
+              }}
               style={{
                 height: 38,
                 width: 38,

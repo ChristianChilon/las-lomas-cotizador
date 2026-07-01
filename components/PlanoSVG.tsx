@@ -159,6 +159,18 @@ export default function PlanoSVG({
                 stroke: "#C9852E",
               };
 
+            case "EN_NEGOCIACION":
+              return {
+                fill: "rgba(104,132,62,0.28)",
+                stroke: "#68843E",
+              };
+
+            case "BLOQUEADO":
+              return {
+                fill: "rgba(90,99,112,0.30)",
+                stroke: "#5A6370",
+              };
+
             case "VENDIDO":
               return {
                 fill: "rgba(159,59,48,0.38)",
@@ -279,19 +291,10 @@ export default function PlanoSVG({
 
             if (!tooltip) return;
 
-            let estadoColor = "#2F6F43";
-
-            if (
-              lote.estado === "VENDIDO"
-            ) {
-              estadoColor = "#9F3B30";
-            }
-
-            if (
-              lote.estado === "SEPARADO"
-            ) {
-              estadoColor = "#C9852E";
-            }
+            const estadoColor =
+              obtenerColorEstado(
+                lote.estado
+              ).stroke;
 
             tooltip.innerHTML = `
             <div
