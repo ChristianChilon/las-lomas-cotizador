@@ -105,21 +105,17 @@ export default function ClientesTable() {
 
   const modoGerencia = esGerencia(profile);
 
-  const asesoresMap = useMemo(() => {
-    const map: Record<string, Profile> = {};
-    asesores.forEach((asesor) => {
-      map[asesor.id] = asesor;
-    });
-    if (profile) {
-      map[profile.id] = profile;
-    }
-    return map;
-  }, [asesores, profile]);
-
   const clientesFiltrados = useMemo(() => {
     const texto = busqueda.trim().toLowerCase();
+    const clientesVisibles =
+      profile && !modoGerencia
+        ? clientes.filter(
+            (cliente) =>
+              cliente.asesor_id === profile.id
+          )
+        : clientes;
 
-    return clientes.filter((cliente) => {
+    return clientesVisibles.filter((cliente) => {
       if (!texto) return true;
 
       return [
@@ -133,7 +129,7 @@ export default function ClientesTable() {
         .toLowerCase()
         .includes(texto);
     });
-  }, [busqueda, clientes]);
+  }, [busqueda, clientes, modoGerencia, profile]);
 
   const actualizarForm = (
     campo: keyof ClienteForm,
@@ -335,6 +331,11 @@ export default function ClientesTable() {
           placeholder="Buscar cliente, DNI, celular o correo"
           style={search}
         />
+        {profile && !modoGerencia && (
+          <span style={filterPill}>
+            Mostrando solo mis clientes
+          </span>
+        )}
       </div>
 
       {mensaje && (
@@ -362,72 +363,64 @@ export default function ClientesTable() {
             </tr>
           </thead>
           <tbody>
-            {clientesFiltrados.map((cliente) => {
-              const asesor = cliente.asesor_id
-                ? asesoresMap[cliente.asesor_id]
-                : null;
-
-              return (
-                <tr key={cliente.id}>
-                  <td style={td}>
-                    {nombreCliente(cliente)}
-                  </td>
-                  <td style={td}>
-                    {cliente.dni || "-"}
-                  </td>
-                  <td style={td}>
-                    {cliente.celular || "-"}
-                  </td>
-                  <td style={td}>
-                    {cliente.correo || "-"}
-                  </td>
-                  <td style={td}>
-                    {cliente.fuente || "-"}
-                  </td>
-                  <td style={td}>
-                    {modoGerencia ? (
-                      <select
-                        value={cliente.asesor_id || ""}
-                        disabled={
-                          asignando === cliente.id
-                        }
-                        onChange={(event) =>
-                          reasignarCliente(
-                            cliente,
-                            event.target.value
-                          )
-                        }
-                        style={selectSmall}
-                      >
-                        <option value="">
-                          Sin asesor
+            {clientesFiltrados.map((cliente) => (
+              <tr key={cliente.id}>
+                <td style={td}>
+                  {nombreCliente(cliente)}
+                </td>
+                <td style={td}>
+                  {cliente.dni || "-"}
+                </td>
+                <td style={td}>
+                  {cliente.celular || "-"}
+                </td>
+                <td style={td}>
+                  {cliente.correo || "-"}
+                </td>
+                <td style={td}>
+                  {cliente.fuente || "-"}
+                </td>
+                <td style={td}>
+                  {modoGerencia ? (
+                    <select
+                      value={cliente.asesor_id || ""}
+                      disabled={
+                        asignando === cliente.id
+                      }
+                      onChange={(event) =>
+                        reasignarCliente(
+                          cliente,
+                          event.target.value
+                        )
+                      }
+                      style={selectSmall}
+                    >
+                      <option value="">
+                        Sin asesor
+                      </option>
+                      {asesores.map((item) => (
+                        <option
+                          key={item.id}
+                          value={item.id}
+                        >
+                          {item.full_name ||
+                            item.email}
                         </option>
-                        {asesores.map((item) => (
-                          <option
-                            key={item.id}
-                            value={item.id}
-                          >
-                            {item.full_name ||
-                              item.email}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      asesor?.full_name ||
-                      asesor?.email ||
-                      "Asignado a ti"
-                    )}
-                  </td>
-                  <td style={td}>
-                    {cliente.created_at
-                      ? new Date(
-                          cliente.created_at
-                        ).toLocaleDateString("es-PE")
-                      : "-"}
-                  </td>
-                </tr>
-              );
-            })}
+                      ))}
+                    </select>
+                  ) : (
+                    "Asignado a ti"
+                  )}
+                </td>
+                <td style={td}>
+                  {cliente.created_at
+                    ? new Date(
+                        cliente.created_at
+                      ).toLocaleDateString("es-PE")
+                    : "-"}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -483,11 +476,27 @@ const primaryButton: React.CSSProperties = {
 
 const toolbar: React.CSSProperties = {
   marginBottom: 14,
+  display: "flex",
+  gap: 10,
+  alignItems: "center",
+  flexWrap: "wrap",
 };
 
 const search: React.CSSProperties = {
   ...input,
   width: "min(100%, 420px)",
+};
+
+const filterPill: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  height: 36,
+  borderRadius: 999,
+  padding: "0 12px",
+  background: "#eef6ff",
+  color: "#244d77",
+  fontWeight: 900,
+  fontSize: 13,
 };
 
 const tableWrap: React.CSSProperties = {
