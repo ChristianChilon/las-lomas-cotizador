@@ -186,7 +186,11 @@ export default function LotesTable() {
     if (!profile) return [lote.estado];
 
     if (modoGerencia) {
-      return Array.from(CRM_ESTADOS);
+      return Array.from(CRM_ESTADOS).filter(
+        (estadoItem) =>
+          estadoItem !== "SEPARADO" ||
+          lote.estado === "SEPARADO"
+      );
     }
 
     if (
@@ -200,7 +204,6 @@ export default function LotesTable() {
       return [
         "DISPONIBLE",
         "EN_NEGOCIACION",
-        "SEPARADO",
         "CIERRE_SOLICITADO",
       ];
     }
@@ -209,7 +212,6 @@ export default function LotesTable() {
       return [
         "EN_NEGOCIACION",
         "DISPONIBLE",
-        "SEPARADO",
         "CIERRE_SOLICITADO",
       ];
     }
@@ -364,6 +366,15 @@ export default function LotesTable() {
         )}
       </div>
 
+      {profile && !modoGerencia && (
+        <div style={infoBox}>
+          Para separar un lote con cliente, usa
+          <strong> Mis separaciones</strong>. El
+          estado separado debe crear una ficha real
+          con cliente, monto, fecha y asesor.
+        </div>
+      )}
+
       {mensaje && (
         <div style={success}>{mensaje}</div>
       )}
@@ -517,6 +528,19 @@ export default function LotesTable() {
                               : "Aprobar venta"}
                           </button>
                         )}
+                      {profile &&
+                        !modoGerencia &&
+                        (lote.estado ===
+                          "DISPONIBLE" ||
+                          lote.estado ===
+                            "EN_NEGOCIACION") && (
+                          <a
+                            href="/asesores/separaciones"
+                            style={secondarySmall}
+                          >
+                            Separar con cliente
+                          </a>
+                        )}
                     </div>
                   </td>
                 </tr>
@@ -616,6 +640,28 @@ const primarySmall: React.CSSProperties = {
   color: "#ffffff",
   fontWeight: 900,
   cursor: "pointer",
+};
+
+const secondarySmall: React.CSSProperties = {
+  minHeight: 36,
+  borderRadius: 10,
+  border: "1px solid #c7b98f",
+  padding: "0 12px",
+  background: "#fff7dc",
+  color: "#5f4a16",
+  fontWeight: 900,
+  display: "inline-flex",
+  alignItems: "center",
+  textDecoration: "none",
+};
+
+const infoBox: React.CSSProperties = {
+  marginBottom: 12,
+  background: "#eef6ff",
+  color: "#244d77",
+  borderRadius: 12,
+  padding: 12,
+  fontWeight: 800,
 };
 
 const success: React.CSSProperties = {

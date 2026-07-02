@@ -92,24 +92,23 @@ export default function ModalLote({
   const cuota36 =
     saldo / 36;
 
+  const estadoVisible =
+    lote.estado === "CIERRE_SOLICITADO"
+      ? "SEPARADO"
+      : lote.estado;
+
   const colorEstado =
-    lote.estado === "VENDIDO"
+    estadoVisible === "VENDIDO"
       ? "#E53935"
-      : lote.estado ===
-        "CIERRE_SOLICITADO"
-        ? "#385F8C"
-      : lote.estado ===
+      : estadoVisible ===
         "SEPARADO"
         ? "#FB8C00"
         : "#2E7D32";
 
   const fondoEstado =
-    lote.estado === "VENDIDO"
+    estadoVisible === "VENDIDO"
       ? "rgba(229,57,53,.25)"
-      : lote.estado ===
-        "CIERRE_SOLICITADO"
-        ? "rgba(56,95,140,.22)"
-      : lote.estado ===
+      : estadoVisible ===
         "SEPARADO"
         ? "rgba(251,140,0,.25)"
         : "rgba(46,125,50,.25)";
@@ -353,7 +352,7 @@ export default function ModalLote({
               `1px solid ${colorEstado}33`,
           }}
         >
-          ● {lote.estado}
+          ● {estadoVisible}
         </div>
       </div>
 
@@ -1048,13 +1047,13 @@ export default function ModalLote({
       >
         <button
           onClick={() => {
-            if (lote.estado !== "DISPONIBLE") {
+            if (estadoVisible !== "DISPONIBLE") {
               return;
             }
 
             onHablarAsesor();
           }}
-          disabled={lote.estado !== "DISPONIBLE"}
+          disabled={estadoVisible !== "DISPONIBLE"}
           style={{
             width: "80%",
             margin: "0 auto",
@@ -1064,12 +1063,12 @@ export default function ModalLote({
             borderRadius: 14,
 
             background:
-              lote.estado === "DISPONIBLE"
+              estadoVisible === "DISPONIBLE"
                 ? "#95ec1c"
                 : "#d1d5db",
 
             color:
-              lote.estado === "DISPONIBLE"
+              estadoVisible === "DISPONIBLE"
                 ? "black"
                 : "#666",
 
@@ -1077,26 +1076,24 @@ export default function ModalLote({
             fontSize: 14,
 
             cursor:
-              lote.estado === "DISPONIBLE"
+              estadoVisible === "DISPONIBLE"
                 ? "pointer"
                 : "not-allowed",
 
             opacity:
-              lote.estado === "DISPONIBLE"
+              estadoVisible === "DISPONIBLE"
                 ? 1
                 : 0.65,
 
             boxShadow:
-              lote.estado === "DISPONIBLE"
+              estadoVisible === "DISPONIBLE"
                 ? "0 4px 20px rgba(58, 251, 129, 0.25)"
                 : "none",
           }}
         >
-          {lote.estado === "DISPONIBLE"
+          {estadoVisible === "DISPONIBLE"
             ? "🗩     Hablar con un asesor"
-            : lote.estado === "CIERRE_SOLICITADO"
-            ? "Cierre solicitado"
-            : lote.estado === "SEPARADO"
+            : estadoVisible === "SEPARADO"
             ? "Lote separado"
             : "Lote vendido"}
         </button>
