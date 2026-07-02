@@ -4,11 +4,18 @@ import { useEffect, useState } from "react";
 import AsesorLayout from "../../components/layout/AsesorLayout";
 import KpiCard from "../../components/dashboard/KpiCard";
 import { supabase } from "../../lib/supabase";
-import { LOTES_TABLE, type LoteCrm } from "../../lib/crm";
+import { obtenerPerfilActual } from "../../lib/auth/clientAuth";
+import {
+  LOTES_TABLE,
+  esGerencia,
+  type LoteCrm,
+  type Profile,
+} from "../../lib/crm";
 
 type Kpis = {
   totalLotes: number;
   disponibles: number;
+  enNegociacion: number;
   separados: number;
   vendidos: number;
   clientes: number;
@@ -16,17 +23,22 @@ type Kpis = {
   separacionesVencidas: number;
 };
 
-export default function AsesoresDashboard() {
-  const [kpis, setKpis] = useState<Kpis>({
-    totalLotes: 0,
-    disponibles: 0,
-    separados: 0,
-    vendidos: 0,
-    clientes: 0,
-    separacionesVigentes: 0,
-    separacionesVencidas: 0,
-  });
+const kpisVacios: Kpis = {
+  totalLotes: 0,
+  disponibles: 0,
+  enNegociacion: 0,
+  separados: 0,
+  vendidos: 0,
+  clientes: 0,
+  separacionesVigentes: 0,
+  separacionesVencidas: 0,
+};
 
+export default function AsesoresDashboard() {
+  const [profile, setProfile] =
+    useState<Profile | null>(null);
+  const [kpis, setKpis] =
+    useState<Kpis>(kpisVacios);
   const [error, setError] =
     useState<string | null>(null);
 
@@ -34,10 +46,23 @@ export default function AsesoresDashboard() {
     const cargar = async () => {
       if (!supabase) return;
 
+      const perfil = await obtenerPerfilActual();
+      setProfile(perfil.profile);
+
+      if (!perfil.profile) {
+        setError(
+          perfil.error ||
+            "No se pudo cargar tu perfil."
+        );
+        return;
+      }
+
+      const modoGerencia = esGerencia(perfil.profile);
+
       const { data: lotes, error: lotesError } =
         await supabase
           .from(LOTES_TABLE)
-          .select("id,estado");
+          .select("id,estado,asesor_id");
 
       const {
         count: clientesCount,
@@ -54,7 +79,7 @@ export default function AsesoresDashboard() {
         error: separacionesError,
       } = await supabase
         .from("separaciones")
-        .select("id,estado");
+        .select("id,estado,asesor_id");
 
       const errorActual =
         lotesError ||
@@ -69,23 +94,39 @@ export default function AsesoresDashboard() {
       const listaLotes =
         (lotes || []) as Pick<
           LoteCrm,
-          "id" | "estado"
+          "id" | "estado" | "asesor_id"
         >[];
 
+      const lotesParaKpi = modoGerencia
+        ? listaLotes
+        : listaLotes.filter(
+            (lote) =>
+              lote.asesor_id ===
+              perfil.profile?.id
+          );
+
       setKpis({
-        totalLotes: listaLotes.length,
-        disponibles: listaLotes.filter(
+        totalLotes: lotesParaKpi.length,
+        disponibles: modoGerencia
+          ? listaLotes.filter(
+              (lote) =>
+                lote.estado === "DISPONIBLE"
+            ).length
+          : 0,
+        enNegociacion: lotesParaKpi.filter(
           (lote) =>
-            lote.estado === "DISPONIBLE"
+            lote.estado === "EN_NEGOCIACION"
         ).length,
-        separados: listaLotes.filter(
+        separados: lotesParaKpi.filter(
           (lote) =>
             lote.estado === "SEPARADO"
         ).length,
-        vendidos: listaLotes.filter(
-          (lote) =>
-            lote.estado === "VENDIDO"
-        ).length,
+        vendidos: modoGerencia
+          ? listaLotes.filter(
+              (lote) =>
+                lote.estado === "VENDIDO"
+            ).length
+          : 0,
         clientes: clientesCount || 0,
         separacionesVigentes: (
           separaciones || []
@@ -105,6 +146,8 @@ export default function AsesoresDashboard() {
     cargar();
   }, []);
 
+  const modoGerencia = esGerencia(profile);
+
   return (
     <AsesorLayout>
       <section>
@@ -117,8 +160,9 @@ export default function AsesoresDashboard() {
             Dashboard comercial
           </h1>
           <p style={subtitle}>
-            Resumen operativo de lotes, clientes y
-            separaciones.
+            {modoGerencia
+              ? "Resumen general de lotes, clientes y separaciones."
+              : "Resumen de tus clientes, separaciones y lotes asignados."}
           </p>
         </div>
 
@@ -137,37 +181,73 @@ export default function AsesoresDashboard() {
             gap: 16,
           }}
         >
+          {modoGerencia ? (
+            <>
+              <KpiCard
+                label="Total de lotes"
+                value={kpis.totalLotes}
+              />
+              <KpiCard
+                label="Disponibles"
+                value={kpis.disponibles}
+                tone="green"
+              />
+            </>
+          ) : (
+            <KpiCard
+              label="Mis lotes en gestion"
+              value={kpis.totalLotes}
+            />
+          )}
           <KpiCard
-            label="Total de lotes"
-            value={kpis.totalLotes}
-          />
-          <KpiCard
-            label="Disponibles"
-            value={kpis.disponibles}
-            tone="green"
-          />
-          <KpiCard
-            label="Separados"
-            value={kpis.separados}
+            label={
+              modoGerencia
+                ? "En negociacion"
+                : "Mis negociaciones"
+            }
+            value={kpis.enNegociacion}
             tone="gold"
           />
           <KpiCard
-            label="Vendidos"
-            value={kpis.vendidos}
-            tone="red"
+            label={
+              modoGerencia
+                ? "Separados"
+                : "Mis separados"
+            }
+            value={kpis.separados}
+            tone="gold"
           />
+          {modoGerencia && (
+            <KpiCard
+              label="Vendidos"
+              value={kpis.vendidos}
+              tone="red"
+            />
+          )}
           <KpiCard
-            label="Clientes registrados"
+            label={
+              modoGerencia
+                ? "Clientes registrados"
+                : "Mis clientes"
+            }
             value={kpis.clientes}
             tone="gray"
           />
           <KpiCard
-            label="Separaciones vigentes"
+            label={
+              modoGerencia
+                ? "Separaciones vigentes"
+                : "Mis separaciones vigentes"
+            }
             value={kpis.separacionesVigentes}
             tone="gold"
           />
           <KpiCard
-            label="Separaciones vencidas"
+            label={
+              modoGerencia
+                ? "Separaciones vencidas"
+                : "Mis separaciones vencidas"
+            }
             value={kpis.separacionesVencidas}
             tone="red"
           />

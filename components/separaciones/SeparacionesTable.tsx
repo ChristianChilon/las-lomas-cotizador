@@ -2,14 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { obtenerPerfilActual } from "../../lib/auth/clientAuth";
 import {
   LOTES_TABLE,
   colorEstado,
+  esAdmin,
+  esGerencia,
   formatearArea,
   formatearMoneda,
   nombreCliente,
   type Cliente,
   type LoteCrm,
+  type Profile,
   type Separacion,
 } from "../../lib/crm";
 
@@ -19,6 +23,7 @@ type SeparacionForm = {
   monto: string;
   fechaLimite: string;
   observaciones: string;
+  asesorId: string;
 };
 
 const formVacio: SeparacionForm = {
@@ -27,13 +32,19 @@ const formVacio: SeparacionForm = {
   monto: "",
   fechaLimite: "",
   observaciones: "",
+  asesorId: "",
 };
 
 export default function SeparacionesTable() {
+  const [profile, setProfile] =
+    useState<Profile | null>(null);
   const [clientes, setClientes] = useState<Cliente[]>(
     []
   );
   const [lotes, setLotes] = useState<LoteCrm[]>([]);
+  const [asesores, setAsesores] = useState<Profile[]>(
+    []
+  );
   const [separaciones, setSeparaciones] = useState<
     Separacion[]
   >([]);
@@ -45,14 +56,20 @@ export default function SeparacionesTable() {
     useState<string | null>(null);
   const [guardando, setGuardando] =
     useState(false);
+  const [anulando, setAnulando] =
+    useState<string | null>(null);
 
   const cargar = async () => {
     if (!supabase) return;
+
+    const perfil = await obtenerPerfilActual();
+    setProfile(perfil.profile);
 
     const [
       clientesRes,
       lotesRes,
       separacionesRes,
+      perfilesRes,
     ] = await Promise.all([
       supabase
         .from("clientes")
@@ -81,6 +98,11 @@ export default function SeparacionesTable() {
         .order("created_at", {
           ascending: false,
         }),
+      supabase
+        .from("profiles")
+        .select(
+          "id,full_name,email,role,phone,active"
+        ),
     ]);
 
     if (
@@ -103,20 +125,39 @@ export default function SeparacionesTable() {
     setSeparaciones(
       (separacionesRes.data || []) as Separacion[]
     );
+    setAsesores(
+      ((perfilesRes.data || []) as Profile[]).filter(
+        (asesor) =>
+          asesor.active !== false &&
+          asesor.role === "asesor"
+      )
+    );
   };
 
   useEffect(() => {
     void Promise.resolve().then(cargar);
   }, []);
 
+  const modoGerencia = esGerencia(profile);
+  const puedeAnular = esAdmin(profile);
+
   const lotesDisponibles = useMemo(
     () =>
-      lotes.filter((lote) =>
-        ["DISPONIBLE", "EN_NEGOCIACION"].includes(
-          lote.estado
-        )
-      ),
-    [lotes]
+      lotes.filter((lote) => {
+        const estadoPermitido = [
+          "DISPONIBLE",
+          "EN_NEGOCIACION",
+        ].includes(lote.estado);
+
+        if (!estadoPermitido) return false;
+        if (modoGerencia) return true;
+
+        return (
+          !lote.asesor_id ||
+          lote.asesor_id === profile?.id
+        );
+      }),
+    [lotes, modoGerencia, profile?.id]
   );
 
   const clientesMap = useMemo(() => {
@@ -134,6 +175,17 @@ export default function SeparacionesTable() {
     });
     return map;
   }, [lotes]);
+
+  const asesoresMap = useMemo(() => {
+    const map: Record<string, Profile> = {};
+    asesores.forEach((asesor) => {
+      map[asesor.id] = asesor;
+    });
+    if (profile) {
+      map[profile.id] = profile;
+    }
+    return map;
+  }, [asesores, profile]);
 
   const actualizarForm = (
     campo: keyof SeparacionForm,
@@ -167,6 +219,10 @@ export default function SeparacionesTable() {
           form.fechaLimite || null,
         p_observaciones:
           form.observaciones.trim() || null,
+        p_asesor_id:
+          modoGerencia && form.asesorId
+            ? form.asesorId
+            : null,
       });
 
     if (rpcError) {
@@ -180,6 +236,32 @@ export default function SeparacionesTable() {
     }
 
     setGuardando(false);
+  };
+
+  const anularSeparacion = async (
+    separacion: Separacion
+  ) => {
+    if (!supabase || !puedeAnular) return;
+
+    setAnulando(separacion.id);
+    setMensaje(null);
+    setError(null);
+
+    const { error: rpcError } =
+      await supabase.rpc("crm_anular_separacion", {
+        p_separacion_id: separacion.id,
+        p_motivo:
+          "Anulacion desde panel CRM",
+      });
+
+    if (rpcError) {
+      setError(rpcError.message);
+    } else {
+      setMensaje("Separacion anulada.");
+      await cargar();
+    }
+
+    setAnulando(null);
   };
 
   return (
@@ -229,6 +311,31 @@ export default function SeparacionesTable() {
               </option>
             ))}
           </select>
+          {modoGerencia && (
+            <select
+              value={form.asesorId}
+              onChange={(event) =>
+                actualizarForm(
+                  "asesorId",
+                  event.target.value
+                )
+              }
+              style={input}
+            >
+              <option value="">
+                Usar asesor del cliente
+              </option>
+              {asesores.map((asesor) => (
+                <option
+                  key={asesor.id}
+                  value={asesor.id}
+                >
+                  {asesor.full_name ||
+                    asesor.email}
+                </option>
+              ))}
+            </select>
+          )}
           <input
             type="number"
             min="0"
@@ -286,10 +393,12 @@ export default function SeparacionesTable() {
               {[
                 "Lote",
                 "Cliente",
+                "Asesor",
                 "Monto",
                 "Vence",
                 "Estado",
                 "Registro",
+                "Accion",
               ].map((head) => (
                 <th key={head} style={th}>
                   {head}
@@ -306,6 +415,9 @@ export default function SeparacionesTable() {
                 separacion.cliente_id
                   ? clientesMap[separacion.cliente_id]
                   : null;
+              const asesor = separacion.asesor_id
+                ? asesoresMap[separacion.asesor_id]
+                : null;
               const estadoColor = colorEstado(
                 lote?.estado || "SEPARADO"
               );
@@ -319,6 +431,11 @@ export default function SeparacionesTable() {
                   </td>
                   <td style={td}>
                     {nombreCliente(cliente) || "-"}
+                  </td>
+                  <td style={td}>
+                    {asesor?.full_name ||
+                      asesor?.email ||
+                      "-"}
                   </td>
                   <td style={td}>
                     {separacion.monto_separacion
@@ -351,6 +468,25 @@ export default function SeparacionesTable() {
                           separacion.created_at
                         ).toLocaleDateString("es-PE")
                       : "-"}
+                  </td>
+                  <td style={td}>
+                    {puedeAnular &&
+                    separacion.estado === "ACTIVA" ? (
+                      <button
+                        type="button"
+                        disabled={
+                          anulando === separacion.id
+                        }
+                        onClick={() =>
+                          anularSeparacion(separacion)
+                        }
+                        style={dangerButton}
+                      >
+                        Anular
+                      </button>
+                    ) : (
+                      "-"
+                    )}
                   </td>
                 </tr>
               );
@@ -404,6 +540,17 @@ const primaryButton: React.CSSProperties = {
   padding: "0 18px",
   background: "#2f7d46",
   color: "#ffffff",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const dangerButton: React.CSSProperties = {
+  height: 34,
+  border: 0,
+  borderRadius: 10,
+  padding: "0 12px",
+  background: "#f7dad6",
+  color: "#8b2f25",
   fontWeight: 900,
   cursor: "pointer",
 };

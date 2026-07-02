@@ -15,6 +15,31 @@ export type CrmRole =
   | "jefe_ventas"
   | "asesor";
 
+export const esAdmin = (
+  profile?: Pick<Profile, "role"> | null
+) => profile?.role === "admin";
+
+export const esGerencia = (
+  profile?: Pick<Profile, "role"> | null
+) =>
+  profile?.role === "admin" ||
+  profile?.role === "jefe_ventas";
+
+export const etiquetaRol = (
+  role: CrmRole | string | null | undefined
+) => {
+  switch (role) {
+    case "admin":
+      return "Admin";
+    case "jefe_ventas":
+      return "Jefe de ventas";
+    case "asesor":
+      return "Asesor";
+    default:
+      return "Usuario";
+  }
+};
+
 export type Profile = {
   id: string;
   full_name: string | null;

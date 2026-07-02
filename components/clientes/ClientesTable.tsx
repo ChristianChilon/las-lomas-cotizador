@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { obtenerPerfilActual } from "../../lib/auth/clientAuth";
 import {
+  esGerencia,
   nombreCliente,
   type Cliente,
   type Profile,
@@ -17,6 +18,7 @@ type ClienteForm = {
   correo: string;
   fuente: string;
   observaciones: string;
+  asesorId: string;
 };
 
 const clienteVacio: ClienteForm = {
@@ -27,12 +29,16 @@ const clienteVacio: ClienteForm = {
   correo: "",
   fuente: "",
   observaciones: "",
+  asesorId: "",
 };
 
 export default function ClientesTable() {
   const [profile, setProfile] =
     useState<Profile | null>(null);
   const [clientes, setClientes] = useState<Cliente[]>(
+    []
+  );
+  const [asesores, setAsesores] = useState<Profile[]>(
     []
   );
   const [busqueda, setBusqueda] = useState("");
@@ -44,36 +50,71 @@ export default function ClientesTable() {
     useState<string | null>(null);
   const [guardando, setGuardando] =
     useState(false);
+  const [asignando, setAsignando] =
+    useState<string | null>(null);
 
   const cargar = async () => {
     if (!supabase) return;
 
-    const perfil =
-      await obtenerPerfilActual();
+    const perfil = await obtenerPerfilActual();
     setProfile(perfil.profile);
 
-    const { data, error: clientesError } =
-      await supabase
-        .from("clientes")
-        .select(
-          "id,nombres,apellidos,dni,celular,correo,direccion,fuente,observaciones,asesor_id,created_at,updated_at"
-        )
-        .order("created_at", {
-          ascending: false,
-        });
+    const clientesQuery = supabase
+      .from("clientes")
+      .select(
+        "id,nombres,apellidos,dni,celular,correo,direccion,fuente,observaciones,asesor_id,created_at,updated_at"
+      )
+      .order("created_at", {
+        ascending: false,
+      });
 
-    if (clientesError) {
-      setError(clientesError.message);
+    const perfilesQuery = supabase
+      .from("profiles")
+      .select(
+        "id,full_name,email,role,phone,active"
+      )
+      .order("full_name", {
+        ascending: true,
+      });
+
+    const [clientesRes, perfilesRes] =
+      await Promise.all([
+        clientesQuery,
+        perfilesQuery,
+      ]);
+
+    if (clientesRes.error) {
+      setError(clientesRes.error.message);
       return;
     }
 
     setError(null);
-    setClientes((data || []) as Cliente[]);
+    setClientes((clientesRes.data || []) as Cliente[]);
+    setAsesores(
+      ((perfilesRes.data || []) as Profile[]).filter(
+        (asesor) =>
+          asesor.active !== false &&
+          asesor.role === "asesor"
+      )
+    );
   };
 
   useEffect(() => {
     void Promise.resolve().then(cargar);
   }, []);
+
+  const modoGerencia = esGerencia(profile);
+
+  const asesoresMap = useMemo(() => {
+    const map: Record<string, Profile> = {};
+    asesores.forEach((asesor) => {
+      map[asesor.id] = asesor;
+    });
+    if (profile) {
+      map[profile.id] = profile;
+    }
+    return map;
+  }, [asesores, profile]);
 
   const clientesFiltrados = useMemo(() => {
     const texto = busqueda.trim().toLowerCase();
@@ -114,6 +155,10 @@ export default function ClientesTable() {
     setMensaje(null);
     setError(null);
 
+    const asesorAsignado = modoGerencia
+      ? form.asesorId || null
+      : profile.id;
+
     const payload = {
       nombres: form.nombres.trim(),
       apellidos: form.apellidos.trim() || null,
@@ -123,7 +168,7 @@ export default function ClientesTable() {
       fuente: form.fuente.trim() || null,
       observaciones:
         form.observaciones.trim() || null,
-      asesor_id: profile.id,
+      asesor_id: asesorAsignado,
       created_by: profile.id,
     };
 
@@ -139,6 +184,33 @@ export default function ClientesTable() {
     }
 
     setGuardando(false);
+  };
+
+  const reasignarCliente = async (
+    cliente: Cliente,
+    asesorId: string
+  ) => {
+    if (!supabase || !modoGerencia) return;
+
+    setAsignando(cliente.id);
+    setMensaje(null);
+    setError(null);
+
+    const { error: updateError } = await supabase
+      .from("clientes")
+      .update({
+        asesor_id: asesorId || null,
+      })
+      .eq("id", cliente.id);
+
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setMensaje("Cliente reasignado.");
+      await cargar();
+    }
+
+    setAsignando(null);
   };
 
   return (
@@ -208,6 +280,31 @@ export default function ClientesTable() {
             placeholder="Fuente"
             style={input}
           />
+          {modoGerencia && (
+            <select
+              value={form.asesorId}
+              onChange={(event) =>
+                actualizarForm(
+                  "asesorId",
+                  event.target.value
+                )
+              }
+              style={input}
+            >
+              <option value="">
+                Sin asesor asignado
+              </option>
+              {asesores.map((asesor) => (
+                <option
+                  key={asesor.id}
+                  value={asesor.id}
+                >
+                  {asesor.full_name ||
+                    asesor.email}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         <textarea
           value={form.observaciones}
@@ -255,6 +352,7 @@ export default function ClientesTable() {
                 "Celular",
                 "Correo",
                 "Fuente",
+                "Asesor",
                 "Registro",
               ].map((head) => (
                 <th key={head} style={th}>
@@ -264,30 +362,72 @@ export default function ClientesTable() {
             </tr>
           </thead>
           <tbody>
-            {clientesFiltrados.map((cliente) => (
-              <tr key={cliente.id}>
-                <td style={td}>
-                  {nombreCliente(cliente)}
-                </td>
-                <td style={td}>{cliente.dni || "-"}</td>
-                <td style={td}>
-                  {cliente.celular || "-"}
-                </td>
-                <td style={td}>
-                  {cliente.correo || "-"}
-                </td>
-                <td style={td}>
-                  {cliente.fuente || "-"}
-                </td>
-                <td style={td}>
-                  {cliente.created_at
-                    ? new Date(
-                        cliente.created_at
-                      ).toLocaleDateString("es-PE")
-                    : "-"}
-                </td>
-              </tr>
-            ))}
+            {clientesFiltrados.map((cliente) => {
+              const asesor = cliente.asesor_id
+                ? asesoresMap[cliente.asesor_id]
+                : null;
+
+              return (
+                <tr key={cliente.id}>
+                  <td style={td}>
+                    {nombreCliente(cliente)}
+                  </td>
+                  <td style={td}>
+                    {cliente.dni || "-"}
+                  </td>
+                  <td style={td}>
+                    {cliente.celular || "-"}
+                  </td>
+                  <td style={td}>
+                    {cliente.correo || "-"}
+                  </td>
+                  <td style={td}>
+                    {cliente.fuente || "-"}
+                  </td>
+                  <td style={td}>
+                    {modoGerencia ? (
+                      <select
+                        value={cliente.asesor_id || ""}
+                        disabled={
+                          asignando === cliente.id
+                        }
+                        onChange={(event) =>
+                          reasignarCliente(
+                            cliente,
+                            event.target.value
+                          )
+                        }
+                        style={selectSmall}
+                      >
+                        <option value="">
+                          Sin asesor
+                        </option>
+                        {asesores.map((item) => (
+                          <option
+                            key={item.id}
+                            value={item.id}
+                          >
+                            {item.full_name ||
+                              item.email}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      asesor?.full_name ||
+                      asesor?.email ||
+                      "Asignado a ti"
+                    )}
+                  </td>
+                  <td style={td}>
+                    {cliente.created_at
+                      ? new Date(
+                          cliente.created_at
+                        ).toLocaleDateString("es-PE")
+                      : "-"}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -377,6 +517,16 @@ const td: React.CSSProperties = {
   borderBottom: "1px solid #eef0ec",
   color: "#111827",
   fontSize: 14,
+};
+
+const selectSmall: React.CSSProperties = {
+  height: 36,
+  borderRadius: 10,
+  border: "1px solid #d1d5db",
+  padding: "0 10px",
+  background: "#ffffff",
+  color: "#111827",
+  fontWeight: 800,
 };
 
 const success: React.CSSProperties = {

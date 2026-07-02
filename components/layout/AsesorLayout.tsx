@@ -127,7 +127,7 @@ export default function AsesorLayout({
         background: "#f4f6f2",
       }}
     >
-      <Sidebar />
+      <Sidebar profile={profile} />
       <div
         style={{
           flex: 1,

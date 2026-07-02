@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { esGerencia, type Profile } from "../../lib/crm";
 
 const links = [
   {
@@ -15,15 +16,30 @@ const links = [
   {
     href: "/asesores/clientes",
     label: "Clientes",
+    asesorLabel: "Mis clientes",
   },
   {
     href: "/asesores/separaciones",
     label: "Separaciones",
+    asesorLabel: "Mis separaciones",
+  },
+  {
+    href: "/asesores/historial",
+    label: "Historial",
+    gerenciaOnly: true,
   },
 ];
 
-export default function Sidebar() {
+type Props = {
+  profile: Profile;
+};
+
+export default function Sidebar({ profile }: Props) {
   const pathname = usePathname();
+  const modoGerencia = esGerencia(profile);
+  const visibleLinks = links.filter(
+    (link) => !link.gerenciaOnly || modoGerencia
+  );
 
   return (
     <aside
@@ -55,9 +71,13 @@ export default function Sidebar() {
           gap: 8,
         }}
       >
-        {links.map((link) => {
+        {visibleLinks.map((link) => {
           const active =
             pathname === link.href;
+          const label =
+            !modoGerencia && link.asesorLabel
+              ? link.asesorLabel
+              : link.label;
 
           return (
             <Link
@@ -78,7 +98,7 @@ export default function Sidebar() {
                 fontWeight: 800,
               }}
             >
-              {link.label}
+              {label}
             </Link>
           );
         })}

@@ -8,6 +8,7 @@ import {
   LOTES_TABLE,
   colorEstado,
   etiquetaEstado,
+  esGerencia,
   formatearArea,
   formatearMoneda,
   nombreCliente,
@@ -34,12 +35,13 @@ export default function LotesTable() {
     useState<string | null>(null);
   const [guardando, setGuardando] =
     useState<number | null>(null);
+  const [asignando, setAsignando] =
+    useState<number | null>(null);
 
   const cargar = async () => {
     if (!supabase) return;
 
-    const perfil =
-      await obtenerPerfilActual();
+    const perfil = await obtenerPerfilActual();
     setProfile(perfil.profile);
 
     const [
@@ -122,6 +124,18 @@ export default function LotesTable() {
     };
   }, []);
 
+  const modoGerencia = esGerencia(profile);
+
+  const asesoresLista = useMemo(
+    () =>
+      Object.values(asesores).filter(
+        (asesor) =>
+          asesor.active !== false &&
+          asesor.role === "asesor"
+      ),
+    [asesores]
+  );
+
   const lotesFiltrados = useMemo(() => {
     const texto = busqueda
       .trim()
@@ -147,6 +161,39 @@ export default function LotesTable() {
     });
   }, [busqueda, estado, lotes]);
 
+  const estadosPermitidos = (lote: LoteCrm) => {
+    if (!profile) return [lote.estado];
+
+    if (modoGerencia) {
+      return Array.from(CRM_ESTADOS);
+    }
+
+    if (
+      lote.asesor_id &&
+      lote.asesor_id !== profile.id
+    ) {
+      return [lote.estado];
+    }
+
+    if (lote.estado === "DISPONIBLE") {
+      return [
+        "DISPONIBLE",
+        "EN_NEGOCIACION",
+        "SEPARADO",
+      ];
+    }
+
+    if (lote.estado === "EN_NEGOCIACION") {
+      return [
+        "EN_NEGOCIACION",
+        "DISPONIBLE",
+        "SEPARADO",
+      ];
+    }
+
+    return [lote.estado];
+  };
+
   const cambiarEstado = async (
     lote: LoteCrm,
     estadoNuevo: string
@@ -158,46 +205,54 @@ export default function LotesTable() {
     setMensaje(null);
     setError(null);
 
-    const estadoAnterior = lote.estado;
+    const { error: rpcError } =
+      await supabase.rpc("crm_cambiar_estado_lote", {
+        p_lote_id: lote.id,
+        p_estado_nuevo: estadoNuevo,
+        p_motivo:
+          "Cambio desde panel CRM",
+      });
 
-    const { error: updateError } =
-      await supabase
-        .from(LOTES_TABLE)
-        .update({
-          estado: estadoNuevo,
-          updated_at:
-            new Date().toISOString(),
-        })
-        .eq("id", lote.id);
-
-    if (updateError) {
-      setError(updateError.message);
-      setGuardando(null);
-      return;
-    }
-
-    const { error: historyError } =
-      await supabase
-        .from("historial_lotes")
-        .insert({
-          lote_id: lote.id,
-          estado_anterior: estadoAnterior,
-          estado_nuevo: estadoNuevo,
-          cambiado_por: profile.id,
-          motivo:
-            "Cambio desde panel CRM",
-        });
-
-    if (historyError) {
-      setError(historyError.message);
+    if (rpcError) {
+      setError(rpcError.message);
     } else {
       setMensaje(
         `Lote ${lote.mz}-${lote.lote} actualizado.`
       );
+      await cargar();
     }
 
     setGuardando(null);
-    cargar();
+  };
+
+  const asignarLote = async (
+    lote: LoteCrm,
+    asesorId: string
+  ) => {
+    if (!supabase || !modoGerencia) return;
+
+    setAsignando(lote.id);
+    setMensaje(null);
+    setError(null);
+
+    const { error: rpcError } =
+      await supabase.rpc("crm_asignar_lote", {
+        p_lote_id: lote.id,
+        p_asesor_id: asesorId || null,
+        p_motivo:
+          "Asignacion desde panel CRM",
+      });
+
+    if (rpcError) {
+      setError(rpcError.message);
+    } else {
+      setMensaje(
+        `Lote ${lote.mz}-${lote.lote} reasignado.`
+      );
+      await cargar();
+    }
+
+    setAsignando(null);
   };
 
   return (
@@ -265,6 +320,10 @@ export default function LotesTable() {
               const asesor = lote.asesor_id
                 ? asesores[lote.asesor_id]
                 : null;
+              const opciones =
+                estadosPermitidos(lote);
+              const puedeCambiar =
+                opciones.length > 1;
 
               return (
                 <tr key={lote.id}>
@@ -296,15 +355,49 @@ export default function LotesTable() {
                       "-"}
                   </td>
                   <td style={td}>
-                    {asesor?.full_name ||
-                      asesor?.email ||
-                      "-"}
+                    {modoGerencia ? (
+                      <select
+                        value={lote.asesor_id || ""}
+                        disabled={
+                          asignando === lote.id
+                        }
+                        onChange={(event) =>
+                          asignarLote(
+                            lote,
+                            event.target.value
+                          )
+                        }
+                        style={selectSmall}
+                      >
+                        <option value="">
+                          Sin asignar
+                        </option>
+                        {asesoresLista.map(
+                          (item) => (
+                            <option
+                              key={item.id}
+                              value={item.id}
+                            >
+                              {item.full_name ||
+                                item.email}
+                            </option>
+                          )
+                        )}
+                      </select>
+                    ) : asesor?.id === profile?.id ? (
+                      "Asignado a ti"
+                    ) : asesor ? (
+                      "Asignado"
+                    ) : (
+                      "-"
+                    )}
                   </td>
                   <td style={td}>
                     <select
                       value={lote.estado}
                       disabled={
-                        guardando === lote.id
+                        guardando === lote.id ||
+                        !puedeCambiar
                       }
                       onChange={(event) =>
                         cambiarEstado(
@@ -314,18 +407,14 @@ export default function LotesTable() {
                       }
                       style={selectSmall}
                     >
-                      {CRM_ESTADOS.map(
-                        (item) => (
-                          <option
-                            key={item}
-                            value={item}
-                          >
-                            {etiquetaEstado(
-                              item
-                            )}
-                          </option>
-                        )
-                      )}
+                      {opciones.map((item) => (
+                        <option
+                          key={item}
+                          value={item}
+                        >
+                          {etiquetaEstado(item)}
+                        </option>
+                      ))}
                     </select>
                   </td>
                 </tr>
