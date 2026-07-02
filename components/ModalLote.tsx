@@ -96,6 +96,9 @@ export default function ModalLote({
     lote.estado === "VENDIDO"
       ? "#E53935"
       : lote.estado ===
+        "CIERRE_SOLICITADO"
+        ? "#385F8C"
+      : lote.estado ===
         "SEPARADO"
         ? "#FB8C00"
         : "#2E7D32";
@@ -103,6 +106,9 @@ export default function ModalLote({
   const fondoEstado =
     lote.estado === "VENDIDO"
       ? "rgba(229,57,53,.25)"
+      : lote.estado ===
+        "CIERRE_SOLICITADO"
+        ? "rgba(56,95,140,.22)"
       : lote.estado ===
         "SEPARADO"
         ? "rgba(251,140,0,.25)"
@@ -1088,6 +1094,8 @@ export default function ModalLote({
         >
           {lote.estado === "DISPONIBLE"
             ? "🗩     Hablar con un asesor"
+            : lote.estado === "CIERRE_SOLICITADO"
+            ? "Cierre solicitado"
             : lote.estado === "SEPARADO"
             ? "Lote separado"
             : "Lote vendido"}

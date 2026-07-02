@@ -29,6 +29,8 @@ export default function LotesTable() {
   >({});
   const [busqueda, setBusqueda] = useState("");
   const [estado, setEstado] = useState("TODOS");
+  const [asesorFiltro, setAsesorFiltro] =
+    useState("TODOS");
   const [mensaje, setMensaje] =
     useState<string | null>(null);
   const [error, setError] =
@@ -36,6 +38,8 @@ export default function LotesTable() {
   const [guardando, setGuardando] =
     useState<number | null>(null);
   const [asignando, setAsignando] =
+    useState<number | null>(null);
+  const [aprobando, setAprobando] =
     useState<number | null>(null);
 
   const cargar = async () => {
@@ -147,6 +151,13 @@ export default function LotesTable() {
         estado === "TODOS" ||
         lote.estado === estado;
 
+      const coincideAsesor =
+        !modoGerencia ||
+        asesorFiltro === "TODOS" ||
+        (asesorFiltro === "SIN_ASIGNAR"
+          ? !lote.asesor_id
+          : lote.asesor_id === asesorFiltro);
+
       const codigo =
         `${lote.mz}${lote.lote}`
           .toLowerCase()
@@ -157,9 +168,19 @@ export default function LotesTable() {
         codigo.includes(texto) ||
         lote.mz.toLowerCase().includes(texto);
 
-      return coincideEstado && coincideTexto;
+      return (
+        coincideEstado &&
+        coincideAsesor &&
+        coincideTexto
+      );
     });
-  }, [busqueda, estado, lotes]);
+  }, [
+    asesorFiltro,
+    busqueda,
+    estado,
+    lotes,
+    modoGerencia,
+  ]);
 
   const estadosPermitidos = (lote: LoteCrm) => {
     if (!profile) return [lote.estado];
@@ -180,6 +201,7 @@ export default function LotesTable() {
         "DISPONIBLE",
         "EN_NEGOCIACION",
         "SEPARADO",
+        "CIERRE_SOLICITADO",
       ];
     }
 
@@ -188,6 +210,14 @@ export default function LotesTable() {
         "EN_NEGOCIACION",
         "DISPONIBLE",
         "SEPARADO",
+        "CIERRE_SOLICITADO",
+      ];
+    }
+
+    if (lote.estado === "SEPARADO") {
+      return [
+        "SEPARADO",
+        "CIERRE_SOLICITADO",
       ];
     }
 
@@ -255,6 +285,32 @@ export default function LotesTable() {
     setAsignando(null);
   };
 
+  const aprobarCierre = async (lote: LoteCrm) => {
+    if (!supabase || !modoGerencia) return;
+
+    setAprobando(lote.id);
+    setMensaje(null);
+    setError(null);
+
+    const { error: rpcError } =
+      await supabase.rpc("crm_aprobar_cierre_lote", {
+        p_lote_id: lote.id,
+        p_motivo:
+          "Venta aprobada desde panel CRM",
+      });
+
+    if (rpcError) {
+      setError(rpcError.message);
+    } else {
+      setMensaje(
+        `Venta aprobada para ${lote.mz}-${lote.lote}.`
+      );
+      await cargar();
+    }
+
+    setAprobando(null);
+  };
+
   return (
     <section>
       <div style={toolbar}>
@@ -282,6 +338,30 @@ export default function LotesTable() {
             </option>
           ))}
         </select>
+        {modoGerencia && (
+          <select
+            value={asesorFiltro}
+            onChange={(event) =>
+              setAsesorFiltro(event.target.value)
+            }
+            style={select}
+          >
+            <option value="TODOS">
+              Todos los asesores
+            </option>
+            <option value="SIN_ASIGNAR">
+              Sin asignar
+            </option>
+            {asesoresLista.map((item) => (
+              <option
+                key={item.id}
+                value={item.id}
+              >
+                {item.full_name || item.email}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {mensaje && (
@@ -393,29 +473,51 @@ export default function LotesTable() {
                     )}
                   </td>
                   <td style={td}>
-                    <select
-                      value={lote.estado}
-                      disabled={
-                        guardando === lote.id ||
-                        !puedeCambiar
-                      }
-                      onChange={(event) =>
-                        cambiarEstado(
-                          lote,
-                          event.target.value
-                        )
-                      }
-                      style={selectSmall}
-                    >
-                      {opciones.map((item) => (
-                        <option
-                          key={item}
-                          value={item}
-                        >
-                          {etiquetaEstado(item)}
-                        </option>
-                      ))}
-                    </select>
+                    <div style={actionStack}>
+                      <select
+                        value={lote.estado}
+                        disabled={
+                          guardando === lote.id ||
+                          !puedeCambiar
+                        }
+                        onChange={(event) =>
+                          cambiarEstado(
+                            lote,
+                            event.target.value
+                          )
+                        }
+                        style={selectSmall}
+                      >
+                        {opciones.map((item) => (
+                          <option
+                            key={item}
+                            value={item}
+                          >
+                            {etiquetaEstado(item)}
+                          </option>
+                        ))}
+                      </select>
+                      {modoGerencia &&
+                        lote.estado ===
+                          "CIERRE_SOLICITADO" && (
+                          <button
+                            type="button"
+                            disabled={
+                              aprobando ===
+                              lote.id
+                            }
+                            onClick={() =>
+                              aprobarCierre(lote)
+                            }
+                            style={primarySmall}
+                          >
+                            {aprobando ===
+                            lote.id
+                              ? "Aprobando..."
+                              : "Aprobar venta"}
+                          </button>
+                        )}
+                    </div>
                   </td>
                 </tr>
               );
@@ -496,6 +598,24 @@ const selectSmall: React.CSSProperties = {
   background: "#ffffff",
   color: "#111827",
   fontWeight: 800,
+};
+
+const actionStack: React.CSSProperties = {
+  display: "flex",
+  gap: 8,
+  alignItems: "center",
+  flexWrap: "wrap",
+};
+
+const primarySmall: React.CSSProperties = {
+  minHeight: 36,
+  borderRadius: 10,
+  border: "1px solid #2f6f43",
+  padding: "0 12px",
+  background: "#2f6f43",
+  color: "#ffffff",
+  fontWeight: 900,
+  cursor: "pointer",
 };
 
 const success: React.CSSProperties = {

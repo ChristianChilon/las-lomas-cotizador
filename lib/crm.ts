@@ -4,6 +4,7 @@ export const CRM_ESTADOS = [
   "DISPONIBLE",
   "EN_NEGOCIACION",
   "SEPARADO",
+  "CIERRE_SOLICITADO",
   "VENDIDO",
   "BLOQUEADO",
 ] as const;
@@ -101,6 +102,8 @@ export const etiquetaEstado = (
       return "En negociacion";
     case "SEPARADO":
       return "Separado";
+    case "CIERRE_SOLICITADO":
+      return "Cierre solicitado";
     case "VENDIDO":
       return "Vendido";
     case "BLOQUEADO":
@@ -128,6 +131,11 @@ export const colorEstado = (
       return {
         bg: "#F7E8D0",
         fg: "#7A4B12",
+      };
+    case "CIERRE_SOLICITADO":
+      return {
+        bg: "#E4ECF7",
+        fg: "#244D77",
       };
     case "VENDIDO":
       return {

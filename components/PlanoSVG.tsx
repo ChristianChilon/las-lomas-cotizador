@@ -165,6 +165,12 @@ export default function PlanoSVG({
                 stroke: "#68843E",
               };
 
+            case "CIERRE_SOLICITADO":
+              return {
+                fill: "rgba(56,95,140,0.30)",
+                stroke: "#385F8C",
+              };
+
             case "BLOQUEADO":
               return {
                 fill: "rgba(90,99,112,0.30)",

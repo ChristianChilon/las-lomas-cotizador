@@ -343,6 +343,13 @@ export default function Home() {
         "SEPARADO"
     ).length;
 
+  const cierresSolicitados =
+    lotes.filter(
+      (l) =>
+        l.estado ===
+        "CIERRE_SOLICITADO"
+    ).length;
+
   const vendidos =
     lotes.filter(
       (l) =>
@@ -1007,6 +1014,48 @@ export default function Home() {
 
                     marginBottom: 14,
 
+                    color: "#385F8C",
+
+                    fontWeight: 700,
+
+                    fontSize: 15,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: "50%",
+                        background: "#385F8C",
+                        boxShadow:
+                          "0 0 12px rgba(56,95,140,.42)",
+                      }}
+                    />
+
+                    <span>CIERRE SOLICITADO</span>
+                  </div>
+
+                  <span>
+                    ({cierresSolicitados})
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent:
+                      "space-between",
+
+                    marginBottom: 14,
+
                     color: "#9F3B30",
 
                     fontWeight: 700,
@@ -1371,6 +1420,9 @@ export default function Home() {
                     <option value="SEPARADO">
                       Separados
                     </option>
+                    <option value="CIERRE_SOLICITADO">
+                      Cierre solicitado
+                    </option>
                     <option value="VENDIDO">
                       Vendidos
                     </option>
@@ -1724,11 +1776,15 @@ export default function Home() {
                                     ? "#c7f2c5"
                                     : lote.estado === "SEPARADO"
                                     ? "#ffe0a6"
+                                    : lote.estado === "CIERRE_SOLICITADO"
+                                    ? "#b9d5f0"
                                     : "#ffc1b6"
                                   : lote.estado === "DISPONIBLE"
                                     ? "#2F6F43"
                                     : lote.estado === "SEPARADO"
                                     ? "#7B5A1D"
+                                    : lote.estado === "CIERRE_SOLICITADO"
+                                    ? "#244D77"
                                     : "#8F2F27",
 
                               background:
@@ -1737,11 +1793,15 @@ export default function Home() {
                                     ? "rgba(59,143,82,.22)"
                                     : lote.estado === "SEPARADO"
                                     ? "rgba(182,126,42,.24)"
+                                    : lote.estado === "CIERRE_SOLICITADO"
+                                    ? "rgba(80,135,190,.22)"
                                     : "rgba(187,69,53,.24)"
                                   : lote.estado === "DISPONIBLE"
                                     ? "#E4F0E6"
                                     : lote.estado === "SEPARADO"
                                     ? "#F6E8CF"
+                                    : lote.estado === "CIERRE_SOLICITADO"
+                                    ? "#E4ECF7"
                                     : "#F4DDD9",
 
                               border: modoNoche
@@ -2069,6 +2129,8 @@ export default function Home() {
               >
                 {loteSeleccionado?.estado === "DISPONIBLE"
                   ? "📨 Solicitar asesoría"
+                  : loteSeleccionado?.estado === "CIERRE_SOLICITADO"
+                  ? "Cierre solicitado"
                   : loteSeleccionado?.estado === "SEPARADO"
                   ? "Lote separado"
                   : "Lote vendido"}

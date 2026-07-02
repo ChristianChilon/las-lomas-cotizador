@@ -17,6 +17,7 @@ type Kpis = {
   disponibles: number;
   enNegociacion: number;
   separados: number;
+  cierresSolicitados: number;
   vendidos: number;
   clientes: number;
   separacionesVigentes: number;
@@ -28,6 +29,7 @@ const kpisVacios: Kpis = {
   disponibles: 0,
   enNegociacion: 0,
   separados: 0,
+  cierresSolicitados: 0,
   vendidos: 0,
   clientes: 0,
   separacionesVigentes: 0,
@@ -121,6 +123,12 @@ export default function AsesoresDashboard() {
           (lote) =>
             lote.estado === "SEPARADO"
         ).length,
+        cierresSolicitados:
+          lotesParaKpi.filter(
+            (lote) =>
+              lote.estado ===
+              "CIERRE_SOLICITADO"
+          ).length,
         vendidos: modoGerencia
           ? listaLotes.filter(
               (lote) =>
@@ -216,6 +224,14 @@ export default function AsesoresDashboard() {
             }
             value={kpis.separados}
             tone="gold"
+          />
+          <KpiCard
+            label={
+              modoGerencia
+                ? "Cierres solicitados"
+                : "Mis cierres solicitados"
+            }
+            value={kpis.cierresSolicitados}
           />
           {modoGerencia && (
             <KpiCard
