@@ -47,6 +47,20 @@ const separacionDirectaVacia: SeparacionDirectaForm = {
   observaciones: "",
 };
 
+const EMPRESA_RAZON_SOCIAL =
+  "INMOBILIARIA KOMODO S.A.C.";
+const EMPRESA_RUC = "20612152404";
+const PROYECTO_NOMBRE = "Las Lomas de Malabrigo";
+const PROYECTO_UBICACION =
+  "PREDIO LA PAMPA, distrito de Razuri, Provincia de Ascope, Departamento La Libertad.";
+const BANCO_NOMBRE = "INTERBANK";
+const BANCO_CUENTA = "600-3005917902";
+const BANCO_CCI = "003-600-003005917902-45";
+const EMPRESA_CELULAR = "933008638";
+const EMPRESA_EMAIL = "inmobiliariakomodo@gmail.com";
+const DIAS_VIGENCIA_SEPARACION = 7;
+const LOGO_LAS_LOMAS = "/las-lomas-logo.png";
+
 export default function LotesTable() {
   const [profile, setProfile] =
     useState<Profile | null>(null);
@@ -177,6 +191,35 @@ export default function LotesTable() {
   }, []);
 
   const modoGerencia = esGerencia(profile);
+
+  const resumenSeparacionDirecta = useMemo(() => {
+    const precio = Number(loteSeparacion?.precio || 0);
+    const montoSeparacion = Number(
+      formSeparacion.montoSeparacion || 0
+    );
+    const inicial = Number(formSeparacion.inicial || 0);
+    const meses = Math.max(
+      Number(formSeparacion.meses || 0),
+      0
+    );
+    const montoFinanciar = Math.max(precio - inicial, 0);
+    const cuotaMensual =
+      meses > 0 ? montoFinanciar / meses : 0;
+
+    return {
+      precio,
+      montoSeparacion,
+      inicial,
+      meses,
+      montoFinanciar,
+      cuotaMensual,
+    };
+  }, [
+    formSeparacion.inicial,
+    formSeparacion.meses,
+    formSeparacion.montoSeparacion,
+    loteSeparacion?.precio,
+  ]);
 
   const asesoresLista = useMemo(
     () =>
@@ -376,6 +419,7 @@ export default function LotesTable() {
     setFormSeparacion({
       ...separacionDirectaVacia,
       inicial: "6000",
+      fechaPagoInicial: fechaVencimientoSeparacionIso(),
       meses: "24",
     });
     setPdfGenerado(null);
@@ -415,6 +459,10 @@ export default function LotesTable() {
       return "Ingresa los nombres del cliente.";
     }
 
+    if (!formSeparacion.apellidos.trim()) {
+      return "Ingresa los apellidos del cliente.";
+    }
+
     if (!formSeparacion.dni.trim()) {
       return "Ingresa el DNI del cliente.";
     }
@@ -427,12 +475,28 @@ export default function LotesTable() {
       return "Ingresa el correo del cliente.";
     }
 
+    if (!formSeparacion.ocupacion.trim()) {
+      return "Ingresa la ocupacion del cliente.";
+    }
+
+    if (!formSeparacion.direccion.trim()) {
+      return "Ingresa la direccion del cliente.";
+    }
+
     if (!formSeparacion.montoSeparacion.trim()) {
       return "Ingresa el monto de separacion.";
     }
 
+    if (!formSeparacion.inicial.trim()) {
+      return "Ingresa la inicial pactada.";
+    }
+
     if (!formSeparacion.fechaPagoInicial) {
       return "Ingresa la fecha de pago de la inicial.";
+    }
+
+    if (!formSeparacion.meses.trim()) {
+      return "Ingresa el numero de cuotas.";
     }
 
     return null;
@@ -442,11 +506,21 @@ export default function LotesTable() {
     const partes = [
       `Ocupacion: ${formSeparacion.ocupacion || "-"}`,
       `Direccion: ${formSeparacion.direccion || "-"}`,
+      `Monto de separacion: ${formatearMoneda(
+        resumenSeparacionDirecta.montoSeparacion
+      )}`,
       `Inicial: ${formSeparacion.inicial || "-"}`,
+      `Monto a financiar: ${formatearMoneda(
+        resumenSeparacionDirecta.montoFinanciar
+      )}`,
       `Meses: ${formSeparacion.meses || "-"}`,
+      `Cuota mensual estimada: ${formatearMoneda(
+        resumenSeparacionDirecta.cuotaMensual
+      )}`,
       `Fecha de pago inicial: ${
         formSeparacion.fechaPagoInicial || "-"
       }`,
+      `Vigencia de separacion: ${DIAS_VIGENCIA_SEPARACION} dias calendario`,
       formSeparacion.observaciones
         ? `Observaciones: ${formSeparacion.observaciones}`
         : "",
@@ -468,7 +542,7 @@ export default function LotesTable() {
     return `separacion-mz-${loteSeparacion.mz}-lote-${loteSeparacion.lote}-${cliente || "cliente"}.pdf`;
   };
 
-  const obtenerPdfFicha = () => {
+  const obtenerPdfFicha = async () => {
     const errorValidacion = validarFicha();
 
     if (errorValidacion) {
@@ -478,18 +552,25 @@ export default function LotesTable() {
 
     if (pdfGenerado) return pdfGenerado;
 
-    const nuevoPdf = crearPdfSeparacion(
-      loteSeparacion!,
-      formSeparacion,
-      profile
-    );
+    try {
+      const nuevoPdf = await crearPdfSeparacion(
+        loteSeparacion!,
+        formSeparacion,
+        profile
+      );
 
-    setPdfGenerado(nuevoPdf);
-    return nuevoPdf;
+      setPdfGenerado(nuevoPdf);
+      return nuevoPdf;
+    } catch {
+      setError(
+        "No se pudo generar el PDF. Revisa los datos e intenta nuevamente."
+      );
+      return null;
+    }
   };
 
-  const descargarFicha = () => {
-    const pdf = obtenerPdfFicha();
+  const descargarFicha = async () => {
+    const pdf = await obtenerPdfFicha();
     if (!pdf) return;
 
     const url = URL.createObjectURL(pdf);
@@ -507,7 +588,7 @@ export default function LotesTable() {
   };
 
   const enviarFichaPorCorreo = async () => {
-    const pdf = obtenerPdfFicha();
+    const pdf = await obtenerPdfFicha();
     if (!pdf || !loteSeparacion) return;
 
     setEnviandoPdf(true);
@@ -591,7 +672,7 @@ export default function LotesTable() {
           formSeparacion.montoSeparacion || 0
         ),
         p_fecha_limite:
-          formSeparacion.fechaPagoInicial || null,
+          fechaVencimientoSeparacionIso(),
       }
     );
 
@@ -898,174 +979,284 @@ export default function LotesTable() {
               </button>
             </div>
 
-            <div style={modalGrid}>
-              <input
-                required
-                value={formSeparacion.nombres}
-                onChange={(event) =>
-                  actualizarSeparacionForm(
-                    "nombres",
-                    event.target.value
-                  )
-                }
-                placeholder="Nombres *"
-                style={input}
-              />
-              <input
-                value={formSeparacion.apellidos}
-                onChange={(event) =>
-                  actualizarSeparacionForm(
-                    "apellidos",
-                    event.target.value
-                  )
-                }
-                placeholder="Apellidos"
-                style={input}
-              />
-              <input
-                required
-                value={formSeparacion.dni}
-                onChange={(event) =>
-                  actualizarSeparacionForm(
-                    "dni",
-                    event.target.value
-                  )
-                }
-                placeholder="DNI *"
-                style={input}
-              />
-              <input
-                required
-                value={formSeparacion.celular}
-                onChange={(event) =>
-                  actualizarSeparacionForm(
-                    "celular",
-                    event.target.value
-                  )
-                }
-                placeholder="Celular *"
-                style={input}
-              />
-              <input
-                required
-                type="email"
-                value={formSeparacion.correo}
-                onChange={(event) =>
-                  actualizarSeparacionForm(
-                    "correo",
-                    event.target.value
-                  )
-                }
-                placeholder="Correo del cliente *"
-                style={input}
-              />
-              <input
-                value={formSeparacion.ocupacion}
-                onChange={(event) =>
-                  actualizarSeparacionForm(
-                    "ocupacion",
-                    event.target.value
-                  )
-                }
-                placeholder="Ocupacion"
-                style={input}
-              />
-              <input
-                value={formSeparacion.direccion}
-                onChange={(event) =>
-                  actualizarSeparacionForm(
-                    "direccion",
-                    event.target.value
-                  )
-                }
-                placeholder="Direccion"
-                style={input}
-              />
-              <input
-                required
-                type="number"
-                min="0"
-                step="0.01"
-                value={
-                  formSeparacion.montoSeparacion
-                }
-                onChange={(event) =>
-                  actualizarSeparacionForm(
-                    "montoSeparacion",
-                    event.target.value
-                  )
-                }
-                placeholder="Monto de separacion *"
-                style={input}
-              />
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={formSeparacion.inicial}
-                onChange={(event) =>
-                  actualizarSeparacionForm(
-                    "inicial",
-                    event.target.value
-                  )
-                }
-                placeholder="Inicial"
-                style={input}
-              />
-              <input
-                required
-                type="date"
-                value={
-                  formSeparacion.fechaPagoInicial
-                }
-                onChange={(event) =>
-                  actualizarSeparacionForm(
-                    "fechaPagoInicial",
-                    event.target.value
-                  )
-                }
-                style={input}
-              />
-              <input
-                type="number"
-                min="1"
-                value={formSeparacion.meses}
-                onChange={(event) =>
-                  actualizarSeparacionForm(
-                    "meses",
-                    event.target.value
-                  )
-                }
-                placeholder="Cuotas / meses"
-                style={input}
-              />
+            <div style={modalSection}>
+              <div style={sectionTitle}>
+                Datos del comprador
+              </div>
+              <div style={modalGrid}>
+                <label style={fieldGroup}>
+                  <span style={fieldLabel}>
+                    Nombres *
+                  </span>
+                  <input
+                    required
+                    value={formSeparacion.nombres}
+                    onChange={(event) =>
+                      actualizarSeparacionForm(
+                        "nombres",
+                        event.target.value
+                      )
+                    }
+                    placeholder="Ej. Carlos Alberto"
+                    style={input}
+                  />
+                </label>
+                <label style={fieldGroup}>
+                  <span style={fieldLabel}>
+                    Apellidos *
+                  </span>
+                  <input
+                    required
+                    value={formSeparacion.apellidos}
+                    onChange={(event) =>
+                      actualizarSeparacionForm(
+                        "apellidos",
+                        event.target.value
+                      )
+                    }
+                    placeholder="Ej. Ramirez Torres"
+                    style={input}
+                  />
+                </label>
+                <label style={fieldGroup}>
+                  <span style={fieldLabel}>DNI *</span>
+                  <input
+                    required
+                    value={formSeparacion.dni}
+                    onChange={(event) =>
+                      actualizarSeparacionForm(
+                        "dni",
+                        event.target.value
+                      )
+                    }
+                    placeholder="Documento"
+                    style={input}
+                  />
+                </label>
+                <label style={fieldGroup}>
+                  <span style={fieldLabel}>
+                    Celular *
+                  </span>
+                  <input
+                    required
+                    value={formSeparacion.celular}
+                    onChange={(event) =>
+                      actualizarSeparacionForm(
+                        "celular",
+                        event.target.value
+                      )
+                    }
+                    placeholder="Numero de contacto"
+                    style={input}
+                  />
+                </label>
+                <label style={fieldGroup}>
+                  <span style={fieldLabel}>
+                    Correo *
+                  </span>
+                  <input
+                    required
+                    type="email"
+                    value={formSeparacion.correo}
+                    onChange={(event) =>
+                      actualizarSeparacionForm(
+                        "correo",
+                        event.target.value
+                      )
+                    }
+                    placeholder="correo@cliente.com"
+                    style={input}
+                  />
+                </label>
+                <label style={fieldGroup}>
+                  <span style={fieldLabel}>
+                    Ocupacion *
+                  </span>
+                  <input
+                    required
+                    value={formSeparacion.ocupacion}
+                    onChange={(event) =>
+                      actualizarSeparacionForm(
+                        "ocupacion",
+                        event.target.value
+                      )
+                    }
+                    placeholder="Actividad u ocupacion"
+                    style={input}
+                  />
+                </label>
+                <label
+                  style={{
+                    ...fieldGroup,
+                    gridColumn: "1 / -1",
+                  }}
+                >
+                  <span style={fieldLabel}>
+                    Domicilio *
+                  </span>
+                  <input
+                    required
+                    value={formSeparacion.direccion}
+                    onChange={(event) =>
+                      actualizarSeparacionForm(
+                        "direccion",
+                        event.target.value
+                      )
+                    }
+                    placeholder="Direccion completa del cliente"
+                    style={{
+                      ...input,
+                      width: "100%",
+                    }}
+                  />
+                </label>
+              </div>
             </div>
 
-            <textarea
-              value={formSeparacion.observaciones}
-              onChange={(event) =>
-                actualizarSeparacionForm(
-                  "observaciones",
-                  event.target.value
-                )
-              }
-              placeholder="Observaciones para la ficha"
-              style={modalTextarea}
-            />
+            <div style={modalSection}>
+              <div style={sectionTitle}>
+                Condiciones comerciales
+              </div>
+              <div style={modalGrid}>
+                <label style={fieldGroup}>
+                  <span style={fieldLabel}>
+                    Monto de separacion *
+                  </span>
+                  <input
+                    required
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={
+                      formSeparacion.montoSeparacion
+                    }
+                    onChange={(event) =>
+                      actualizarSeparacionForm(
+                        "montoSeparacion",
+                        event.target.value
+                      )
+                    }
+                    placeholder="Ej. 1000.00"
+                    style={input}
+                  />
+                </label>
+                <label style={fieldGroup}>
+                  <span style={fieldLabel}>
+                    Inicial pactada *
+                  </span>
+                  <input
+                    required
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formSeparacion.inicial}
+                    onChange={(event) =>
+                      actualizarSeparacionForm(
+                        "inicial",
+                        event.target.value
+                      )
+                    }
+                    placeholder="Ej. 6000.00"
+                    style={input}
+                  />
+                </label>
+                <label style={fieldGroup}>
+                  <span style={fieldLabel}>
+                    Fecha de pago de inicial *
+                  </span>
+                  <input
+                    required
+                    type="date"
+                    value={
+                      formSeparacion.fechaPagoInicial
+                    }
+                    onChange={(event) =>
+                      actualizarSeparacionForm(
+                        "fechaPagoInicial",
+                        event.target.value
+                      )
+                    }
+                    style={input}
+                  />
+                </label>
+                <label style={fieldGroup}>
+                  <span style={fieldLabel}>
+                    Numero de cuotas *
+                  </span>
+                  <input
+                    required
+                    type="number"
+                    min="1"
+                    value={formSeparacion.meses}
+                    onChange={(event) =>
+                      actualizarSeparacionForm(
+                        "meses",
+                        event.target.value
+                      )
+                    }
+                    placeholder="Ej. 24"
+                    style={input}
+                  />
+                </label>
+              </div>
 
-            <div style={fichaResumen}>
-              <span>
-                Precio:{" "}
-                {formatearMoneda(
-                  loteSeparacion.precio
-                )}
-              </span>
-              <span>
-                Area:{" "}
-                {formatearArea(
-                  loteSeparacion.area
-                )}
-              </span>
+              <div style={summaryGrid}>
+                <div style={summaryCard}>
+                  <span>Precio total</span>
+                  <strong>
+                    {formatearMoneda(
+                      resumenSeparacionDirecta.precio
+                    )}
+                  </strong>
+                </div>
+                <div style={summaryCard}>
+                  <span>Area</span>
+                  <strong>
+                    {formatearArea(
+                      loteSeparacion.area
+                    )}
+                  </strong>
+                </div>
+                <div style={summaryCard}>
+                  <span>Monto a financiar</span>
+                  <strong>
+                    {formatearMoneda(
+                      resumenSeparacionDirecta.montoFinanciar
+                    )}
+                  </strong>
+                </div>
+                <div style={summaryCard}>
+                  <span>Cuota mensual estimada</span>
+                  <strong>
+                    {formatearMoneda(
+                      resumenSeparacionDirecta.cuotaMensual
+                    )}
+                  </strong>
+                </div>
+                <div style={summaryCard}>
+                  <span>Vigencia de separacion</span>
+                  <strong>
+                    {DIAS_VIGENCIA_SEPARACION} dias
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            <div style={modalSection}>
+              <div style={sectionTitle}>
+                Observaciones internas
+              </div>
+              <textarea
+                value={formSeparacion.observaciones}
+                onChange={(event) =>
+                  actualizarSeparacionForm(
+                    "observaciones",
+                    event.target.value
+                  )
+                }
+                placeholder="Notas internas para el CRM. No reemplazan las condiciones juridicas de la ficha."
+                style={modalTextarea}
+              />
             </div>
 
             <div style={modalActions}>
@@ -1260,7 +1451,7 @@ const modalOverlay: React.CSSProperties = {
 };
 
 const modalPanel: React.CSSProperties = {
-  width: "min(760px, 96vw)",
+  width: "min(920px, 96vw)",
   maxHeight: "92vh",
   overflowY: "auto",
   background: "#ffffff",
@@ -1307,8 +1498,8 @@ const closeButton: React.CSSProperties = {
 const modalGrid: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns:
-    "repeat(auto-fit, minmax(180px, 1fr))",
-  gap: 10,
+    "repeat(auto-fit, minmax(210px, 1fr))",
+  gap: 12,
 };
 
 const modalTextarea: React.CSSProperties = {
@@ -1317,16 +1508,54 @@ const modalTextarea: React.CSSProperties = {
   minHeight: 82,
   padding: 12,
   resize: "vertical",
-  marginTop: 10,
+  marginTop: 0,
 };
 
-const fichaResumen: React.CSSProperties = {
-  display: "flex",
-  gap: 10,
-  flexWrap: "wrap",
-  marginTop: 12,
-  color: "#334155",
+const modalSection: React.CSSProperties = {
+  border: "1px solid #e7e3d4",
+  borderRadius: 16,
+  background:
+    "linear-gradient(135deg, #ffffff 0%, #fbf8ed 100%)",
+  padding: 14,
+  marginBottom: 12,
+};
+
+const sectionTitle: React.CSSProperties = {
+  color: "#294f35",
+  fontSize: 13,
+  fontWeight: 950,
+  letterSpacing: ".08em",
+  textTransform: "uppercase",
+  marginBottom: 10,
+};
+
+const fieldGroup: React.CSSProperties = {
+  display: "grid",
+  gap: 6,
+};
+
+const fieldLabel: React.CSSProperties = {
+  color: "#5d6b58",
+  fontSize: 12,
   fontWeight: 900,
+};
+
+const summaryGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns:
+    "repeat(auto-fit, minmax(150px, 1fr))",
+  gap: 10,
+  marginTop: 12,
+};
+
+const summaryCard: React.CSSProperties = {
+  borderRadius: 14,
+  border: "1px solid #d9d0aa",
+  background: "#fffdf5",
+  padding: "10px 12px",
+  display: "grid",
+  gap: 4,
+  color: "#1f2937",
 };
 
 const modalActions: React.CSSProperties = {
@@ -1365,172 +1594,638 @@ const modalHint: React.CSSProperties = {
   fontWeight: 700,
 };
 
-const limpiarPdfTexto = (valor: string) =>
-  valor
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\x20-\x7E]/g, "")
-    .replace(/\\/g, "\\\\")
-    .replace(/\(/g, "\\(")
-    .replace(/\)/g, "\\)");
+const formatoSoles = (valor: number) =>
+  `S/ ${Number(valor || 0).toLocaleString("es-PE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 
-const textoPdf = (
+const fechaIsoDesdeDate = (fecha: Date) => {
+  const year = fecha.getFullYear();
+  const month = String(fecha.getMonth() + 1).padStart(
+    2,
+    "0"
+  );
+  const day = String(fecha.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const fechaVencimientoSeparacionIso = () => {
+  const fecha = new Date();
+  fecha.setDate(
+    fecha.getDate() + DIAS_VIGENCIA_SEPARACION
+  );
+  return fechaIsoDesdeDate(fecha);
+};
+
+const formatearFechaInput = (valor?: string) => {
+  if (!valor) return "-";
+  const [year, month, day] = valor.split("-");
+  if (!year || !month || !day) return valor;
+  return `${day}/${month}/${year}`;
+};
+
+const fechaLargaActual = () => {
+  const meses = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+  ];
+  const fecha = new Date();
+  return `${fecha.getDate()} de ${
+    meses[fecha.getMonth()]
+  } de ${fecha.getFullYear()}`;
+};
+
+const numeroMenorMilALetras = (numero: number) => {
+  const unidades = [
+    "",
+    "uno",
+    "dos",
+    "tres",
+    "cuatro",
+    "cinco",
+    "seis",
+    "siete",
+    "ocho",
+    "nueve",
+  ];
+  const especiales = [
+    "diez",
+    "once",
+    "doce",
+    "trece",
+    "catorce",
+    "quince",
+  ];
+  const decenas = [
+    "",
+    "",
+    "veinte",
+    "treinta",
+    "cuarenta",
+    "cincuenta",
+    "sesenta",
+    "setenta",
+    "ochenta",
+    "noventa",
+  ];
+  const centenas = [
+    "",
+    "ciento",
+    "doscientos",
+    "trescientos",
+    "cuatrocientos",
+    "quinientos",
+    "seiscientos",
+    "setecientos",
+    "ochocientos",
+    "novecientos",
+  ];
+
+  if (numero === 0) return "";
+  if (numero === 100) return "cien";
+
+  const centena = Math.floor(numero / 100);
+  const resto = numero % 100;
+  const partes: string[] = [];
+
+  if (centena > 0) {
+    partes.push(centenas[centena]);
+  }
+
+  if (resto > 0 && resto < 10) {
+    partes.push(unidades[resto]);
+  } else if (resto >= 10 && resto <= 15) {
+    partes.push(especiales[resto - 10]);
+  } else if (resto > 15 && resto < 20) {
+    partes.push(`dieci${unidades[resto - 10]}`);
+  } else if (resto === 20) {
+    partes.push("veinte");
+  } else if (resto > 20 && resto < 30) {
+    partes.push(`veinti${unidades[resto - 20]}`);
+  } else if (resto >= 30) {
+    const decena = Math.floor(resto / 10);
+    const unidad = resto % 10;
+    partes.push(
+      unidad
+        ? `${decenas[decena]} y ${unidades[unidad]}`
+        : decenas[decena]
+    );
+  }
+
+  return partes.filter(Boolean).join(" ");
+};
+
+const numeroEnteroALetras = (numero: number): string => {
+  const valor = Math.floor(Math.abs(numero));
+  if (valor === 0) return "cero";
+
+  const millones = Math.floor(valor / 1000000);
+  const miles = Math.floor((valor % 1000000) / 1000);
+  const resto = valor % 1000;
+  const partes: string[] = [];
+
+  if (millones > 0) {
+    partes.push(
+      millones === 1
+        ? "un millon"
+        : `${numeroMenorMilALetras(millones)} millones`
+    );
+  }
+
+  if (miles > 0) {
+    partes.push(
+      miles === 1
+        ? "mil"
+        : `${numeroMenorMilALetras(miles)} mil`
+    );
+  }
+
+  if (resto > 0) {
+    partes.push(numeroMenorMilALetras(resto));
+  }
+
+  return partes.join(" ");
+};
+
+const numeroSolesEnLetras = (valor: number) => {
+  const absoluto = Math.abs(Number(valor || 0));
+  const entero = Math.floor(absoluto);
+  const centimos = Math.round(
+    (absoluto - entero) * 100
+  );
+  return `${numeroEnteroALetras(entero)} y ${String(
+    centimos
+  ).padStart(2, "0")}/100 soles`;
+};
+
+const escaparSvg = (valor: string | number) =>
+  String(valor)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+const envolverTexto = (
+  texto: string,
+  maxCaracteres: number
+) => {
+  const palabras = texto.split(/\s+/).filter(Boolean);
+  const lineas: string[] = [];
+  let actual = "";
+
+  palabras.forEach((palabra) => {
+    const candidato = actual
+      ? `${actual} ${palabra}`
+      : palabra;
+
+    if (candidato.length > maxCaracteres && actual) {
+      lineas.push(actual);
+      actual = palabra;
+    } else {
+      actual = candidato;
+    }
+  });
+
+  if (actual) lineas.push(actual);
+  return lineas;
+};
+
+const textoMultilineaSvg = (
   x: number,
   y: number,
   texto: string,
-  size = 11,
-  font = "F1"
-) =>
-  `BT /${font} ${size} Tf ${x} ${y} Td (${limpiarPdfTexto(
-    texto
-  )}) Tj ET`;
+  maxCaracteres: number,
+  opciones: {
+    size?: number;
+    lineHeight?: number;
+    weight?: number | string;
+    color?: string;
+    family?: string;
+    justifyWidth?: number;
+  } = {}
+) => {
+  const size = opciones.size || 24;
+  const lineHeight = opciones.lineHeight || size + 10;
+  const weight = opciones.weight || 400;
+  const color = opciones.color || "#1f2937";
+  const family =
+    opciones.family ||
+    "Arial, Helvetica, sans-serif";
+  const justifyWidth = opciones.justifyWidth;
+  const lineas = envolverTexto(texto, maxCaracteres);
+  const svg = lineas
+    .map(
+      (linea, index) => {
+        const justificar =
+          justifyWidth && index < lineas.length - 1
+            ? ` textLength="${justifyWidth}" lengthAdjust="spacing"`
+            : "";
+        return (
+        `<text x="${x}" y="${
+          y + index * lineHeight
+        }" font-family="${family}" font-size="${size}" font-weight="${weight}" fill="${color}"${justificar}>${escaparSvg(
+          linea
+        )}</text>`
+        );
+      }
+    )
+    .join("");
 
-const lineaPdf = (
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number
-) => `${x1} ${y1} m ${x2} ${y2} l S`;
+  return {
+    svg,
+    nextY: y + lineas.length * lineHeight,
+  };
+};
 
-const crearPdfSeparacion = (
+const blobToDataUrl = async (blob: Blob) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () =>
+      resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+
+const cargarImagenDataUrl = async (src: string) => {
+  const response = await fetch(src);
+  if (!response.ok) return "";
+  return blobToDataUrl(await response.blob());
+};
+
+const crearSvgFichaSeparacion = (
   lote: LoteCrm,
   form: SeparacionDirectaForm,
-  profile: Profile | null
+  profile: Profile | null,
+  logoLasLomas: string
 ) => {
+  const width = 1240;
+  const height = 1754;
   const precio = Number(lote.precio || 0);
   const montoSeparacion = Number(
     form.montoSeparacion || 0
   );
   const inicial = Number(form.inicial || 0);
+  const meses = Math.max(Number(form.meses || 0), 1);
   const montoFinanciar = Math.max(precio - inicial, 0);
+  const cuotaMensual = montoFinanciar / meses;
   const nombreCompleto =
     `${form.nombres} ${form.apellidos}`.trim();
   const asesor =
     profile?.full_name || profile?.email || "-";
+  const celularAsesor = profile?.phone || "-";
+  const fechaEmision = fechaLargaActual();
+  const vencimientoSeparacion =
+    formatearFechaInput(fechaVencimientoSeparacionIso());
+  const fechaPagoInicial = formatearFechaInput(
+    form.fechaPagoInicial
+  );
+  const inicialEnLetras =
+    numeroSolesEnLetras(inicial);
 
-  const lines = [
-    textoPdf(58, 790, "LAS LOMAS DE MALABRIGO", 16, "F2"),
-    textoPdf(
-      150,
-      756,
-      "PRE-ACUERDO DE PAGO POR SEPARACION DE LOTE",
-      13,
-      "F2"
-    ),
-    lineaPdf(150, 752, 445, 752),
-    textoPdf(
-      58,
-      720,
-      `Cliente: ${nombreCompleto}    DNI: ${form.dni}`
-    ),
-    textoPdf(
-      58,
-      700,
-      `Ocupacion: ${form.ocupacion || "-"}    Celular: ${form.celular}`
-    ),
-    textoPdf(
-      58,
-      680,
-      `Correo: ${form.correo || "-"}`
-    ),
-    textoPdf(
-      58,
-      660,
-      `Direccion: ${form.direccion || "-"}`
-    ),
-    textoPdf(
-      58,
-      628,
-      `Por concepto de separacion del lote MZ ${lote.mz} - LOTE ${lote.lote}.`
-    ),
-    textoPdf(
-      58,
-      608,
-      "Proyecto: LAS LOMAS DE MALABRIGO."
-    ),
-    textoPdf(
-      92,
-      560,
-      `Precio total: S/ ${precio.toLocaleString("es-PE", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}`,
-      12,
-      "F2"
-    ),
-    textoPdf(
-      92,
-      535,
-      `Monto de separacion: S/ ${montoSeparacion.toLocaleString("es-PE", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}`,
-      12,
-      "F2"
-    ),
-    textoPdf(
-      92,
-      510,
-      `Inicial: S/ ${inicial.toLocaleString("es-PE", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}`,
-      12,
-      "F2"
-    ),
-    textoPdf(
-      92,
-      485,
-      `Fecha de pago de inicial: ${form.fechaPagoInicial || "-"}`
-    ),
-    textoPdf(
-      92,
-      460,
-      `Monto a financiar: S/ ${montoFinanciar.toLocaleString("es-PE", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}    Cuotas de: ${form.meses || "-"}`
-    ),
-    textoPdf(
-      58,
-      420,
-      "El comprador se compromete a cumplir con los pagos indicados."
-    ),
-    textoPdf(
-      58,
-      400,
-      "En caso de incumplimiento o desistimiento, perdera la separacion sin opcion a reclamo.",
-      10,
-      "F2"
-    ),
-    textoPdf(
-      360,
-      350,
-      `Fecha: ${new Date().toLocaleDateString("es-PE")}`
-    ),
-    lineaPdf(58, 255, 235, 255),
-    textoPdf(58, 238, "Firma cliente", 10, "F2"),
-    textoPdf(58, 222, `Nombre: ${nombreCompleto}`),
-    textoPdf(58, 206, `DNI: ${form.dni}`),
-    textoPdf(58, 190, `Celular: ${form.celular}`),
-    lineaPdf(335, 255, 512, 255),
-    textoPdf(335, 238, "Firma asesor", 10, "F2"),
-    textoPdf(335, 222, `Asesor: ${asesor}`),
-    textoPdf(335, 206, `Celular: ${profile?.phone || "-"}`),
-    textoPdf(
-      58,
-      145,
-      `Observaciones: ${form.observaciones || "-"}`
-    ),
+  const rojo = "#9f1d1d";
+  const rojoOscuro = "#651515";
+  const texto = "#252525";
+  const textoSuave = "#636363";
+  const borde = "#e1d7d7";
+  const fondoSuave = "#fffafa";
+  const resumenY = 790;
+  const resumenAlto = 230;
+  const firmaLineaY = 1410;
+  let clausulasY = 430;
+  const clausulas = [
+    `Comparecen ${EMPRESA_RAZON_SOCIAL}, con RUC No. ${EMPRESA_RUC}, en adelante LA EMPRESA; y el/la Sr(a). ${nombreCompleto}, identificado(a) con DNI No. ${form.dni}, domiciliado(a) en ${form.direccion}, en adelante EL COMPRADOR.`,
+    `EL COMPRADOR manifiesta su interes en separar el lote MZ ${lote.mz} - LOTE ${lote.lote}, con area de ${formatearArea(
+      lote.area
+    )}, integrante del proyecto ${PROYECTO_NOMBRE}, ubicado en ${PROYECTO_UBICACION}`,
+    `El monto de separacion asciende a ${formatoSoles(
+      montoSeparacion
+    )}, suma que reserva temporalmente la disponibilidad comercial del lote, sujeta a verificacion administrativa de LA EMPRESA.`,
+    `El precio total referencial asciende a ${formatoSoles(
+      precio
+    )}. La inicial pactada es de ${formatoSoles(
+      inicial
+    )} (${inicialEnLetras}), con fecha maxima de pago el ${fechaPagoInicial}. El saldo estimado a financiar es de ${formatoSoles(
+      montoFinanciar
+    )}, referencialmente en ${meses} cuotas mensuales de ${formatoSoles(
+      cuotaMensual
+    )}.`,
   ];
 
-  const content = lines.join("\n");
+  const clausulasSvg = clausulas
+    .map((clausula, index) => {
+      const bloque = textoMultilineaSvg(
+        92,
+        clausulasY,
+        `${index + 1}. ${clausula}`,
+        126,
+        {
+          size: 18,
+          lineHeight: 25,
+          color: texto,
+          justifyWidth: 1056,
+        }
+      );
+      clausulasY = bloque.nextY + 12;
+      return bloque.svg;
+    })
+    .join("");
+
+  const fila = (
+    y: number,
+    etiqueta: string,
+    valor: string
+  ) =>
+    `<text x="116" y="${y}" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="${textoSuave}">${escaparSvg(
+      etiqueta
+    )}</text><text x="548" y="${y}" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="900" fill="${texto}">${escaparSvg(
+      valor
+    )}</text>`;
+
+  const titularBanco = textoMultilineaSvg(
+    724,
+    resumenY + 184,
+    `Titular: ${EMPRESA_RAZON_SOCIAL}`,
+    46,
+    {
+      size: 15,
+      lineHeight: 20,
+      weight: 800,
+      color: textoSuave,
+    }
+  );
+  const condicionesEspeciales = textoMultilineaSvg(
+    92,
+    1062,
+    `5. Vigencia de separacion: ${DIAS_VIGENCIA_SEPARACION} dias calendario desde la emision de esta ficha, con vencimiento el ${vencimientoSeparacion}. Vencido el plazo sin pago de inicial, LA EMPRESA podra liberar el lote previa revision interna. 6. Incumplimiento o desistimiento: EL COMPRADOR perdera automaticamente el monto de separacion, sin opcion a reclamo, reembolso, compensacion ni reserva posterior.`,
+    136,
+    {
+      size: 14,
+      lineHeight: 20,
+      weight: 700,
+      color: "#555555",
+      justifyWidth: 1056,
+    }
+  );
+  const constancia = textoMultilineaSvg(
+    92,
+    condicionesEspeciales.nextY + 22,
+    "EL COMPRADOR declara que adjunta copia de DNI y voucher de pago de separacion, documentos que forman parte del expediente comercial. En senal de conformidad, las partes suscriben la presente ficha.",
+    126,
+    {
+      size: 17,
+      lineHeight: 24,
+      weight: 700,
+      color: texto,
+      justifyWidth: 1056,
+    }
+  );
+  const firmaCompradorNombre = textoMultilineaSvg(
+    104,
+    firmaLineaY + 56,
+    `Nombre: ${nombreCompleto}`,
+    34,
+    {
+      size: 15,
+      lineHeight: 20,
+      weight: 700,
+      color: textoSuave,
+    }
+  );
+  const firmaCompradorDatos = textoMultilineaSvg(
+    104,
+    firmaCompradorNombre.nextY + 2,
+    `DNI: ${form.dni} | Ocupacion: ${form.ocupacion}`,
+    36,
+    {
+      size: 15,
+      lineHeight: 20,
+      weight: 700,
+      color: textoSuave,
+    }
+  );
+  const firmaEmpresa = textoMultilineaSvg(
+    480,
+    firmaLineaY + 56,
+    EMPRESA_RAZON_SOCIAL,
+    31,
+    {
+      size: 15,
+      lineHeight: 20,
+      weight: 700,
+      color: textoSuave,
+    }
+  );
+  const firmaAsesorNombre = textoMultilineaSvg(
+    846,
+    firmaLineaY + 56,
+    `Asesor: ${asesor}`,
+    32,
+    {
+      size: 15,
+      lineHeight: 20,
+      weight: 700,
+      color: textoSuave,
+    }
+  );
+
+  return `
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#3c1b1b" flood-opacity=".10"/>
+    </filter>
+  </defs>
+  <rect width="${width}" height="${height}" fill="#ffffff"/>
+
+  <image href="${logoLasLomas}" x="92" y="78" width="190" height="108" preserveAspectRatio="xMidYMid meet"/>
+  <text x="620" y="110" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800" fill="${texto}">PRE-ACUERDO DE PAGO</text>
+  <text x="620" y="148" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="950" fill="${rojoOscuro}">POR SEPARACION DE LOTE</text>
+  <text x="620" y="188" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="800" fill="${textoSuave}">${escaparSvg(
+    EMPRESA_RAZON_SOCIAL
+  )} | RUC ${escaparSvg(EMPRESA_RUC)}</text>
+  <text x="620" y="216" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="${textoSuave}">${escaparSvg(
+    PROYECTO_NOMBRE
+  )}</text>
+  <line x1="92" y1="246" x2="1148" y2="246" stroke="${borde}" stroke-width="2"/>
+
+  <rect x="92" y="276" width="488" height="112" rx="14" fill="${fondoSuave}" stroke="${borde}" stroke-width="2"/>
+  <text x="116" y="310" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="950" fill="${rojo}">LOTE SEPARADO</text>
+  <text x="116" y="352" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="950" fill="${texto}">MZ ${escaparSvg(
+    lote.mz
+  )} - LOTE ${escaparSvg(lote.lote)}</text>
+  <text x="116" y="380" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="${textoSuave}">Area: ${escaparSvg(
+    formatearArea(lote.area)
+  )}</text>
+
+  <rect x="660" y="276" width="488" height="112" rx="14" fill="${fondoSuave}" stroke="${borde}" stroke-width="2"/>
+  <text x="684" y="310" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="950" fill="${rojo}">COMPRADOR</text>
+  <text x="684" y="350" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="950" fill="${texto}">${escaparSvg(
+    nombreCompleto
+  )}</text>
+  <text x="684" y="378" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="${textoSuave}">DNI: ${escaparSvg(
+    form.dni
+  )} | Celular: ${escaparSvg(form.celular)}</text>
+
+  ${clausulasSvg}
+
+  <rect x="92" y="${resumenY}" width="500" height="${resumenAlto}" rx="14" fill="${fondoSuave}" stroke="${borde}" stroke-width="2"/>
+  <text x="116" y="${resumenY + 44}" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="950" fill="${rojoOscuro}">Resumen economico pactado</text>
+  ${fila(resumenY + 84, "Precio total", formatoSoles(precio))}
+  ${fila(
+    resumenY + 120,
+    "Monto de separacion",
+    formatoSoles(montoSeparacion)
+  )}
+  ${fila(resumenY + 156, "Inicial pactada", formatoSoles(inicial))}
+  ${fila(
+    resumenY + 192,
+    "Monto a financiar",
+    formatoSoles(montoFinanciar)
+  )}
+  ${fila(
+    resumenY + 224,
+    `Cuotas (${meses})`,
+    formatoSoles(cuotaMensual)
+  )}
+
+  <rect x="692" y="${resumenY}" width="456" height="${resumenAlto}" rx="14" fill="#ffffff" stroke="${borde}" stroke-width="2"/>
+  <text x="724" y="${resumenY + 44}" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="950" fill="${rojoOscuro}">Cuentas oficiales</text>
+  <text x="724" y="${resumenY + 89}" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="900" fill="${texto}">Banco: ${escaparSvg(
+    BANCO_NOMBRE
+  )}</text>
+  <text x="724" y="${resumenY + 127}" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="800" fill="${texto}">Cuenta: ${escaparSvg(
+    BANCO_CUENTA
+  )}</text>
+  <text x="724" y="${resumenY + 164}" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="800" fill="${texto}">CCI: ${escaparSvg(
+    BANCO_CCI
+  )}</text>
+  ${titularBanco.svg}
+
+  <line x1="92" y1="1044" x2="1148" y2="1044" stroke="${borde}" stroke-width="2"/>
+  ${condicionesEspeciales.svg}
+  ${constancia.svg}
+
+  <text x="794" y="1266" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="850" fill="${texto}">Trujillo, ${escaparSvg(
+    fechaEmision
+  )}</text>
+
+  <line x1="104" y1="${firmaLineaY}" x2="392" y2="${firmaLineaY}" stroke="${texto}" stroke-width="2"/>
+  <text x="104" y="${firmaLineaY + 30}" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="900" fill="${texto}">Firma comprador</text>
+  ${firmaCompradorNombre.svg}
+  ${firmaCompradorDatos.svg}
+  <text x="104" y="${firmaCompradorDatos.nextY + 2}" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="${textoSuave}">Celular: ${escaparSvg(
+    form.celular
+  )}</text>
+
+  <line x1="480" y1="${firmaLineaY}" x2="768" y2="${firmaLineaY}" stroke="${texto}" stroke-width="2"/>
+  <text x="480" y="${firmaLineaY + 30}" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="900" fill="${texto}">Firma representante</text>
+  ${firmaEmpresa.svg}
+  <text x="480" y="${firmaEmpresa.nextY + 2}" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="${textoSuave}">RUC: ${escaparSvg(
+    EMPRESA_RUC
+  )}</text>
+
+  <line x1="846" y1="${firmaLineaY}" x2="1136" y2="${firmaLineaY}" stroke="${texto}" stroke-width="2"/>
+  <text x="846" y="${firmaLineaY + 30}" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="900" fill="${texto}">Firma asesor</text>
+  ${firmaAsesorNombre.svg}
+  <text x="846" y="${firmaAsesorNombre.nextY + 2}" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="${textoSuave}">Celular: ${escaparSvg(
+    celularAsesor
+  )}</text>
+
+  <circle cx="116" cy="1586" r="14" fill="${rojo}"/>
+  <text x="116" y="1593" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="900" fill="#ffffff">☎</text>
+  <text x="140" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">${escaparSvg(
+    EMPRESA_CELULAR
+  )}</text>
+  <circle cx="306" cy="1586" r="14" fill="${rojo}"/>
+  <text x="306" y="1592" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="900" fill="#ffffff">@</text>
+  <text x="330" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">${escaparSvg(
+    EMPRESA_EMAIL
+  )}</text>
+  <circle cx="684" cy="1586" r="14" fill="${rojo}"/>
+  <text x="684" y="1593" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="950" fill="#ffffff">f</text>
+  <text x="708" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">Komodo Inmobiliaria</text>
+  <circle cx="944" cy="1586" r="14" fill="${rojo}"/>
+  <text x="944" y="1592" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="950" fill="#ffffff">ig</text>
+  <text x="968" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">Komodo Inmobiliaria</text>
+  <path d="M0 1642 C250 1694 412 1698 620 1648 C816 1601 1000 1618 1240 1676 L1240 1754 L0 1754 Z" fill="#f7e7e7"/>
+</svg>`;
+};
+
+const convertirSvgEnJpegDataUrl = async (
+  svg: string,
+  width: number,
+  height: number
+) =>
+  new Promise<string>((resolve, reject) => {
+    const svgBlob = new Blob([svg], {
+      type: "image/svg+xml;charset=utf-8",
+    });
+    const url = URL.createObjectURL(svgBlob);
+    const image = new Image();
+
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d");
+
+      if (!context) {
+        URL.revokeObjectURL(url);
+        reject(new Error("Canvas no disponible."));
+        return;
+      }
+
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, width, height);
+      context.drawImage(image, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/jpeg", 0.94));
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("No se pudo renderizar la ficha."));
+    };
+
+    image.src = url;
+  });
+
+const crearPdfDesdeJpeg = (
+  jpegDataUrl: string,
+  width: number,
+  height: number
+) => {
+  const base64 = jpegDataUrl.split(",")[1] || "";
+  const binary = atob(base64);
+  const partesHex: string[] = [];
+
+  for (let index = 0; index < binary.length; index += 1) {
+    partesHex.push(
+      binary
+        .charCodeAt(index)
+        .toString(16)
+        .padStart(2, "0")
+    );
+  }
+
+  const hexStream = `${partesHex.join("")}>`;
+  const content = "q\n595 0 0 842 0 0 cm\n/Im1 Do\nQ";
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>",
-    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im1 4 0 R >> >> /Contents 5 0 R >>",
+    `<< /Type /XObject /Subtype /Image /Width ${width} /Height ${height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter [/ASCIIHexDecode /DCTDecode] /Length ${hexStream.length} >>\nstream\n${hexStream}\nendstream`,
     `<< /Length ${content.length} >>\nstream\n${content}\nendstream`,
   ];
 
@@ -1548,11 +2243,37 @@ const crearPdfSeparacion = (
   offsets.slice(1).forEach((offset) => {
     pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
   });
-  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+  pdf += `trailer\n<< /Size ${
+    objects.length + 1
+  } /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
 
   return new Blob([pdf], {
     type: "application/pdf",
   });
+};
+
+const crearPdfSeparacion = async (
+  lote: LoteCrm,
+  form: SeparacionDirectaForm,
+  profile: Profile | null
+) => {
+  const logoLasLomas =
+    await cargarImagenDataUrl(LOGO_LAS_LOMAS);
+  const width = 1240;
+  const height = 1754;
+  const svg = crearSvgFichaSeparacion(
+    lote,
+    form,
+    profile,
+    logoLasLomas
+  );
+  const jpegDataUrl = await convertirSvgEnJpegDataUrl(
+    svg,
+    width,
+    height
+  );
+
+  return crearPdfDesdeJpeg(jpegDataUrl, width, height);
 };
 
 const blobToBase64 = async (blob: Blob) => {
