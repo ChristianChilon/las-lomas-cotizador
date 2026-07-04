@@ -2004,7 +2004,7 @@ const crearSvgFichaSeparacion = (
     }
   );
   const fechaY = constancia.nextY + 38;
-  const firmaLineaY = fechaY + 118;
+  const firmaLineaY = Math.max(fechaY + 185, 1438);
   const firmaCompradorNombre = textoMultilineaSvg(
     104,
     firmaLineaY + 56,
@@ -2159,7 +2159,9 @@ const crearSvgFichaSeparacion = (
   )}</text>
 
   <circle cx="116" cy="1586" r="14" fill="${rojo}"/>
-  <path d="M109 1578 C112 1575 116 1575 118 1578 L121 1582 C122 1584 121 1586 119 1587 L117 1588 C120 1592 124 1596 129 1598 L130 1595 C131 1593 134 1592 136 1594 L140 1597 C142 1599 142 1602 139 1605 C136 1608 131 1608 126 1606 C117 1602 109 1594 106 1585 C104 1581 106 1579 109 1578 Z" fill="#ffffff"/>
+  <path d="M109 1579 C111 1588 118 1595 127 1598" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  <path d="M109 1579 L114 1577" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  <path d="M127 1598 L129 1593" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
   <text x="140" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">${escaparSvg(
     EMPRESA_CELULAR
   )}</text>
@@ -2177,7 +2179,7 @@ const crearSvgFichaSeparacion = (
   <circle cx="944" cy="1586" r="4" fill="none" stroke="#ffffff" stroke-width="2"/>
   <circle cx="949" cy="1581" r="1.5" fill="#ffffff"/>
   <text x="968" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">Komodo Inmobiliaria</text>
-  <path d="M0 1642 C250 1694 412 1698 620 1648 C816 1601 1000 1618 1240 1676 L1240 1754 L0 1754 Z" fill="#efcaca"/>
+  <path d="M0 1642 C250 1694 412 1698 620 1648 C816 1601 1000 1618 1240 1676 L1240 1754 L0 1754 Z" fill="#e8b1b1"/>
 </svg>`;
 };
 
