@@ -1899,9 +1899,9 @@ const crearSvgFichaSeparacion = (
   const textoSuave = "#636363";
   const borde = "#e1d7d7";
   const fondoSuave = "#fffafa";
-  const resumenY = 790;
-  const resumenAlto = 230;
-  const firmaLineaY = 1410;
+  const resumenY = 700;
+  const resumenAlto = 220;
+  const condicionesY = resumenY + resumenAlto + 34;
   let clausulasY = 430;
   const clausulas = [
     `Comparecen ${EMPRESA_RAZON_SOCIAL}, con RUC No. ${EMPRESA_RUC}, en adelante LA EMPRESA; y el/la Sr(a). ${nombreCompleto}, identificado(a) con DNI No. ${form.dni}, domiciliado(a) en ${form.direccion}, en adelante EL COMPRADOR.`,
@@ -1954,7 +1954,7 @@ const crearSvgFichaSeparacion = (
 
   const titularBanco = textoMultilineaSvg(
     724,
-    resumenY + 184,
+    resumenY + 176,
     `Titular: ${EMPRESA_RAZON_SOCIAL}`,
     46,
     {
@@ -1964,10 +1964,23 @@ const crearSvgFichaSeparacion = (
       color: textoSuave,
     }
   );
-  const condicionesEspeciales = textoMultilineaSvg(
+  const condicionVigencia = textoMultilineaSvg(
     92,
-    1062,
-    `5. Vigencia de separacion: ${DIAS_VIGENCIA_SEPARACION} dias calendario desde la emision de esta ficha, con vencimiento el ${vencimientoSeparacion}. Vencido el plazo sin pago de inicial, LA EMPRESA podra liberar el lote previa revision interna. 6. Incumplimiento o desistimiento: EL COMPRADOR perdera automaticamente el monto de separacion, sin opcion a reclamo, reembolso, compensacion ni reserva posterior.`,
+    condicionesY,
+    `5. Vigencia de separacion: ${DIAS_VIGENCIA_SEPARACION} dias calendario desde la emision de esta ficha, con vencimiento el ${vencimientoSeparacion}. Vencido el plazo sin pago de inicial, LA EMPRESA podra liberar el lote previa revision interna.`,
+    136,
+    {
+      size: 14,
+      lineHeight: 20,
+      weight: 700,
+      color: "#555555",
+      justifyWidth: 1056,
+    }
+  );
+  const condicionIncumplimiento = textoMultilineaSvg(
+    92,
+    condicionVigencia.nextY + 10,
+    "6. Incumplimiento o desistimiento: EL COMPRADOR perdera automaticamente el monto de separacion, sin opcion a reclamo, reembolso, compensacion ni reserva posterior.",
     136,
     {
       size: 14,
@@ -1979,7 +1992,7 @@ const crearSvgFichaSeparacion = (
   );
   const constancia = textoMultilineaSvg(
     92,
-    condicionesEspeciales.nextY + 22,
+    condicionIncumplimiento.nextY + 24,
     "EL COMPRADOR declara que adjunta copia de DNI y voucher de pago de separacion, documentos que forman parte del expediente comercial. En senal de conformidad, las partes suscriben la presente ficha.",
     126,
     {
@@ -1990,6 +2003,8 @@ const crearSvgFichaSeparacion = (
       justifyWidth: 1056,
     }
   );
+  const fechaY = constancia.nextY + 38;
+  const firmaLineaY = fechaY + 118;
   const firmaCompradorNombre = textoMultilineaSvg(
     104,
     firmaLineaY + 56,
@@ -2094,7 +2109,7 @@ const crearSvgFichaSeparacion = (
     formatoSoles(montoFinanciar)
   )}
   ${fila(
-    resumenY + 224,
+    resumenY + 212,
     `Cuotas (${meses})`,
     formatoSoles(cuotaMensual)
   )}
@@ -2112,11 +2127,12 @@ const crearSvgFichaSeparacion = (
   )}</text>
   ${titularBanco.svg}
 
-  <line x1="92" y1="1044" x2="1148" y2="1044" stroke="${borde}" stroke-width="2"/>
-  ${condicionesEspeciales.svg}
+  <line x1="92" y1="${condicionesY - 24}" x2="1148" y2="${condicionesY - 24}" stroke="${borde}" stroke-width="2"/>
+  ${condicionVigencia.svg}
+  ${condicionIncumplimiento.svg}
   ${constancia.svg}
 
-  <text x="794" y="1266" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="850" fill="${texto}">Trujillo, ${escaparSvg(
+  <text x="794" y="${fechaY}" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="850" fill="${texto}">Trujillo, ${escaparSvg(
     fechaEmision
   )}</text>
 
@@ -2143,22 +2159,25 @@ const crearSvgFichaSeparacion = (
   )}</text>
 
   <circle cx="116" cy="1586" r="14" fill="${rojo}"/>
-  <text x="116" y="1593" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="900" fill="#ffffff">☎</text>
+  <path d="M109 1578 C112 1575 116 1575 118 1578 L121 1582 C122 1584 121 1586 119 1587 L117 1588 C120 1592 124 1596 129 1598 L130 1595 C131 1593 134 1592 136 1594 L140 1597 C142 1599 142 1602 139 1605 C136 1608 131 1608 126 1606 C117 1602 109 1594 106 1585 C104 1581 106 1579 109 1578 Z" fill="#ffffff"/>
   <text x="140" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">${escaparSvg(
     EMPRESA_CELULAR
   )}</text>
   <circle cx="306" cy="1586" r="14" fill="${rojo}"/>
-  <text x="306" y="1592" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="900" fill="#ffffff">@</text>
+  <rect x="298" y="1579" width="17" height="13" rx="2" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <path d="M299 1581 L306.5 1587 L314 1581" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <text x="330" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">${escaparSvg(
     EMPRESA_EMAIL
   )}</text>
   <circle cx="684" cy="1586" r="14" fill="${rojo}"/>
-  <text x="684" y="1593" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="950" fill="#ffffff">f</text>
+  <text x="684" y="1595" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="950" fill="#ffffff">f</text>
   <text x="708" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">Komodo Inmobiliaria</text>
   <circle cx="944" cy="1586" r="14" fill="${rojo}"/>
-  <text x="944" y="1592" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="950" fill="#ffffff">ig</text>
+  <rect x="936" y="1578" width="16" height="16" rx="5" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="944" cy="1586" r="4" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="949" cy="1581" r="1.5" fill="#ffffff"/>
   <text x="968" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">Komodo Inmobiliaria</text>
-  <path d="M0 1642 C250 1694 412 1698 620 1648 C816 1601 1000 1618 1240 1676 L1240 1754 L0 1754 Z" fill="#f7e7e7"/>
+  <path d="M0 1642 C250 1694 412 1698 620 1648 C816 1601 1000 1618 1240 1676 L1240 1754 L0 1754 Z" fill="#efcaca"/>
 </svg>`;
 };
 
