@@ -78,6 +78,14 @@ const normalizarLotes = (
     }));
 
 export default function Home() {
+  const activarPantallaCompleta = async () => {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+    } else {
+      await document.exitFullscreen();
+    }
+  };
+
   const [loteSeleccionado, setLoteSeleccionado] =
     useState<LoteSeleccionado | null>(null);
 
@@ -1099,6 +1107,63 @@ export default function Home() {
                 style={boton}
               >
                 ⌂
+              </button>
+
+              <button
+                type="button"
+                onClick={activarPantallaCompleta}
+                title="Pantalla completa"
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 16,
+                  border: "none",
+                  background: "rgba(40,40,40,.55)",
+                  backdropFilter: "blur(10px)",
+                  WebkitBackdropFilter: "blur(10px)",
+                  color: "#ffffff",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 8px 22px rgba(0,0,0,.22)",
+                }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    d="M4 9V4H9"
+                    stroke="white"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M20 9V4H15"
+                    stroke="white"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M4 15V20H9"
+                    stroke="white"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M20 15V20H15"
+                    stroke="white"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </button>
             </div>
             )}
