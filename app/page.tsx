@@ -1104,9 +1104,62 @@ export default function Home() {
                 onClick={() =>
                   resetTransform()
                 }
-                style={boton}
+                style={{
+                  ...boton,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 0,
+                }}
+                title="Centrar plano"
               >
-                ⌂
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  style={{
+                    display: "block",
+                  }}
+                >
+                  <path
+                    d="M12 5V3"
+                    stroke="white"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M12 21V19"
+                    stroke="white"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M5 12H3"
+                    stroke="white"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M21 12H19"
+                    stroke="white"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                  />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="5"
+                    stroke="white"
+                    strokeWidth="2.4"
+                  />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="1.4"
+                    fill="white"
+                  />
+                </svg>
               </button>
 
               <button
