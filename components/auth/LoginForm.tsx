@@ -222,7 +222,7 @@ export default function LoginForm() {
                   style={eyeButton}
                   aria-label="Mostrar contraseña"
                 >
-                  {mostrarPassword ? "🙈" : "👁"}
+                  {mostrarPassword ? "👁️" : "👁"}
                 </button>
               </div>
             </label>
