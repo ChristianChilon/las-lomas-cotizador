@@ -1899,8 +1899,8 @@ const crearSvgFichaSeparacion = (
   const textoSuave = "#636363";
   const borde = "#e1d7d7";
   const fondoSuave = "#fffafa";
-  const resumenY = 700;
-  const resumenAlto = 220;
+  const resumenY = 690;
+  const resumenAlto = 242;
   const condicionesY = resumenY + resumenAlto + 34;
   let clausulasY = 430;
   const clausulas = [
@@ -1954,7 +1954,7 @@ const crearSvgFichaSeparacion = (
 
   const titularBanco = textoMultilineaSvg(
     724,
-    resumenY + 176,
+    resumenY + 196,
     `Titular: ${EMPRESA_RAZON_SOCIAL}`,
     46,
     {
@@ -2069,7 +2069,7 @@ const crearSvgFichaSeparacion = (
   <text x="620" y="188" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="800" fill="${textoSuave}">${escaparSvg(
     EMPRESA_RAZON_SOCIAL
   )} | RUC ${escaparSvg(EMPRESA_RUC)}</text>
-  <text x="620" y="216" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="${textoSuave}">${escaparSvg(
+  <text x="620" y="216" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="800" fill="${textoSuave}">${escaparSvg(
     PROYECTO_NOMBRE
   )}</text>
   <line x1="92" y1="246" x2="1148" y2="246" stroke="${borde}" stroke-width="2"/>
@@ -2096,30 +2096,30 @@ const crearSvgFichaSeparacion = (
 
   <rect x="92" y="${resumenY}" width="500" height="${resumenAlto}" rx="14" fill="${fondoSuave}" stroke="${borde}" stroke-width="2"/>
   <text x="116" y="${resumenY + 44}" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="950" fill="${rojoOscuro}">Resumen economico pactado</text>
-  ${fila(resumenY + 84, "Precio total", formatoSoles(precio))}
+  ${fila(resumenY + 82, "Precio total", formatoSoles(precio))}
   ${fila(
     resumenY + 120,
     "Monto de separacion",
     formatoSoles(montoSeparacion)
   )}
-  ${fila(resumenY + 156, "Inicial pactada", formatoSoles(inicial))}
+  ${fila(resumenY + 158, "Inicial pactada", formatoSoles(inicial))}
   ${fila(
-    resumenY + 192,
+    resumenY + 196,
     "Monto a financiar",
     formatoSoles(montoFinanciar)
   )}
   ${fila(
-    resumenY + 212,
+    resumenY + 226,
     `Cuotas (${meses})`,
     formatoSoles(cuotaMensual)
   )}
 
   <rect x="692" y="${resumenY}" width="456" height="${resumenAlto}" rx="14" fill="#ffffff" stroke="${borde}" stroke-width="2"/>
   <text x="724" y="${resumenY + 44}" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="950" fill="${rojoOscuro}">Cuentas oficiales</text>
-  <text x="724" y="${resumenY + 89}" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="900" fill="${texto}">Banco: ${escaparSvg(
+  <text x="724" y="${resumenY + 84}" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="900" fill="${texto}">Banco: ${escaparSvg(
     BANCO_NOMBRE
   )}</text>
-  <text x="724" y="${resumenY + 127}" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="800" fill="${texto}">Cuenta: ${escaparSvg(
+  <text x="724" y="${resumenY + 124}" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="800" fill="${texto}">Cuenta: ${escaparSvg(
     BANCO_CUENTA
   )}</text>
   <text x="724" y="${resumenY + 164}" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="800" fill="${texto}">CCI: ${escaparSvg(
@@ -2145,7 +2145,7 @@ const crearSvgFichaSeparacion = (
   )}</text>
 
   <line x1="480" y1="${firmaLineaY}" x2="768" y2="${firmaLineaY}" stroke="${texto}" stroke-width="2"/>
-  <text x="480" y="${firmaLineaY + 30}" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="900" fill="${texto}">Firma representante</text>
+  <text x="480" y="${firmaLineaY + 30}" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="900" fill="${texto}">CHRISTIAN CHILON CHILON</text>
   ${firmaEmpresa.svg}
   <text x="480" y="${firmaEmpresa.nextY + 2}" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="${textoSuave}">RUC: ${escaparSvg(
     EMPRESA_RUC
@@ -2159,9 +2159,9 @@ const crearSvgFichaSeparacion = (
   )}</text>
 
   <circle cx="116" cy="1586" r="14" fill="${rojo}"/>
-  <path d="M109 1579 C111 1588 118 1595 127 1598" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-  <path d="M109 1579 L114 1577" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-  <path d="M127 1598 L129 1593" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  <path d="M110 1582 C112 1589 117 1594 124 1596" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M110 1582 L114 1580" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M124 1596 L126 1592" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
   <text x="140" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">${escaparSvg(
     EMPRESA_CELULAR
   )}</text>
@@ -2211,7 +2211,7 @@ const convertirSvgEnJpegDataUrl = async (
       context.fillRect(0, 0, width, height);
       context.drawImage(image, 0, 0, width, height);
       URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL("image/jpeg", 0.94));
+      resolve(canvas.toDataURL("image/jpeg", 0.96));
     };
 
     image.onerror = () => {
@@ -2282,6 +2282,9 @@ const crearPdfSeparacion = async (
     await cargarImagenDataUrl(LOGO_LAS_LOMAS);
   const width = 1240;
   const height = 1754;
+  const renderScale = 2;
+  const renderWidth = width * renderScale;
+  const renderHeight = height * renderScale;
   const svg = crearSvgFichaSeparacion(
     lote,
     form,
@@ -2290,11 +2293,15 @@ const crearPdfSeparacion = async (
   );
   const jpegDataUrl = await convertirSvgEnJpegDataUrl(
     svg,
-    width,
-    height
+    renderWidth,
+    renderHeight
   );
 
-  return crearPdfDesdeJpeg(jpegDataUrl, width, height);
+  return crearPdfDesdeJpeg(
+    jpegDataUrl,
+    renderWidth,
+    renderHeight
+  );
 };
 
 const blobToBase64 = async (blob: Blob) => {
