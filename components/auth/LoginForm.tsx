@@ -222,7 +222,65 @@ export default function LoginForm() {
                   style={eyeButton}
                   aria-label="Mostrar contraseña"
                 >
-                  {mostrarPassword ? "👁️" : "👁"}
+                  {mostrarPassword ? (
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M3 3L21 21"
+                        stroke="#6b7280"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M10.58 10.58A2 2 0 0 0 13.42 13.42"
+                        stroke="#6b7280"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M9.88 5.08A9.8 9.8 0 0 1 12 4.85C16.7 4.85 20.32 8.28 22 12C21.38 13.38 20.45 14.67 19.28 15.73"
+                        stroke="#6b7280"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M6.1 6.35C4.35 7.57 2.95 9.55 2 12C3.68 15.72 7.3 19.15 12 19.15C13.45 19.15 14.8 18.82 16 18.22"
+                        stroke="#6b7280"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M2 12C3.68 8.28 7.3 4.85 12 4.85C16.7 4.85 20.32 8.28 22 12C20.32 15.72 16.7 19.15 12 19.15C7.3 19.15 3.68 15.72 2 12Z"
+                        stroke="#6b7280"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M12 15A3 3 0 1 0 12 9A3 3 0 0 0 12 15Z"
+                        stroke="#6b7280"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
                 </button>
               </div>
             </label>
