@@ -1116,36 +1116,67 @@ export default function Home() {
                 style={boton}
               >
                 <svg
-                  width="19"
-                  height="19"
+                  width="22"
+                  height="22"
                   viewBox="0 0 24 24"
                   fill="none"
                 >
                   <path
                     d="M8 3H3V8"
                     stroke="white"
-                    strokeWidth="2.4"
+                    strokeWidth="2.6"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
+                  <path
+                    d="M3 3L9 9"
+                    stroke="white"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+
                   <path
                     d="M16 3H21V8"
                     stroke="white"
-                    strokeWidth="2.4"
+                    strokeWidth="2.6"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
+                  <path
+                    d="M21 3L15 9"
+                    stroke="white"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+
                   <path
                     d="M8 21H3V16"
                     stroke="white"
-                    strokeWidth="2.4"
+                    strokeWidth="2.6"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                   <path
+                    d="M3 21L9 15"
+                    stroke="white"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+
+                  <path
                     d="M16 21H21V16"
                     stroke="white"
-                    strokeWidth="2.4"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M21 21L15 15"
+                    stroke="white"
+                    strokeWidth="2.6"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
