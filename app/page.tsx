@@ -1116,36 +1116,36 @@ export default function Home() {
                 style={boton}
               >
                 <svg
-                  width="20"
-                  height="20"
+                  width="19"
+                  height="19"
                   viewBox="0 0 24 24"
                   fill="none"
                 >
                   <path
-                    d="M4 9V4H9"
+                    d="M8 3H3V8"
                     stroke="white"
-                    strokeWidth="2.3"
+                    strokeWidth="2.4"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                   <path
-                    d="M20 9V4H15"
+                    d="M16 3H21V8"
                     stroke="white"
-                    strokeWidth="2.3"
+                    strokeWidth="2.4"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                   <path
-                    d="M4 15V20H9"
+                    d="M8 21H3V16"
                     stroke="white"
-                    strokeWidth="2.3"
+                    strokeWidth="2.4"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                   <path
-                    d="M20 15V20H15"
+                    d="M16 21H21V16"
                     stroke="white"
-                    strokeWidth="2.3"
+                    strokeWidth="2.4"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
