@@ -96,7 +96,7 @@ export default function LoginForm() {
           <div style={headerContent}>
             <div style={systemTextHeader}>
               <span style={headerLine} />
-              <span>SISTEMA DE GESTION</span>
+              <span>SISTEMA DE GESTIÓN</span>
               <span style={headerLine} />
             </div>
 
@@ -127,33 +127,25 @@ export default function LoginForm() {
                 )}
               >
                 <span style={inputIcon}>
-                  {mostrarPassword ? (
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M17 10H10V8C10 6.9 10.9 6 12 6C12.95 6 13.75 6.67 13.95 7.56C14.07 8.1 14.61 8.43 15.15 8.31C15.69 8.19 16.02 7.65 15.9 7.11C15.5 5.33 13.9 4 12 4C9.79 4 8 5.79 8 8V10H7C5.9 10 5 10.9 5 12V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V12C19 10.9 18.1 10 17 10Z"
-                        fill="#138975"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M17 10H16V8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8V10H7C5.9 10 5 10.9 5 12V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V12C19 10.9 18.1 10 17 10ZM10 8C10 6.9 10.9 6 12 6C13.1 6 14 6.9 14 8V10H10V8Z"
-                        fill="#138975"
-                      />
-                    </svg>
-                  )}
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M4 6H20C21.1 6 22 6.9 22 8V16C22 17.1 21.1 18 20 18H4C2.9 18 2 17.1 2 16V8C2 6.9 2.9 6 4 6Z"
+                      fill="#138975"
+                    />
+                    <path
+                      d="M4 8L12 13L20 8"
+                      stroke="white"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </span>
 
                 <input
@@ -184,18 +176,33 @@ export default function LoginForm() {
                 )}
               >
                 <span style={inputIcon}>
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M17 10H16V8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8V10H7C5.9 10 5 10.9 5 12V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V12C19 10.9 18.1 10 17 10ZM10 8C10 6.9 10.9 6 12 6C13.1 6 14 6.9 14 8V10H10V8Z"
-                      fill="#138975"
-                    />
-                  </svg>
+                  {mostrarPassword ? (
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M17 10H10V8C10 6.9 10.9 6 12 6C12.95 6 13.75 6.67 13.95 7.56C14.07 8.1 14.61 8.43 15.15 8.31C15.69 8.19 16.02 7.65 15.9 7.11C15.5 5.33 13.9 4 12 4C9.79 4 8 5.79 8 8V10H7C5.9 10 5 10.9 5 12V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V12C19 10.9 18.1 10 17 10Z"
+                        fill="#138975"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M17 10H16V8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8V10H7C5.9 10 5 10.9 5 12V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V12C19 10.9 18.1 10 17 10ZM10 8C10 6.9 10.9 6 12 6C13.1 6 14 6.9 14 8V10H10V8Z"
+                        fill="#138975"
+                      />
+                    </svg>
+                  )}
                 </span>
 
                 <input
