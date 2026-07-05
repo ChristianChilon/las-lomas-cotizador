@@ -1122,8 +1122,8 @@ export default function Home() {
                 }}
               >
                 <svg
-                  width="21"
-                  height="21"
+                  width="15"
+                  height="15"
                   viewBox="0 0 24 24"
                   fill="none"
                   style={{
