@@ -1904,7 +1904,7 @@ const crearSvgFichaSeparacion = (
   const condicionesY = resumenY + resumenAlto + 34;
   let clausulasY = 430;
   const clausulas = [
-    `Comparecen ${EMPRESA_RAZON_SOCIAL}, con RUC No. ${EMPRESA_RUC}, en adelante LA EMPRESA; y el/la Sr(a). ${nombreCompleto}, identificado(a) con DNI No. ${form.dni}, domiciliado(a) en ${form.direccion}, en adelante EL COMPRADOR.`,
+    `Comparecen ${EMPRESA_RAZON_SOCIAL}, con RUC No. ${EMPRESA_RUC}, en adelante LA EMPRESA; y el/la Sr(a). ${nombreCompleto}, identificado(a) con DNI No. ${form.dni}, de ocupacion ${form.ocupacion}, domiciliado(a) en ${form.direccion}, en adelante EL COMPRADOR.`,
     `EL COMPRADOR manifiesta su interes en separar el lote MZ ${lote.mz} - LOTE ${lote.lote}, con area de ${formatearArea(
       lote.area
     )}, integrante del proyecto ${PROYECTO_NOMBRE}, ubicado en ${PROYECTO_UBICACION}`,
@@ -2020,7 +2020,7 @@ const crearSvgFichaSeparacion = (
   const firmaCompradorDatos = textoMultilineaSvg(
     104,
     firmaCompradorNombre.nextY + 2,
-    `DNI: ${form.dni} | Ocupacion: ${form.ocupacion}`,
+    `DNI: ${form.dni}`,
     36,
     {
       size: 15,
@@ -2159,9 +2159,7 @@ const crearSvgFichaSeparacion = (
   )}</text>
 
   <circle cx="116" cy="1586" r="14" fill="${rojo}"/>
-  <path d="M110 1582 C112 1589 117 1594 124 1596" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
-  <path d="M110 1582 L114 1580" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
-  <path d="M124 1596 L126 1592" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M110.3 1578.4 C109.1 1579.2 108.7 1580.7 109.2 1582.1 C111.8 1589.2 116.7 1594.1 123.9 1596.8 C125.2 1597.3 126.7 1596.8 127.5 1595.6 L128.9 1593.5 C129.3 1592.8 129.1 1591.9 128.4 1591.5 L124.9 1589.6 C124.2 1589.2 123.3 1589.4 122.9 1590.1 L122.1 1591.2 C119.3 1589.8 116.2 1586.7 114.8 1583.9 L116.0 1583.1 C116.6 1582.7 116.9 1581.8 116.5 1581.1 L114.5 1577.6 C114.1 1576.9 113.2 1576.7 112.5 1577.1 Z" fill="#ffffff"/>
   <text x="140" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">${escaparSvg(
     EMPRESA_CELULAR
   )}</text>
