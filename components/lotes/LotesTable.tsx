@@ -546,6 +546,7 @@ export default function LotesTable() {
     const errorValidacion = validarFicha();
 
     if (errorValidacion) {
+      console.error("ERROR DE VALIDACION FICHA:", errorValidacion);
       setError(errorValidacion);
       return null;
     }
@@ -561,30 +562,51 @@ export default function LotesTable() {
 
       setPdfGenerado(nuevoPdf);
       return nuevoPdf;
-    } catch {
+    } catch (error) {
+      console.error("ERROR EN crearPdfSeparacion:", error);
+
       setError(
-        "No se pudo generar el PDF. Revisa los datos e intenta nuevamente."
+        error instanceof Error
+          ? error.message
+          : "No se pudo generar el PDF. Revisa los datos e intenta nuevamente."
       );
+
       return null;
     }
   };
 
   const descargarFicha = async () => {
-    const pdf = await obtenerPdfFicha();
-    if (!pdf) return;
+    try {
+      console.log("CLICK DESCARGAR PDF");
 
-    const url = URL.createObjectURL(pdf);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = nombreArchivoFicha();
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-    setPdfDescargado(true);
-    setMensaje(
-      "Ficha descargada. Ya puedes finalizar la separacion."
-    );
+      const pdf = await obtenerPdfFicha();
+
+      console.log("PDF GENERADO:", pdf);
+
+      if (!pdf) {
+        console.error("obtenerPdfFicha devolvio null o undefined");
+        return;
+      }
+
+      const url = URL.createObjectURL(pdf);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = nombreArchivoFicha();
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      setPdfDescargado(true);
+      setMensaje(
+        "Ficha descargada. Ya puedes finalizar la separacion."
+      );
+    } catch (error) {
+      console.error("ERROR AL DESCARGAR PDF:", error);
+      setError(
+        "Error al generar o descargar la ficha PDF. Revisa la consola."
+      );
+    }
   };
 
   const enviarFichaPorCorreo = async () => {
@@ -1879,8 +1901,92 @@ const crearSvgFichaSeparacion = (
   const meses = Math.max(Number(form.meses || 0), 1);
   const montoFinanciar = Math.max(precio - inicial, 0);
   const cuotaMensual = montoFinanciar / meses;
+  const dividirEnLineas = (
+    texto: string,
+    maxCaracteres = 28
+  ) => {
+    const palabras = texto.trim().split(/\s+/);
+    const lineas: string[] = [];
+    let lineaActual = "";
+
+    for (const palabra of palabras) {
+      const prueba = lineaActual
+        ? `${lineaActual} ${palabra}`
+        : palabra;
+
+      if (prueba.length <= maxCaracteres) {
+        lineaActual = prueba;
+      } else {
+        if (lineaActual) lineas.push(lineaActual);
+        lineaActual = palabra;
+      }
+    }
+
+    if (lineaActual) lineas.push(lineaActual);
+
+    if (lineas.length <= 2) return lineas;
+
+    return [
+      lineas[0],
+      lineas.slice(1).join(" "),
+    ];
+  };
+
   const nombreCompleto =
     `${form.nombres} ${form.apellidos}`.trim();
+    
+  const nombreCompradorLineas = dividirEnLineas(
+    nombreCompleto,
+    28
+  );
+
+  const rojo = "#9f1d1d";
+  const rojoOscuro = "#651515";
+  const texto = "#252525";
+  const textoSuave = "#636363";
+  const borde = "#e1d7d7";
+  const fondoSuave = "#fffafa";
+
+  const nombreCompradorFontSize =
+    nombreCompleto.length > 48
+      ? 18
+      : nombreCompradorLineas.length > 1
+        ? 21
+        : 25;
+
+  const nombreCompradorY =
+    nombreCompradorLineas.length > 1 ? 342 : 350;
+
+  const nombreCompradorSvg = nombreCompradorLineas
+    .map(
+      (linea, index) => `
+        <text 
+          x="684" 
+          y="${nombreCompradorY + index * 25}" 
+          font-family="Arial, Helvetica, sans-serif" 
+          font-size="${nombreCompradorFontSize}" 
+          font-weight="950" 
+          fill="${texto}"
+        >${escaparSvg(linea)}</text>
+      `
+    )
+    .join("");
+
+  const compradorDniY =
+    nombreCompradorLineas.length > 1 ? 398 : 378;
+
+  const panelSuperiorY = 276;
+
+  const compradorCajaAlto =
+    nombreCompradorLineas.length > 1 ? 136 : 112;
+
+  const loteCajaAltoBase = 112;
+
+  const panelSuperiorAlto = Math.max(
+    compradorCajaAlto,
+    loteCajaAltoBase
+  );
+
   const asesor =
     profile?.full_name || profile?.email || "-";
   const celularAsesor = profile?.phone || "-";
@@ -1893,16 +1999,12 @@ const crearSvgFichaSeparacion = (
   const inicialEnLetras =
     numeroSolesEnLetras(inicial);
 
-  const rojo = "#9f1d1d";
-  const rojoOscuro = "#651515";
-  const texto = "#252525";
-  const textoSuave = "#636363";
-  const borde = "#e1d7d7";
-  const fondoSuave = "#fffafa";
-  const resumenY = 690;
+  
+  const resumenY = 760;
   const resumenAlto = 242;
   const condicionesY = resumenY + resumenAlto + 34;
-  let clausulasY = 430;
+  let clausulasY = panelSuperiorY + panelSuperiorAlto + 38;
+
   const clausulas = [
     `Comparecen ${EMPRESA_RAZON_SOCIAL}, con RUC No. ${EMPRESA_RUC}, en adelante LA EMPRESA; y el/la Sr(a). ${nombreCompleto}, identificado(a) con DNI No. ${form.dni}, de ocupacion ${form.ocupacion}, domiciliado(a) en ${form.direccion}, en adelante EL COMPRADOR.`,
     `EL COMPRADOR manifiesta su interes en separar el lote MZ ${lote.mz} - LOTE ${lote.lote}, con area de ${formatearArea(
@@ -2004,7 +2106,7 @@ const crearSvgFichaSeparacion = (
     }
   );
   const fechaY = constancia.nextY + 38;
-  const firmaLineaY = Math.max(fechaY + 185, 1438);
+  const firmaLineaY = Math.max(fechaY + 135, 1388);
   const firmaCompradorNombre = textoMultilineaSvg(
     104,
     firmaLineaY + 56,
@@ -2074,7 +2176,7 @@ const crearSvgFichaSeparacion = (
   )}</text>
   <line x1="92" y1="246" x2="1148" y2="246" stroke="${borde}" stroke-width="2"/>
 
-  <rect x="92" y="276" width="488" height="112" rx="14" fill="${fondoSuave}" stroke="${borde}" stroke-width="2"/>
+  <rect x="92" y="${panelSuperiorY}" width="488" height="${panelSuperiorAlto}" rx="14" fill="${fondoSuave}" stroke="${borde}" stroke-width="2"/>
   <text x="116" y="310" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="950" fill="${rojo}">LOTE SEPARADO</text>
   <text x="116" y="352" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="950" fill="${texto}">MZ ${escaparSvg(
     lote.mz
@@ -2083,14 +2185,12 @@ const crearSvgFichaSeparacion = (
     formatearArea(lote.area)
   )}</text>
 
-  <rect x="660" y="276" width="488" height="112" rx="14" fill="${fondoSuave}" stroke="${borde}" stroke-width="2"/>
-  <text x="684" y="310" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="950" fill="${rojo}">COMPRADOR</text>
-  <text x="684" y="350" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="950" fill="${texto}">${escaparSvg(
-    nombreCompleto
-  )}</text>
-  <text x="684" y="378" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="${textoSuave}">DNI: ${escaparSvg(
-    form.dni
-  )} | Celular: ${escaparSvg(form.celular)}</text>
+  <rect x="660" y="${panelSuperiorY}" width="488" height="${panelSuperiorAlto}" rx="14" fill="${fondoSuave}" stroke="${borde}" stroke-width="2"/>
+    <text x="684" y="310" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="950" fill="${rojo}">COMPRADOR</text>
+    ${nombreCompradorSvg}
+    <text x="684" y="${compradorDniY}" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="${textoSuave}">DNI: ${escaparSvg(
+      form.dni
+    )} | Celular: ${escaparSvg(form.celular)}</text>
 
   ${clausulasSvg}
 
@@ -2158,26 +2258,37 @@ const crearSvgFichaSeparacion = (
     celularAsesor
   )}</text>
 
-  <circle cx="116" cy="1586" r="14" fill="${rojo}"/>
-  <path d="M110.3 1578.4 C109.1 1579.2 108.7 1580.7 109.2 1582.1 C111.8 1589.2 116.7 1594.1 123.9 1596.8 C125.2 1597.3 126.7 1596.8 127.5 1595.6 L128.9 1593.5 C129.3 1592.8 129.1 1591.9 128.4 1591.5 L124.9 1589.6 C124.2 1589.2 123.3 1589.4 122.9 1590.1 L122.1 1591.2 C119.3 1589.8 116.2 1586.7 114.8 1583.9 L116.0 1583.1 C116.6 1582.7 116.9 1581.8 116.5 1581.1 L114.5 1577.6 C114.1 1576.9 113.2 1576.7 112.5 1577.1 Z" fill="#ffffff"/>
-  <text x="140" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">${escaparSvg(
-    EMPRESA_CELULAR
-  )}</text>
-  <circle cx="306" cy="1586" r="14" fill="${rojo}"/>
-  <rect x="298" y="1579" width="17" height="13" rx="2" fill="none" stroke="#ffffff" stroke-width="2"/>
-  <path d="M299 1581 L306.5 1587 L314 1581" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="330" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">${escaparSvg(
-    EMPRESA_EMAIL
-  )}</text>
-  <circle cx="684" cy="1586" r="14" fill="${rojo}"/>
-  <text x="684" y="1595" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="950" fill="#ffffff">f</text>
-  <text x="708" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">Komodo Inmobiliaria</text>
-  <circle cx="944" cy="1586" r="14" fill="${rojo}"/>
-  <rect x="936" y="1578" width="16" height="16" rx="5" fill="none" stroke="#ffffff" stroke-width="2"/>
-  <circle cx="944" cy="1586" r="4" fill="none" stroke="#ffffff" stroke-width="2"/>
-  <circle cx="949" cy="1581" r="1.5" fill="#ffffff"/>
-  <text x="968" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">Komodo Inmobiliaria</text>
-  <path d="M0 1642 C250 1694 412 1698 620 1648 C816 1601 1000 1618 1240 1676 L1240 1754 L0 1754 Z" fill="#e8b1b1"/>
+    <circle cx="116" cy="1586" r="14" fill="${rojo}"/>
+    <rect x="108" y="1579" width="17" height="13" rx="2" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <path d="M109 1581 L116.5 1587 L124 1581" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="140" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">${escaparSvg(
+      EMPRESA_EMAIL
+    )}</text>
+
+    <g transform="translate(45 0)">
+      <circle cx="430" cy="1586" r="14" fill="${rojo}"/>
+      <path
+        d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102A1.125 1.125 0 0 0 5.872 2.25H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
+        fill="#ffffff"
+        transform="translate(421 1577) scale(0.78)"
+      />
+    </g>
+
+    <text x="500" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">
+      ${escaparSvg(EMPRESA_CELULAR)}
+    </text>
+
+    <circle cx="684" cy="1586" r="14" fill="${rojo}"/>
+    <text x="684" y="1595" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="950" fill="#ffffff">f</text>
+    <text x="708" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">Komodo Inmobiliaria</text>
+
+    <circle cx="944" cy="1586" r="14" fill="${rojo}"/>
+    <rect x="936" y="1578" width="16" height="16" rx="5" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <circle cx="944" cy="1586" r="4" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <circle cx="949" cy="1581" r="1.5" fill="#ffffff"/>
+    <text x="968" y="1593" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="750" fill="${textoSuave}">komodoinmobiliaria</text>
+
+    <path d="M0 1642 C250 1694 412 1698 620 1648 C816 1601 1000 1618 1240 1676 L1240 1754 L0 1754 Z" fill="#e8b1b1"/>
 </svg>`;
 };
 
