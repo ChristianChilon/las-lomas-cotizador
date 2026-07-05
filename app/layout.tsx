@@ -9,6 +9,7 @@ export const metadata: Metadata = {
       {
         url: "/icon.png",
         type: "image/png",
+        sizes: "512x512",
       },
     ],
     shortcut: "/icon.png",
