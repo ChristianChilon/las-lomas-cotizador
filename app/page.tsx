@@ -1111,7 +1111,7 @@ export default function Home() {
                   justifyContent: "center",
                   padding: 0,
                 }}
-                title="Centrar plano"
+                title="Restablecer vista"
               >
                 <svg
                   width="18"
