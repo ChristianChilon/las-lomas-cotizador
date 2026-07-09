@@ -39,6 +39,11 @@ const links = [
     label: "Historial",
     gerenciaOnly: true,
   },
+  {
+    href: "/asesores/reportes",
+    label: "Reportes",
+    gerenciaOnly: true,
+  },
 ];
 
 type Props = {
