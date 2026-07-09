@@ -10,6 +10,11 @@ const links = [
     label: "Dashboard",
   },
   {
+    href: "/asesores/tareas",
+    label: "Tareas",
+    asesorLabel: "Mis tareas",
+  },
+  {
     href: "/asesores/lotes",
     label: "Lotes",
   },
