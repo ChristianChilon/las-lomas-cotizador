@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 
@@ -100,9 +101,11 @@ export default function LoginForm() {
               <span style={headerLine} />
             </div>
 
-            <img
+            <Image
               src="/logokomodo.png"
               alt="Komodo Inmobiliaria"
+              width={340}
+              height={160}
               style={logoWhite}
             />
           </div>

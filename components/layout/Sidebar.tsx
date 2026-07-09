@@ -19,6 +19,12 @@ const links = [
     asesorLabel: "Mis clientes",
   },
   {
+    href: "/asesores/seguimientos",
+    label: "Seguimientos",
+    asesorLabel: "Mis seguimientos",
+  },
+
+  {
     href: "/asesores/separaciones",
     label: "Separaciones",
     asesorLabel: "Mis separaciones",

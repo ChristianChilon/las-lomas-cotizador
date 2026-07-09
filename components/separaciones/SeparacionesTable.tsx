@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { obtenerPerfilActual } from "../../lib/auth/clientAuth";
 import {
@@ -35,7 +36,153 @@ const formVacio: SeparacionForm = {
   asesorId: "",
 };
 
+type FiltroSeparaciones =
+  | "TODAS"
+  | "ACTIVAS"
+  | "VENCIDAS"
+  | "LIBERACION";
+
+type EstadoVencimiento = {
+  clave:
+    | "VIGENTE"
+    | "PRONTO"
+    | "HOY"
+    | "VENCIDA"
+    | "SIN_FECHA"
+    | "NO_ACTIVA";
+  etiqueta: string;
+  detalle: string;
+  bg: string;
+  fg: string;
+  border: string;
+};
+
+const crearFechaLocal = (fecha?: string | null) => {
+  if (!fecha) return null;
+
+  const [year, month, day] = fecha
+    .split("-")
+    .map(Number);
+
+  if (!year || !month || !day) return null;
+
+  return new Date(year, month - 1, day);
+};
+
+const inicioDeHoy = () => {
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  return hoy;
+};
+
+const pluralDias = (dias: number) =>
+  dias === 1 ? "dia" : "dias";
+
+const obtenerVencimientoSeparacion = (
+  separacion: Separacion
+): EstadoVencimiento => {
+  const estado = separacion.estado?.toUpperCase();
+
+  if (estado !== "ACTIVA") {
+    return {
+      clave: "NO_ACTIVA",
+      etiqueta: estado || "Sin estado",
+      detalle:
+        estado === "CANCELADA"
+          ? "Cancelada"
+          : estado === "CONVERTIDA"
+            ? "Convertida a venta"
+            : estado === "VENCIDA"
+              ? "Vencida"
+              : "No activa",
+      bg: "#f3f4f6",
+      fg: "#4b5563",
+      border: "#e5e7eb",
+    };
+  }
+
+  const fechaLimite = crearFechaLocal(
+    separacion.fecha_limite
+  );
+
+  if (!fechaLimite) {
+    return {
+      clave: "SIN_FECHA",
+      etiqueta: "Sin fecha",
+      detalle: "Sin fecha limite",
+      bg: "#f3f4f6",
+      fg: "#4b5563",
+      border: "#e5e7eb",
+    };
+  }
+
+  const diferenciaMs =
+    fechaLimite.getTime() - inicioDeHoy().getTime();
+  const dias = Math.round(
+    diferenciaMs / (1000 * 60 * 60 * 24)
+  );
+
+  if (dias < 0) {
+    const vencidaHace = Math.abs(dias);
+
+    return {
+      clave: "VENCIDA",
+      etiqueta: "Vencida",
+      detalle: `Vencida hace ${vencidaHace} ${pluralDias(
+        vencidaHace
+      )}`,
+      bg: "#fbe0dc",
+      fg: "#8b2f25",
+      border: "#f4b9b0",
+    };
+  }
+
+  if (dias === 0) {
+    return {
+      clave: "HOY",
+      etiqueta: "Vence hoy",
+      detalle: "Vence hoy",
+      bg: "#fff0d6",
+      fg: "#9a3412",
+      border: "#fed7aa",
+    };
+  }
+
+  if (dias <= 3) {
+    return {
+      clave: "PRONTO",
+      etiqueta: "Vence pronto",
+      detalle: `Vence en ${dias} ${pluralDias(dias)}`,
+      bg: "#fff7dc",
+      fg: "#7a4b12",
+      border: "#f2d17a",
+    };
+  }
+
+  return {
+    clave: "VIGENTE",
+    etiqueta: "Vigente",
+    detalle: `Vence en ${dias} ${pluralDias(dias)}`,
+    bg: "#e7f4eb",
+    fg: "#17633a",
+    border: "#b8dbc4",
+  };
+};
+
+const formatearFechaLocal = (fecha?: string | null) => {
+  const fechaLocal = crearFechaLocal(fecha);
+
+  if (!fechaLocal) return "-";
+
+  return fechaLocal.toLocaleDateString("es-PE");
+};
+
 export default function SeparacionesTable() {
+  const searchParams = useSearchParams();
+
+  const separacionDesdeUrl =
+    searchParams.get("separacion");
+    
   const [profile, setProfile] =
     useState<Profile | null>(null);
   const [clientes, setClientes] = useState<Cliente[]>(
@@ -58,6 +205,17 @@ export default function SeparacionesTable() {
     useState(false);
   const [anulando, setAnulando] =
     useState<string | null>(null);
+  const [filtroSeparaciones, setFiltroSeparaciones] =
+    useState<FiltroSeparaciones>("TODAS");
+  
+  const [solicitandoLiberacion, setSolicitandoLiberacion] =
+    useState<string | null>(null);
+
+  const [rechazandoLiberacion, setRechazandoLiberacion] =
+    useState<string | null>(null);
+
+  const [motivosLiberacion, setMotivosLiberacion] =
+    useState<Record<string, string>>({});
 
   const cargar = async () => {
     if (!supabase) return;
@@ -93,7 +251,7 @@ export default function SeparacionesTable() {
       supabase
         .from("separaciones")
         .select(
-          "id,lote_id,cliente_id,asesor_id,monto_separacion,fecha_limite,estado,observaciones,created_at,updated_at"
+          "id,lote_id,cliente_id,asesor_id,monto_separacion,fecha_limite,estado,observaciones,created_at,updated_at,liberacion_solicitada,motivo_liberacion,fecha_solicitud_liberacion,solicitado_liberacion_por,fecha_liberacion_resuelta,resuelto_liberacion_por"
         )
         .order("created_at", {
           ascending: false,
@@ -137,6 +295,24 @@ export default function SeparacionesTable() {
   useEffect(() => {
     void Promise.resolve().then(cargar);
   }, []);
+
+  useEffect(() => {
+    if (!separacionDesdeUrl) return;
+    if (separaciones.length === 0) return;
+
+    const timer = window.setTimeout(() => {
+      const fila = document.getElementById(
+        `separacion-${separacionDesdeUrl}`
+      );
+
+      fila?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 150);
+
+    return () => window.clearTimeout(timer);
+  }, [separacionDesdeUrl, separaciones]);
 
   const modoGerencia = esGerencia(profile);
   const puedeAnular = esAdmin(profile);
@@ -186,6 +362,88 @@ export default function SeparacionesTable() {
     }
     return map;
   }, [asesores, profile]);
+
+  const resumenSeparaciones = useMemo(() => {
+    return separaciones.reduce(
+      (acumulado, separacion) => {
+        const vencimiento =
+          obtenerVencimientoSeparacion(separacion);
+
+        if (separacion.estado === "ACTIVA") {
+          acumulado.activas += 1;
+        }
+
+        if (vencimiento.clave === "VENCIDA") {
+          acumulado.vencidas += 1;
+        }
+
+        if (vencimiento.clave === "HOY") {
+          acumulado.hoy += 1;
+        }
+
+        if (vencimiento.clave === "PRONTO") {
+          acumulado.pronto += 1;
+        }
+
+        if (separacion.liberacion_solicitada) {
+          acumulado.liberacion += 1;
+        }
+
+        return acumulado;
+      },
+      {
+        activas: 0,
+        vencidas: 0,
+        hoy: 0,
+        pronto: 0,
+        liberacion: 0,
+      }
+    );
+  }, [separaciones]);
+
+  const separacionesFiltradas = useMemo(() => {
+    return separaciones.filter((separacion) => {
+      const vencimiento =
+        obtenerVencimientoSeparacion(separacion);
+
+      if (filtroSeparaciones === "ACTIVAS") {
+        return separacion.estado === "ACTIVA";
+      }
+
+      if (filtroSeparaciones === "VENCIDAS") {
+        return vencimiento.clave === "VENCIDA";
+      }
+
+      if (filtroSeparaciones === "LIBERACION") {
+        return Boolean(separacion.liberacion_solicitada);
+      }
+
+      return true;
+    });
+  }, [filtroSeparaciones, separaciones]);
+
+  const filtros = [
+    {
+      key: "TODAS" as const,
+      label: "Todas",
+      count: separaciones.length,
+    },
+    {
+      key: "ACTIVAS" as const,
+      label: "Activas",
+      count: resumenSeparaciones.activas,
+    },
+    {
+      key: "VENCIDAS" as const,
+      label: "Vencidas",
+      count: resumenSeparaciones.vencidas,
+    },
+    {
+      key: "LIBERACION" as const,
+      label: "Liberacion solicitada",
+      count: resumenSeparaciones.liberacion,
+    },
+  ];
 
   const actualizarForm = (
     campo: keyof SeparacionForm,
@@ -262,6 +520,177 @@ export default function SeparacionesTable() {
     }
 
     setAnulando(null);
+  };
+
+  const solicitarLiberacion = async (
+    separacion: Separacion
+  ) => {
+    if (!supabase || !profile) return;
+
+    const motivo =
+      motivosLiberacion[separacion.id]?.trim() || "";
+
+    if (!motivo) {
+      setError(
+        "Escribe el motivo de la liberación antes de solicitarla."
+      );
+      return;
+    }
+
+    setSolicitandoLiberacion(separacion.id);
+    setMensaje(null);
+    setError(null);
+
+    const { error: rpcError } = await supabase.rpc(
+      "crm_solicitar_liberacion_separacion",
+      {
+        p_separacion_id: separacion.id,
+        p_motivo: motivo,
+      }
+    );
+
+    if (rpcError) {
+      setError(rpcError.message);
+    } else {
+      setMensaje(
+        "Solicitud de liberación enviada a gerencia."
+      );
+      setMotivosLiberacion((actual) => ({
+        ...actual,
+        [separacion.id]: "",
+      }));
+      await cargar();
+    }
+
+    setSolicitandoLiberacion(null);
+  };
+
+  const aprobarLiberacion = async (
+    separacion: Separacion
+  ) => {
+    if (!supabase || !puedeAnular || !profile) return;
+
+    setAnulando(separacion.id);
+    setMensaje(null);
+    setError(null);
+
+    const motivo =
+      separacion.motivo_liberacion ||
+      "Liberación aprobada desde panel CRM";
+
+    const { error: rpcError } =
+      await supabase.rpc("crm_anular_separacion", {
+        p_separacion_id: separacion.id,
+        p_motivo: motivo,
+      });
+
+    if (rpcError) {
+      setError(rpcError.message);
+      setAnulando(null);
+      return;
+    }
+
+    const {
+      data: separacionesActivas,
+      error: separacionesActivasError,
+    } = await supabase
+      .from("separaciones")
+      .select("id")
+      .eq("cliente_id", separacion.cliente_id)
+      .eq("estado", "ACTIVA");
+
+    if (separacionesActivasError) {
+      setError(separacionesActivasError.message);
+      setAnulando(null);
+      return;
+    }
+
+    const tieneOtraSeparacionActiva =
+      (separacionesActivas || []).length > 0;
+
+    const { error: clienteUpdateError } = await supabase
+      .from("clientes")
+      .update(
+        tieneOtraSeparacionActiva
+          ? {
+              estado_lead: "SEPARADO",
+              proxima_accion: "ESPERAR_PAGO",
+            }
+          : {
+              estado_lead: "SEGUIMIENTO",
+              proxima_accion: "VOLVER_A_CONTACTAR",
+              fecha_proximo_seguimiento: new Date()
+                .toISOString()
+                .slice(0, 10),
+            }
+      )
+      .eq("id", separacion.cliente_id);
+
+    if (clienteUpdateError) {
+      setError(clienteUpdateError.message);
+      setAnulando(null);
+      return;
+    }
+
+    const { error: updateError } = await supabase
+      .from("separaciones")
+      .update({
+        liberacion_solicitada: false,
+        fecha_liberacion_resuelta:
+          new Date().toISOString(),
+        resuelto_liberacion_por: profile.id,
+      })
+      .eq("id", separacion.id);
+
+    if (updateError) {
+      setError(updateError.message);
+      setAnulando(null);
+      return;
+    }
+
+    setMensaje(
+      tieneOtraSeparacionActiva
+        ? "Liberación aprobada. La separación fue anulada, pero el cliente mantiene otra separación activa."
+        : "Liberación aprobada. La separación fue anulada y el cliente volvió a seguimiento."
+    );
+
+    await cargar();
+    setAnulando(null);
+  };
+
+  const rechazarLiberacion = async (
+    separacion: Separacion
+  ) => {
+    if (!supabase || !puedeAnular || !profile) return;
+
+    setRechazandoLiberacion(separacion.id);
+    setMensaje(null);
+    setError(null);
+
+    const { error: updateError } = await supabase
+      .from("separaciones")
+      .update({
+        liberacion_solicitada: false,
+        motivo_liberacion:
+          separacion.motivo_liberacion
+            ? `${separacion.motivo_liberacion}\n\nSolicitud rechazada por gerencia.`
+            : "Solicitud de liberación rechazada por gerencia.",
+        fecha_liberacion_resuelta:
+          new Date().toISOString(),
+        resuelto_liberacion_por: profile.id,
+      })
+      .eq("id", separacion.id);
+
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setMensaje(
+        "Solicitud de liberación rechazada."
+      );
+      await cargar();
+    }
+
+    setRechazandoLiberacion(null);
   };
 
   return (
@@ -386,6 +815,49 @@ export default function SeparacionesTable() {
       )}
       {error && <div style={alert}>{error}</div>}
 
+      <div style={resumenBar}>
+        <div style={resumenItem}>
+          <strong>{resumenSeparaciones.vencidas}</strong>
+          <span>Vencidas</span>
+        </div>
+        <div style={resumenItem}>
+          <strong>{resumenSeparaciones.hoy}</strong>
+          <span>Vencen hoy</span>
+        </div>
+        <div style={resumenItem}>
+          <strong>{resumenSeparaciones.pronto}</strong>
+          <span>Vencen pronto</span>
+        </div>
+        <div style={resumenItem}>
+          <strong>{resumenSeparaciones.liberacion}</strong>
+          <span>Liberacion solicitada</span>
+        </div>
+      </div>
+
+      <div style={filtrosBar}>
+        {filtros.map((filtro) => {
+          const activo =
+            filtroSeparaciones === filtro.key;
+
+          return (
+            <button
+              key={filtro.key}
+              type="button"
+              onClick={() =>
+                setFiltroSeparaciones(filtro.key)
+              }
+              style={{
+                ...filterButton,
+                ...(activo ? filterButtonActive : {}),
+              }}
+            >
+              <span>{filtro.label}</span>
+              <strong>{filtro.count}</strong>
+            </button>
+          );
+        })}
+      </div>
+
       <div style={tableWrap}>
         <table style={table}>
           <thead>
@@ -395,7 +867,7 @@ export default function SeparacionesTable() {
                 "Cliente",
                 "Asesor",
                 "Monto",
-                "Vence",
+                "Vencimiento",
                 "Estado",
                 "Registro",
                 "Accion",
@@ -407,7 +879,7 @@ export default function SeparacionesTable() {
             </tr>
           </thead>
           <tbody>
-            {separaciones.map((separacion) => {
+            {separacionesFiltradas.map((separacion) => {
               const lote = separacion.lote_id
                 ? lotesMap[separacion.lote_id]
                 : null;
@@ -421,9 +893,21 @@ export default function SeparacionesTable() {
               const estadoColor = colorEstado(
                 lote?.estado || "SEPARADO"
               );
+              const vencimiento =
+                obtenerVencimientoSeparacion(
+                  separacion
+                );
 
               return (
-                <tr key={separacion.id}>
+                <tr
+                  key={separacion.id}
+                  id={`separacion-${separacion.id}`}
+                  style={
+                    separacionDesdeUrl === separacion.id
+                      ? filaResaltada
+                      : undefined
+                  }
+                >
                   <td style={td}>
                     {lote
                       ? `MZ ${lote.mz} - Lote ${lote.lote}`
@@ -445,11 +929,25 @@ export default function SeparacionesTable() {
                       : "-"}
                   </td>
                   <td style={td}>
-                    {separacion.fecha_limite
-                      ? new Date(
-                          `${separacion.fecha_limite}T00:00:00`
-                        ).toLocaleDateString("es-PE")
-                      : "-"}
+                    <div style={vencimientoStack}>
+                      <span style={vencimientoDate}>
+                        {formatearFechaLocal(
+                          separacion.fecha_limite
+                        )}
+                      </span>
+                      <span
+                        title={vencimiento.etiqueta}
+                        style={{
+                          ...vencimientoBadge,
+                          background: vencimiento.bg,
+                          color: vencimiento.fg,
+                          borderColor:
+                            vencimiento.border,
+                        }}
+                      >
+                        {vencimiento.detalle}
+                      </span>
+                    </div>
                   </td>
                   <td style={td}>
                     <span
@@ -470,20 +968,98 @@ export default function SeparacionesTable() {
                       : "-"}
                   </td>
                   <td style={td}>
-                    {puedeAnular &&
-                    separacion.estado === "ACTIVA" ? (
-                      <button
-                        type="button"
-                        disabled={
-                          anulando === separacion.id
-                        }
-                        onClick={() =>
-                          anularSeparacion(separacion)
-                        }
-                        style={dangerButton}
-                      >
-                        Anular
-                      </button>
+                    {separacion.estado === "ACTIVA" ? (
+                      separacion.liberacion_solicitada ? (
+                        puedeAnular ? (
+                          <div style={actionStack}>
+                            <div style={liberacionNotice}>
+                              Liberación solicitada
+                              {separacion.motivo_liberacion && (
+                                <small>
+                                  Motivo: {separacion.motivo_liberacion}
+                                </small>
+                              )}
+                            </div>
+
+                            <button
+                              type="button"
+                              disabled={anulando === separacion.id}
+                              onClick={() =>
+                                aprobarLiberacion(separacion)
+                              }
+                              style={dangerButton}
+                            >
+                              {anulando === separacion.id
+                                ? "Liberando..."
+                                : "Aprobar liberación"}
+                            </button>
+
+                            <button
+                              type="button"
+                              disabled={
+                                rechazandoLiberacion === separacion.id
+                              }
+                              onClick={() =>
+                                rechazarLiberacion(separacion)
+                              }
+                              style={secondaryButton}
+                            >
+                              Rechazar
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={liberacionNotice}>
+                            Liberación solicitada
+                            {separacion.motivo_liberacion && (
+                              <small>
+                                Motivo: {separacion.motivo_liberacion}
+                              </small>
+                            )}
+                          </div>
+                        )
+                      ) : puedeAnular ? (
+                        <button
+                          type="button"
+                          disabled={anulando === separacion.id}
+                          onClick={() =>
+                            anularSeparacion(separacion)
+                          }
+                          style={dangerButton}
+                        >
+                          {anulando === separacion.id
+                            ? "Anulando..."
+                            : "Anular"}
+                        </button>
+                      ) : (
+                        <div style={actionStack}>
+                          <textarea
+                            value={motivosLiberacion[separacion.id] || ""}
+                            onChange={(event) =>
+                              setMotivosLiberacion((actual) => ({
+                                ...actual,
+                                [separacion.id]: event.target.value,
+                              }))
+                            }
+                            placeholder="Motivo para liberar"
+                            style={miniTextarea}
+                          />
+
+                          <button
+                            type="button"
+                            disabled={
+                              solicitandoLiberacion === separacion.id
+                            }
+                            onClick={() =>
+                              solicitarLiberacion(separacion)
+                            }
+                            style={warningButton}
+                          >
+                            {solicitandoLiberacion === separacion.id
+                              ? "Solicitando..."
+                              : "Solicitar liberación"}
+                          </button>
+                        </div>
+                      )
                     ) : (
                       "-"
                     )}
@@ -491,6 +1067,13 @@ export default function SeparacionesTable() {
                 </tr>
               );
             })}
+            {separacionesFiltradas.length === 0 && (
+              <tr>
+                <td colSpan={8} style={emptyState}>
+                  No hay separaciones para este filtro.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -553,6 +1136,137 @@ const dangerButton: React.CSSProperties = {
   color: "#8b2f25",
   fontWeight: 900,
   cursor: "pointer",
+};
+
+const secondaryButton: React.CSSProperties = {
+  height: 34,
+  border: "1px solid #d1d5db",
+  borderRadius: 10,
+  padding: "0 12px",
+  background: "#ffffff",
+  color: "#334155",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const warningButton: React.CSSProperties = {
+  minHeight: 34,
+  border: "1px solid #d9b85f",
+  borderRadius: 10,
+  padding: "0 12px",
+  background: "#fff7dc",
+  color: "#6b4e00",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const actionStack: React.CSSProperties = {
+  display: "grid",
+  gap: 8,
+  minWidth: 220,
+};
+
+const miniTextarea: React.CSSProperties = {
+  width: "100%",
+  minHeight: 58,
+  border: "1px solid #d1d5db",
+  borderRadius: 10,
+  padding: 8,
+  resize: "vertical",
+  fontSize: 12,
+  color: "#111827",
+};
+
+const liberacionNotice: React.CSSProperties = {
+  borderRadius: 10,
+  background: "#fff7ed",
+  color: "#9a3412",
+  border: "1px solid #fed7aa",
+  padding: 8,
+  fontSize: 12,
+  fontWeight: 900,
+  display: "grid",
+  gap: 4,
+};
+
+const filaResaltada: React.CSSProperties = {
+  background: "#fff8e1",
+  boxShadow: "inset 5px 0 0 #d97706",
+};
+
+const resumenBar: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns:
+    "repeat(auto-fit, minmax(170px, 1fr))",
+  gap: 12,
+  marginBottom: 12,
+};
+
+const resumenItem: React.CSSProperties = {
+  border: "1px solid #e5e7eb",
+  borderRadius: 14,
+  background: "#ffffff",
+  padding: "12px 14px",
+  display: "grid",
+  gap: 3,
+  boxShadow: "0 10px 28px rgba(15,23,42,.05)",
+};
+
+const filtrosBar: React.CSSProperties = {
+  display: "flex",
+  gap: 10,
+  alignItems: "center",
+  flexWrap: "wrap",
+  marginBottom: 14,
+};
+
+const filterButton: React.CSSProperties = {
+  height: 38,
+  border: "1px solid #d7ded4",
+  borderRadius: 999,
+  padding: "0 12px",
+  background: "#ffffff",
+  color: "#334155",
+  fontWeight: 900,
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 8,
+};
+
+const filterButtonActive: React.CSSProperties = {
+  background: "#0f3b2f",
+  color: "#ffffff",
+  borderColor: "#0f3b2f",
+};
+
+const vencimientoStack: React.CSSProperties = {
+  display: "grid",
+  gap: 6,
+  minWidth: 136,
+};
+
+const vencimientoDate: React.CSSProperties = {
+  color: "#111827",
+  fontWeight: 800,
+};
+
+const vencimientoBadge: React.CSSProperties = {
+  display: "inline-flex",
+  width: "fit-content",
+  borderRadius: 999,
+  border: "1px solid",
+  padding: "5px 9px",
+  fontSize: 12,
+  fontWeight: 900,
+  whiteSpace: "nowrap",
+};
+
+const emptyState: React.CSSProperties = {
+  padding: "26px 16px",
+  color: "#64748b",
+  textAlign: "center",
+  fontWeight: 800,
 };
 
 const tableWrap: React.CSSProperties = {

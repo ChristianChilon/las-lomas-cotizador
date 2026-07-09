@@ -66,15 +66,24 @@ export default function AsesoresDashboard() {
           .from(LOTES_TABLE)
           .select("id,estado,asesor_id");
 
-      const {
-        count: clientesCount,
-        error: clientesError,
-      } = await supabase
+      let clientesQuery = supabase
         .from("clientes")
         .select("id", {
           count: "exact",
           head: true,
         });
+
+      if (!modoGerencia) {
+        clientesQuery = clientesQuery.eq(
+          "asesor_id",
+          perfil.profile.id
+        );
+      }
+
+      const {
+        count: clientesCount,
+        error: clientesError,
+      } = await clientesQuery;
 
       const {
         data: separaciones,
@@ -107,6 +116,16 @@ export default function AsesoresDashboard() {
               perfil.profile?.id
           );
 
+      const listaSeparaciones = separaciones || [];
+
+      const separacionesParaKpi = modoGerencia
+        ? listaSeparaciones
+        : listaSeparaciones.filter(
+            (item) =>
+              item.asesor_id ===
+              perfil.profile?.id
+          );
+
       setKpis({
         totalLotes: lotesParaKpi.length,
         disponibles: modoGerencia
@@ -136,18 +155,16 @@ export default function AsesoresDashboard() {
             ).length
           : 0,
         clientes: clientesCount || 0,
-        separacionesVigentes: (
-          separaciones || []
-        ).filter(
-          (item) =>
-            item.estado === "ACTIVA"
-        ).length,
-        separacionesVencidas: (
-          separaciones || []
-        ).filter(
-          (item) =>
-            item.estado === "VENCIDA"
-        ).length,
+        separacionesVigentes:
+          separacionesParaKpi.filter(
+            (item) =>
+              item.estado === "ACTIVA"
+          ).length,
+        separacionesVencidas:
+          separacionesParaKpi.filter(
+            (item) =>
+              item.estado === "VENCIDA"
+          ).length,
       });
     };
 
@@ -159,11 +176,7 @@ export default function AsesoresDashboard() {
   return (
     <AsesorLayout>
       <section>
-        <div
-          style={{
-            marginBottom: 24,
-          }}
-        >
+        <div style={{ marginBottom: 24 }}>
           <h1 style={title}>
             Dashboard comercial
           </h1>
@@ -207,6 +220,7 @@ export default function AsesoresDashboard() {
               value={kpis.totalLotes}
             />
           )}
+
           <KpiCard
             label={
               modoGerencia
@@ -216,6 +230,7 @@ export default function AsesoresDashboard() {
             value={kpis.enNegociacion}
             tone="gold"
           />
+
           <KpiCard
             label={
               modoGerencia
@@ -225,6 +240,7 @@ export default function AsesoresDashboard() {
             value={kpis.separados}
             tone="gold"
           />
+
           <KpiCard
             label={
               modoGerencia
@@ -233,6 +249,7 @@ export default function AsesoresDashboard() {
             }
             value={kpis.cierresSolicitados}
           />
+
           {modoGerencia && (
             <KpiCard
               label="Vendidos"
@@ -240,6 +257,7 @@ export default function AsesoresDashboard() {
               tone="red"
             />
           )}
+
           <KpiCard
             label={
               modoGerencia
@@ -249,6 +267,7 @@ export default function AsesoresDashboard() {
             value={kpis.clientes}
             tone="gray"
           />
+
           <KpiCard
             label={
               modoGerencia
@@ -258,6 +277,7 @@ export default function AsesoresDashboard() {
             value={kpis.separacionesVigentes}
             tone="gold"
           />
+
           <KpiCard
             label={
               modoGerencia

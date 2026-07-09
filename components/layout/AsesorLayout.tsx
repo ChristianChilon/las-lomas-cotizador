@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
@@ -60,17 +61,22 @@ export default function AsesorLayout({
 
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "grid",
-          placeItems: "center",
-          background: "#f3f5f1",
-          color: "#0b2f24",
-          fontWeight: 900,
-        }}
-      >
-        Cargando panel...
+      <div style={loadingScreen}>
+        <Image
+          src="/icon.png"
+          alt="Las Lomas CRM"
+          width={86}
+          height={86}
+          style={loadingLogo}
+        />
+
+        <div style={loadingText}>
+          Cargando panel...
+        </div>
+
+        <div style={loadingCredit}>
+          Desarrollado by Christian Chilon
+        </div>
       </div>
     );
   }
@@ -170,4 +176,37 @@ const subtitleStyle: React.CSSProperties = {
   margin: "8px 0 0",
   color: "#6b7280",
   fontSize: 15,
+};
+
+const loadingScreen: React.CSSProperties = {
+  minHeight: "100vh",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 14,
+  background: "#f7f8f5",
+  color: "#052e22",
+};
+
+const loadingLogo: React.CSSProperties = {
+  width: 86,
+  height: 86,
+  objectFit: "contain",
+  borderRadius: 20,
+  boxShadow: "0 18px 40px rgba(5,46,34,.14)",
+};
+
+const loadingText: React.CSSProperties = {
+  marginTop: 4,
+  fontSize: 18,
+  fontWeight: 950,
+  letterSpacing: ".02em",
+  color: "#052e22",
+};
+
+const loadingCredit: React.CSSProperties = {
+  fontSize: 13,
+  fontWeight: 800,
+  color: "#64748b",
 };

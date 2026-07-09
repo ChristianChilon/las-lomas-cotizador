@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { obtenerPerfilActual } from "../../lib/auth/clientAuth";
 import {
@@ -62,6 +63,17 @@ const DIAS_VIGENCIA_SEPARACION = 7;
 const LOGO_LAS_LOMAS = "/las-lomas-logo.png";
 
 export default function LotesTable() {
+  const searchParams = useSearchParams();
+  
+  const loteSepararDesdeUrl =
+    searchParams.get("separar");
+
+  const clienteSepararDesdeUrl =
+    searchParams.get("cliente");
+  
+  const loteDesdeUrl =
+   searchParams.get("lote");
+
   const [profile, setProfile] =
     useState<Profile | null>(null);
   const [lotes, setLotes] = useState<LoteCrm[]>([]);
@@ -103,6 +115,16 @@ export default function LotesTable() {
     useState(false);
   const [creandoSeparacion, setCreandoSeparacion] =
     useState(false);
+  
+  const [
+    clienteSeparacionExistenteId,
+    setClienteSeparacionExistenteId,
+  ] = useState<string | null>(null);
+
+  const [
+    separacionUrlProcesada,
+    setSeparacionUrlProcesada,
+  ] = useState(false);
 
   const cargar = async () => {
     if (!supabase) return;
@@ -189,6 +211,24 @@ export default function LotesTable() {
       clienteSupabase.removeChannel(canal);
     };
   }, []);
+
+  useEffect(() => {
+    if (!loteDesdeUrl) return;
+    if (lotes.length === 0) return;
+
+    const timer = window.setTimeout(() => {
+      const fila = document.getElementById(
+        `lote-${loteDesdeUrl}`
+      );
+
+      fila?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 150);
+
+    return () => window.clearTimeout(timer);
+  }, [loteDesdeUrl, lotes]);
 
   const modoGerencia = esGerencia(profile);
 
@@ -415,6 +455,8 @@ export default function LotesTable() {
   };
 
   const abrirSeparacionDirecta = (lote: LoteCrm) => {
+    setClienteSeparacionExistenteId(null);
+
     setLoteSeparacion(lote);
     setFormSeparacion({
       ...separacionDirectaVacia,
@@ -429,8 +471,79 @@ export default function LotesTable() {
     setError(null);
   };
 
+  const abrirSeparacionConClienteExistente = (
+    lote: LoteCrm,
+    cliente: Cliente
+  ) => {
+    setClienteSeparacionExistenteId(cliente.id);
+    setLoteSeparacion(lote);
+
+    setFormSeparacion({
+      ...separacionDirectaVacia,
+      nombres: cliente.nombres || "",
+      apellidos: cliente.apellidos || "",
+      dni: cliente.dni || "",
+      celular: cliente.celular || "",
+      correo: cliente.correo || "",
+      direccion: cliente.direccion || "",
+      ocupacion: "",
+      inicial: "6000",
+      fechaPagoInicial: fechaVencimientoSeparacionIso(),
+      meses: "24",
+      observaciones: cliente.observaciones || "",
+    });
+
+    setPdfGenerado(null);
+    setPdfDescargado(false);
+    setPdfEnviado(false);
+    setMensaje(null);
+    setError(null);
+  };
+
+  useEffect(() => {
+    if (separacionUrlProcesada) return;
+    if (!loteSepararDesdeUrl || !clienteSepararDesdeUrl) return;
+    if (lotes.length === 0) return;
+    if (Object.keys(clientes).length === 0) return;
+
+    const loteEncontrado = lotes.find(
+      (lote) => lote.id === Number(loteSepararDesdeUrl)
+    );
+
+    const clienteEncontrado =
+      clientes[clienteSepararDesdeUrl];
+
+    if (!loteEncontrado || !clienteEncontrado) return;
+
+    const timer = window.setTimeout(() => {
+    if (loteEncontrado.estado !== "DISPONIBLE") {
+      setError(
+        `No se puede separar el lote MZ ${loteEncontrado.mz} - Lote ${loteEncontrado.lote}, porque está en estado ${loteEncontrado.estado}.`
+      );
+      setSeparacionUrlProcesada(true);
+      return;
+    }
+
+    abrirSeparacionConClienteExistente(
+      loteEncontrado,
+      clienteEncontrado
+    );
+
+    setSeparacionUrlProcesada(true);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    loteSepararDesdeUrl,
+    clienteSepararDesdeUrl,
+    separacionUrlProcesada,
+    lotes,
+    clientes,
+  ]);
+
   const cerrarSeparacionDirecta = () => {
     setLoteSeparacion(null);
+    setClienteSeparacionExistenteId(null);
     setPdfGenerado(null);
     setPdfDescargado(false);
     setPdfEnviado(false);
@@ -674,6 +787,65 @@ export default function LotesTable() {
     setError(null);
     setMensaje(null);
 
+    const clienteExistente =
+      clienteSeparacionExistenteId
+        ? clientes[clienteSeparacionExistenteId]
+        : null;
+
+    if (clienteExistente) {
+      const { error: rpcError } = await supabase.rpc(
+        "crm_crear_separacion",
+        {
+          p_lote_id: loteSeparacion.id,
+          p_cliente_id: clienteExistente.id,
+          p_monto: Number(
+            formSeparacion.montoSeparacion || 0
+          ),
+          p_fecha_limite:
+            fechaVencimientoSeparacionIso(),
+          p_observaciones:
+            construirObservacionesFicha(),
+          p_asesor_id:
+            clienteExistente.asesor_id ||
+            profile?.id ||
+            null,
+        }
+      );
+
+      if (rpcError) {
+        setError(rpcError.message);
+        setCreandoSeparacion(false);
+        return;
+      }
+
+      const { error: clienteUpdateError } =
+        await supabase
+          .from("clientes")
+          .update({
+            lote_interes_id: null,
+            estado_lead: "SEPARADO",
+            proxima_accion: "ESPERAR_PAGO",
+          })
+          .eq("id", clienteExistente.id);
+
+      if (clienteUpdateError) {
+        setError(clienteUpdateError.message);
+        setCreandoSeparacion(false);
+        return;
+      }
+
+      setMensaje(
+        `Separación creada para cliente existente: ${nombreCliente(
+          clienteExistente
+        )}.`
+      );
+
+      cerrarSeparacionDirecta();
+      await cargar();
+      setCreandoSeparacion(false);
+      return;
+    }
+
     const { error: rpcError } = await supabase.rpc(
       "crm_crear_cliente_y_separacion",
       {
@@ -702,7 +874,7 @@ export default function LotesTable() {
       setError(rpcError.message);
     } else {
       setMensaje(
-        `Cliente y separacion creados para ${loteSeparacion.mz}-${loteSeparacion.lote}.`
+        `Cliente y separación creados para ${loteSeparacion.mz}-${loteSeparacion.lote}.`
       );
       cerrarSeparacionDirecta();
       await cargar();
@@ -841,7 +1013,15 @@ export default function LotesTable() {
                 opciones.length > 1;
 
               return (
-                <tr key={lote.id}>
+                <tr
+                  key={lote.id}
+                  id={`lote-${lote.id}`}
+                  style={
+                    loteDesdeUrl === String(lote.id)
+                      ? filaResaltada
+                      : undefined
+                  }
+                >
                   <td style={td}>{lote.mz}</td>
                   <td style={td}>{lote.lote}</td>
                   <td style={td}>
@@ -1316,14 +1496,16 @@ export default function LotesTable() {
               >
                 {creandoSeparacion
                   ? "Creando..."
-                  : "Finalizar separacion"}
+                  : clienteSeparacionExistenteId
+                    ? "Finalizar separación"
+                    : "Crear cliente y separación"}
               </button>
             </div>
 
             <div style={modalHint}>
-              Primero descarga o envia el PDF. Luego
-              se habilita la creacion del cliente y
-              la separacion.
+              {clienteSeparacionExistenteId
+                ? "Primero descarga o envía el PDF. Luego se habilita la separación para este cliente existente."
+                : "Primero descarga o envía el PDF. Luego se habilita la creación del cliente y la separación."}
             </div>
           </div>
         </div>
@@ -2423,4 +2605,9 @@ const blobToBase64 = async (blob: Blob) => {
   }
 
   return btoa(binary);
+};
+
+const filaResaltada: React.CSSProperties = {
+  background: "#fff8e1",
+  boxShadow: "inset 5px 0 0 #d97706",
 };
