@@ -69,6 +69,37 @@ const formatearFechaHora = (
   return new Date(fecha).toLocaleString("es-PE");
 };
 
+const limpiarCelularWhatsApp = (
+  celular: string | null | undefined
+) => {
+  const limpio = (celular || "").replace(/\D/g, "");
+
+  if (!limpio) return "";
+
+  if (limpio.startsWith("51")) {
+    return limpio;
+  }
+
+  if (limpio.length === 9) {
+    return `51${limpio}`;
+  }
+
+  return limpio;
+};
+
+const crearWhatsappUrl = (
+  celular: string | null | undefined,
+  mensaje: string
+) => {
+  const numero = limpiarCelularWhatsApp(celular);
+
+  if (!numero) return "";
+
+  return `https://wa.me/${numero}?text=${encodeURIComponent(
+    mensaje
+  )}`;
+};
+
 type SeguimientoForm = {
   tipoContacto: string;
   resultado: string;
@@ -828,6 +859,62 @@ export default function ClienteDetallePage() {
     loteInteres &&
     loteInteres.estado !== "DISPONIBLE";
 
+  const separacionActiva = separacionesConLote.find(
+    ({ separacion }) => separacion.estado === "ACTIVA"
+  );
+
+  const etiquetaLoteInteres = loteInteres
+    ? `MZ ${loteInteres.mz} - LOTE ${loteInteres.lote}`
+    : "el lote que te interesa";
+
+  const detalleLoteInteres = loteInteres
+    ? `${etiquetaLoteInteres}, area ${formatearArea(
+        loteInteres.area
+      )}, precio ${formatearMoneda(loteInteres.precio)}`
+    : "el proyecto Las Lomas de Malabrigo";
+
+  const mensajesWhatsApp = [
+    {
+      titulo: "Primer contacto",
+      descripcion: "Para responder rapido a un lead nuevo.",
+      texto: `Hola ${cliente.nombres}, soy tu asesor de Las Lomas de Malabrigo. Gracias por tu interes. Te puedo ayudar con disponibilidad, precios, ubicacion y condiciones para separar tu lote.`,
+    },
+    {
+      titulo: "Enviar disponibilidad",
+      descripcion: "Para compartir datos del lote de interes.",
+      texto: `Hola ${cliente.nombres}, te comparto la informacion de ${detalleLoteInteres}. La separacion es desde S/ 500 y tiene vigencia limitada. Si deseas, revisamos juntos la mejor opcion para separar.`,
+    },
+    {
+      titulo: "Seguimiento",
+      descripcion: "Para reactivar un cliente pendiente.",
+      texto: `Hola ${cliente.nombres}, te escribo para dar seguimiento a tu interes en Las Lomas de Malabrigo. Aun puedo ayudarte a revisar disponibilidad, cuotas y condiciones de separacion.`,
+    },
+    {
+      titulo: "Recordatorio de cita",
+      descripcion: "Para confirmar una cita pendiente o pactada.",
+      texto: `Hola ${cliente.nombres}, te confirmo que tenemos pendiente coordinar tu cita sobre Las Lomas de Malabrigo${
+        cliente.fecha_cita
+          ? ` para el ${formatearFechaLocal(cliente.fecha_cita)}`
+          : ""
+      }${cliente.hora_cita ? ` a las ${cliente.hora_cita}` : ""}. Me confirmas por favor tu disponibilidad.`,
+    },
+    {
+      titulo: "Recordatorio de separacion",
+      descripcion: "Para separaciones activas o por vencer.",
+      texto: `Hola ${cliente.nombres}, te recuerdo que tu separacion de ${
+        separacionActiva?.lote
+          ? `MZ ${separacionActiva.lote.mz} - LOTE ${separacionActiva.lote.lote}`
+          : etiquetaLoteInteres
+      } esta vigente${
+        separacionActiva?.separacion.fecha_limite
+          ? ` hasta el ${formatearFechaLocal(
+              separacionActiva.separacion.fecha_limite
+            )}`
+          : ""
+      }. Para mantenerla, es importante completar el pago/validacion dentro del plazo indicado.`,
+    },
+  ];
+
   return (
     <AsesorLayout
       title="Cliente"
@@ -950,6 +1037,81 @@ export default function ClienteDetallePage() {
             />
           </article>
         </div>
+
+        <article style={whatsappCard}>
+          <div style={cardHeader}>
+            <div>
+              <h2 style={cardTitle}>Plantillas WhatsApp</h2>
+              <p style={smallText}>
+                Mensajes rapidos y uniformes para contactar al cliente sin
+                improvisar.
+              </p>
+            </div>
+
+            <span style={whatsappBadge}>
+              {cliente.celular
+                ? limpiarCelularWhatsApp(cliente.celular)
+                : "Sin celular"}
+            </span>
+          </div>
+
+          {!cliente.celular && (
+            <div style={warningBox}>
+              Este cliente no tiene celular registrado. Agrega un numero para
+              poder abrir WhatsApp directamente.
+            </div>
+          )}
+
+          <div style={whatsappGrid}>
+            {mensajesWhatsApp.map((plantilla) => {
+              const url = crearWhatsappUrl(
+                cliente.celular,
+                plantilla.texto
+              );
+
+              return (
+                <div key={plantilla.titulo} style={whatsappTemplate}>
+                  <div>
+                    <strong>{plantilla.titulo}</strong>
+                    <p>{plantilla.descripcion}</p>
+                  </div>
+
+                  <div style={whatsappPreview}>
+                    {plantilla.texto}
+                  </div>
+
+                  <div style={miniActions}>
+                    <a
+                      href={url || undefined}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        ...primaryMiniLink,
+                        opacity: url ? 1 : 0.5,
+                        pointerEvents: url ? "auto" : "none",
+                      }}
+                    >
+                      Enviar WhatsApp
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void navigator.clipboard?.writeText(
+                          plantilla.texto
+                        );
+                        setMensaje("Mensaje copiado al portapapeles.");
+                      }}
+                      style={secondaryMiniButton}
+                    >
+                      Copiar texto
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </article>
 
         <div style={sectionGrid}>
           <article style={card}>
@@ -1902,6 +2064,63 @@ const secondaryMiniButton: React.CSSProperties = {
   padding: "10px 14px",
   fontWeight: 900,
   cursor: "pointer",
+};
+
+const primaryMiniLink: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  border: "none",
+  background: "#2f7d46",
+  color: "#ffffff",
+  borderRadius: 12,
+  padding: "10px 14px",
+  fontWeight: 900,
+  cursor: "pointer",
+  textDecoration: "none",
+  fontSize: 13,
+};
+
+const whatsappCard: React.CSSProperties = {
+  ...mainCard,
+  marginBottom: 16,
+};
+
+const whatsappBadge: React.CSSProperties = {
+  borderRadius: 999,
+  padding: "6px 10px",
+  background: "#eef8f1",
+  color: "#17633a",
+  fontSize: 12,
+  fontWeight: 950,
+  whiteSpace: "nowrap",
+};
+
+const whatsappGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns:
+    "repeat(auto-fit,minmax(260px,1fr))",
+  gap: 12,
+};
+
+const whatsappTemplate: React.CSSProperties = {
+  border: "1px solid #d9e6db",
+  background: "#fbfdfb",
+  borderRadius: 16,
+  padding: 14,
+  display: "grid",
+  gap: 10,
+  color: "#1f2937",
+};
+
+const whatsappPreview: React.CSSProperties = {
+  borderRadius: 12,
+  background: "#ffffff",
+  border: "1px solid #e5e7eb",
+  padding: 11,
+  color: "#475569",
+  fontSize: 13,
+  lineHeight: 1.45,
 };
 const smallText: React.CSSProperties = {
   margin: "5px 0 0",
