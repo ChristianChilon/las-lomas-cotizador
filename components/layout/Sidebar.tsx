@@ -15,6 +15,11 @@ const links = [
     asesorLabel: "Mis tareas",
   },
   {
+    href: "/asesores/agenda",
+    label: "Agenda",
+    asesorLabel: "Mi agenda",
+  },
+  {
     href: "/asesores/embudo",
     label: "Embudo",
     asesorLabel: "Mi embudo",
