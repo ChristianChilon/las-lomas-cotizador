@@ -5,18 +5,12 @@ import AsesorLayout from "../../../components/layout/AsesorLayout";
 import { obtenerPerfilActual } from "../../../lib/auth/clientAuth";
 import { esGerencia, type Profile } from "../../../lib/crm";
 import { supabase } from "../../../lib/supabase";
+import {
+  CONFIGURACION_COMERCIAL_BASE,
+  type ConfiguracionComercial,
+} from "../../../lib/comercial";
 
-type ConfiguracionComercial = {
-  project_key: string;
-  sla_primer_contacto_minutos: number;
-  cadencia_caliente_dias: number;
-  cadencia_tibio_dias: number;
-  cadencia_frio_dias: number;
-  alerta_separacion_dias: number;
-  hora_inicio: string;
-  hora_fin: string;
-  atender_sabado: boolean;
-  atender_domingo: boolean;
+type ConfiguracionGuardada = ConfiguracionComercial & {
   updated_by?: string | null;
   updated_at?: string | null;
 };
@@ -34,15 +28,25 @@ type ConfigDraft = {
 };
 
 const valoresIniciales: ConfigDraft = {
-  sla_primer_contacto_minutos: "30",
-  cadencia_caliente_dias: "2",
-  cadencia_tibio_dias: "4",
-  cadencia_frio_dias: "7",
-  alerta_separacion_dias: "3",
-  hora_inicio: "08:00",
-  hora_fin: "20:00",
-  atender_sabado: true,
-  atender_domingo: true,
+  sla_primer_contacto_minutos: String(
+    CONFIGURACION_COMERCIAL_BASE.sla_primer_contacto_minutos
+  ),
+  cadencia_caliente_dias: String(
+    CONFIGURACION_COMERCIAL_BASE.cadencia_caliente_dias
+  ),
+  cadencia_tibio_dias: String(
+    CONFIGURACION_COMERCIAL_BASE.cadencia_tibio_dias
+  ),
+  cadencia_frio_dias: String(
+    CONFIGURACION_COMERCIAL_BASE.cadencia_frio_dias
+  ),
+  alerta_separacion_dias: String(
+    CONFIGURACION_COMERCIAL_BASE.alerta_separacion_dias
+  ),
+  hora_inicio: CONFIGURACION_COMERCIAL_BASE.hora_inicio.slice(0, 5),
+  hora_fin: CONFIGURACION_COMERCIAL_BASE.hora_fin.slice(0, 5),
+  atender_sabado: CONFIGURACION_COMERCIAL_BASE.atender_sabado,
+  atender_domingo: CONFIGURACION_COMERCIAL_BASE.atender_domingo,
 };
 
 const horaCorta = (hora: string | null | undefined) =>
@@ -57,7 +61,7 @@ const enteroPositivo = (valor: string) => {
 export default function ConfiguracionPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [configuracion, setConfiguracion] =
-    useState<ConfiguracionComercial | null>(null);
+    useState<ConfiguracionGuardada | null>(null);
   const [draft, setDraft] = useState<ConfigDraft>(valoresIniciales);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -112,7 +116,7 @@ export default function ConfiguracionPage() {
       return;
     }
 
-    const actual = data as unknown as ConfiguracionComercial | null;
+    const actual = data as unknown as ConfiguracionGuardada | null;
     setConfiguracion(actual);
 
     if (actual) {
@@ -200,7 +204,7 @@ export default function ConfiguracionPage() {
       return;
     }
 
-    setConfiguracion(data as unknown as ConfiguracionComercial);
+    setConfiguracion(data as unknown as ConfiguracionGuardada);
     setMensaje("Reglas comerciales actualizadas correctamente.");
     setGuardando(false);
   };

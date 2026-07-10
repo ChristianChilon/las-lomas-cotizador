@@ -71,7 +71,7 @@ const links = [
   },
   {
     href: "/asesores/reportes",
-    label: "Reportes",
+    label: "Analitica",
     gerenciaOnly: true,
   },
 ];

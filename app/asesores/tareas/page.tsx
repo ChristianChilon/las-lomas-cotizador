@@ -22,6 +22,14 @@ import {
   type SeguimientoCliente,
 } from "../../../lib/crm";
 import { supabase } from "../../../lib/supabase";
+import {
+  CONFIGURACION_COMERCIAL_BASE,
+  diasCadencia,
+  diasDesde,
+  formatearDuracion,
+  minutosAtencionTranscurridos,
+  type ConfiguracionComercial,
+} from "../../../lib/comercial";
 
 type TipoTarea =
   | "PRIMER_CONTACTO_PENDIENTE"
@@ -64,32 +72,6 @@ type FiltroTareas =
   | "CLIENTES"
   | "SEPARACIONES"
   | "APROBACIONES";
-
-type ConfiguracionComercial = {
-  project_key: string;
-  sla_primer_contacto_minutos: number;
-  cadencia_caliente_dias: number;
-  cadencia_tibio_dias: number;
-  cadencia_frio_dias: number;
-  alerta_separacion_dias: number;
-  hora_inicio: string;
-  hora_fin: string;
-  atender_sabado: boolean;
-  atender_domingo: boolean;
-};
-
-const configuracionBase: ConfiguracionComercial = {
-  project_key: "las_lomas",
-  sla_primer_contacto_minutos: 30,
-  cadencia_caliente_dias: 2,
-  cadencia_tibio_dias: 4,
-  cadencia_frio_dias: 7,
-  alerta_separacion_dias: 3,
-  hora_inicio: "08:00:00",
-  hora_fin: "20:00:00",
-  atender_sabado: true,
-  atender_domingo: true,
-};
 
 const obtenerFechaHoyISO = () => {
   const hoy = new Date();
@@ -137,109 +119,6 @@ const esClienteActivo = (cliente: Cliente) =>
   cliente.estado_lead !== "VENDIDO" &&
   cliente.estado_lead !== "PERDIDO";
 
-const minutosHora = (hora: string) => {
-  const [horas, minutos] = hora.split(":").map(Number);
-
-  return (horas || 0) * 60 + (minutos || 0);
-};
-
-const esDiaAtencion = (
-  fecha: Date,
-  configuracion: ConfiguracionComercial
-) => {
-  const dia = fecha.getDay();
-
-  if (dia === 6 && !configuracion.atender_sabado) return false;
-  if (dia === 0 && !configuracion.atender_domingo) return false;
-
-  return true;
-};
-
-const minutosAtencionTranscurridos = (
-  fechaCreacion: string | null | undefined,
-  configuracion: ConfiguracionComercial
-) => {
-  if (!fechaCreacion) return 0;
-
-  const inicio = new Date(fechaCreacion);
-  const fin = new Date();
-
-  if (
-    Number.isNaN(inicio.getTime()) ||
-    fin.getTime() <= inicio.getTime()
-  ) {
-    return 0;
-  }
-
-  const inicioMinutos = minutosHora(configuracion.hora_inicio);
-  const finMinutos = minutosHora(configuracion.hora_fin);
-  const cursor = new Date(
-    inicio.getFullYear(),
-    inicio.getMonth(),
-    inicio.getDate()
-  );
-  let total = 0;
-
-  for (let dias = 0; dias < 3700 && cursor <= fin; dias += 1) {
-    if (esDiaAtencion(cursor, configuracion)) {
-      const apertura = new Date(cursor);
-      apertura.setMinutes(inicioMinutos);
-
-      const cierre = new Date(cursor);
-      cierre.setMinutes(finMinutos);
-
-      const tramoInicio = Math.max(apertura.getTime(), inicio.getTime());
-      const tramoFin = Math.min(cierre.getTime(), fin.getTime());
-
-      if (tramoFin > tramoInicio) {
-        total += tramoFin - tramoInicio;
-      }
-    }
-
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  return Math.floor(total / 60000);
-};
-
-const diasDesde = (fecha: string | null | undefined) => {
-  if (!fecha) return 0;
-
-  const inicio = new Date(fecha);
-  const fin = new Date();
-
-  if (Number.isNaN(inicio.getTime())) return 0;
-
-  return Math.max(
-    0,
-    Math.floor((fin.getTime() - inicio.getTime()) / 86400000)
-  );
-};
-
-const formatearDuracion = (minutos: number) => {
-  if (minutos < 60) return `${minutos} min`;
-
-  const horas = Math.floor(minutos / 60);
-  const resto = minutos % 60;
-
-  return resto ? `${horas} h ${resto} min` : `${horas} h`;
-};
-
-const diasCadencia = (
-  cliente: Cliente,
-  configuracion: ConfiguracionComercial
-) => {
-  if (cliente.nivel_interes === "CALIENTE") {
-    return configuracion.cadencia_caliente_dias;
-  }
-
-  if (cliente.nivel_interes === "TIBIO") {
-    return configuracion.cadencia_tibio_dias;
-  }
-
-  return configuracion.cadencia_frio_dias;
-};
-
 export default function CentroTareasPage() {
   const [profile, setProfile] =
     useState<Profile | null>(null);
@@ -252,7 +131,7 @@ export default function CentroTareasPage() {
     SeguimientoCliente[]
   >([]);
   const [configuracion, setConfiguracion] =
-    useState<ConfiguracionComercial>(configuracionBase);
+    useState<ConfiguracionComercial>(CONFIGURACION_COMERCIAL_BASE);
   const [setupPendiente, setSetupPendiente] = useState(false);
   const [filtro, setFiltro] =
     useState<FiltroTareas>("TODAS");
@@ -416,7 +295,7 @@ export default function CentroTareasPage() {
     );
     setConfiguracion(
       faltaConfiguracion || !configuracionResult.data
-        ? configuracionBase
+        ? CONFIGURACION_COMERCIAL_BASE
         : (configuracionResult.data as unknown as ConfiguracionComercial)
     );
     setCargando(false);
