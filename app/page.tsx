@@ -23,11 +23,18 @@ export type LoteData = {
 };
 
 export type LoteSeleccionado = {
+  id: number;
   nombre?: string;
   area: string | number;
   precio: string | number;
   estado: string;
 };
+
+type EstadoSolicitudContacto =
+  | "LISTO"
+  | "ENVIANDO"
+  | "ENVIADA"
+  | "ERROR";
 
 type LoteRegistro = {
   id: number | string;
@@ -115,6 +122,15 @@ export default function Home() {
     aceptaComercial,
     setAceptaComercial,
   ] = useState(false);
+
+  const [nombreContacto, setNombreContacto] = useState("");
+  const [celularContacto, setCelularContacto] = useState("");
+  const [correoContacto, setCorreoContacto] = useState("");
+  const [mensajeContacto, setMensajeContacto] = useState("");
+  const [websiteContacto, setWebsiteContacto] = useState("");
+  const [estadoSolicitud, setEstadoSolicitud] =
+    useState<EstadoSolicitudContacto>("LISTO");
+  const [errorSolicitud, setErrorSolicitud] = useState("");
   
   const [
     mostrarDatos,
@@ -394,25 +410,151 @@ export default function Home() {
     setAreaMax("");
   };
 
-  const enviarWhatsApp = () => {
-    if (!loteSeleccionado) return;
+  const crearMensajeContacto = (lote: LoteSeleccionado) =>
+    `Hola, me interesa el siguiente lote: ${lote.nombre}
+- Área: ${lote.area}
+- Precio: ${lote.precio}
+- Estado: ${lote.estado}
 
-    if (loteSeleccionado.estado !== "DISPONIBLE") {
+Quisiera más información.`;
+
+  const abrirFormularioContacto = () => {
+    if (
+      !loteSeleccionado ||
+      loteSeleccionado.estado !== "DISPONIBLE"
+    ) {
       return;
     }
 
-    const mensaje = `Hola, me interesa el siguiente lote: ${loteSeleccionado.nombre}
-   - Área: ${loteSeleccionado.area} 
-   - Precio: ${loteSeleccionado.precio}
-   - Estado: ${loteSeleccionado.estado}
+    setNombreContacto("");
+    setCelularContacto("");
+    setCorreoContacto("");
+    setWebsiteContacto("");
+    setMensajeContacto(
+      crearMensajeContacto(loteSeleccionado)
+    );
+    setAceptaDatos(false);
+    setAceptaComercial(false);
+    setErrorSolicitud("");
+    setEstadoSolicitud("LISTO");
+    setMostrarContacto(true);
+  };
 
-  Quisiera más información.`;
+  const cerrarFormularioContacto = () => {
+    if (estadoSolicitud === "ENVIANDO") return;
 
+    setMostrarContacto(false);
+    setErrorSolicitud("");
+    setEstadoSolicitud("LISTO");
+  };
+
+  const abrirWhatsApp = () => {
+    if (!loteSeleccionado) return;
+
+    const presentacion = nombreContacto.trim()
+      ? `Hola, soy ${nombreContacto.trim()}.\n\n`
+      : "Hola.\n\n";
+    const mensaje = `${presentacion}${
+      mensajeContacto || crearMensajeContacto(loteSeleccionado)
+    }`;
     const url = `https://wa.me/51933008638?text=${encodeURIComponent(
       mensaje
     )}`;
 
-    window.open(url, "_blank");
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const registrarSolicitud = async () => {
+    if (
+      !loteSeleccionado ||
+      loteSeleccionado.estado !== "DISPONIBLE" ||
+      estadoSolicitud === "ENVIANDO"
+    ) {
+      return;
+    }
+
+    const nombre = nombreContacto.trim();
+    let celular = celularContacto.replace(/\D/g, "");
+    const correo = correoContacto.trim();
+
+    if (celular.length === 11 && celular.startsWith("51")) {
+      celular = celular.slice(2);
+    }
+
+    if (nombre.length < 3) {
+      setErrorSolicitud("Ingresa tu nombre completo.");
+      setEstadoSolicitud("ERROR");
+      return;
+    }
+
+    if (!/^9\d{8}$/.test(celular)) {
+      setErrorSolicitud(
+        "Ingresa un celular peruano válido de 9 dígitos."
+      );
+      setEstadoSolicitud("ERROR");
+      return;
+    }
+
+    if (
+      correo &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)
+    ) {
+      setErrorSolicitud("Ingresa un correo válido.");
+      setEstadoSolicitud("ERROR");
+      return;
+    }
+
+    if (!aceptaDatos) {
+      setErrorSolicitud(
+        "Debes aceptar el tratamiento de datos personales."
+      );
+      setEstadoSolicitud("ERROR");
+      return;
+    }
+
+    setErrorSolicitud("");
+    setEstadoSolicitud("ENVIANDO");
+
+    try {
+      const respuesta = await fetch("/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombreCompleto: nombre,
+          celular,
+          correo: correo || null,
+          loteId: loteSeleccionado.id,
+          mensaje: mensajeContacto,
+          aceptaDatos,
+          aceptaComercial,
+          website: websiteContacto,
+        }),
+      });
+
+      const resultado = (await respuesta
+        .json()
+        .catch(() => ({}))) as {
+        error?: string;
+      };
+
+      if (!respuesta.ok) {
+        throw new Error(
+          resultado.error ||
+            "No pudimos registrar tu solicitud. Inténtalo nuevamente."
+        );
+      }
+
+      setEstadoSolicitud("ENVIADA");
+    } catch (error) {
+      setErrorSolicitud(
+        error instanceof Error
+          ? error.message
+          : "No pudimos registrar tu solicitud. Inténtalo nuevamente."
+      );
+      setEstadoSolicitud("ERROR");
+    }
   };
 
   const colorDivisorTabla = modoNoche
@@ -1918,15 +2060,7 @@ export default function Home() {
           onClose={() =>
             setLoteSeleccionado(null)
           }
-          onHablarAsesor={() => {
-            if (
-              loteSeleccionado.estado !== "DISPONIBLE"
-            ) {
-              return;
-            }
-
-            setMostrarContacto(true);
-          }}
+          onHablarAsesor={abrirFormularioContacto}
         />
       )}
 
@@ -1955,6 +2089,12 @@ export default function Home() {
               width: 700,
 
               maxWidth: "90vw",
+
+              maxHeight: "90vh",
+
+              overflowY: "auto",
+
+              boxSizing: "border-box",
 
               background:
                 "white",
@@ -1985,16 +2125,17 @@ export default function Home() {
               </h2>
 
               <button
-                onClick={() =>
-                  setMostrarContacto(
-                    false
-                  )
-                }
+                onClick={cerrarFormularioContacto}
+                disabled={estadoSolicitud === "ENVIANDO"}
+                aria-label="Cerrar formulario"
                 style={{
                   border: "none",
                   background:
                     "transparent",
-                  cursor: "pointer",
+                  cursor:
+                    estadoSolicitud === "ENVIANDO"
+                      ? "wait"
+                      : "pointer",
                   fontSize: 24,
                 }}
               >
@@ -2003,7 +2144,17 @@ export default function Home() {
             </div>
 
             <input
+              value={nombreContacto}
+              onChange={(event) =>
+                setNombreContacto(event.target.value)
+              }
               placeholder="Nombre completo *"
+              autoComplete="name"
+              maxLength={120}
+              disabled={
+                estadoSolicitud === "ENVIANDO" ||
+                estadoSolicitud === "ENVIADA"
+              }
               style={{
                 width: "100%",
                 padding: 12,
@@ -2011,11 +2162,24 @@ export default function Home() {
                 borderRadius: 12,
                 border:
                   "1px solid #ddd",
+                boxSizing: "border-box",
               }}
             />
 
             <input
+              value={celularContacto}
+              onChange={(event) =>
+                setCelularContacto(event.target.value)
+              }
               placeholder="Celular *"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              maxLength={18}
+              disabled={
+                estadoSolicitud === "ENVIANDO" ||
+                estadoSolicitud === "ENVIADA"
+              }
               style={{
                 width: "100%",
                 padding: 12,
@@ -2023,11 +2187,23 @@ export default function Home() {
                 borderRadius: 12,
                 border:
                   "1px solid #ddd",
+                boxSizing: "border-box",
               }}
             />
 
             <input
+              value={correoContacto}
+              onChange={(event) =>
+                setCorreoContacto(event.target.value)
+              }
               placeholder="Email (opcional)"
+              type="email"
+              autoComplete="email"
+              maxLength={160}
+              disabled={
+                estadoSolicitud === "ENVIANDO" ||
+                estadoSolicitud === "ENVIADA"
+              }
               style={{
                 width: "100%",
                 padding: 12,
@@ -2035,25 +2211,83 @@ export default function Home() {
                 borderRadius: 12,
                 border:
                   "1px solid #ddd",
+                boxSizing: "border-box",
+              }}
+            />
+
+            <input
+              value={websiteContacto}
+              onChange={(event) =>
+                setWebsiteContacto(event.target.value)
+              }
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              name="website"
+              style={{
+                position: "absolute",
+                left: -10000,
+                width: 1,
+                height: 1,
+                opacity: 0,
               }}
             />
 
             <textarea
-              defaultValue={`Hola, me interesa el siguiente lote: ${loteSeleccionado?.nombre}
-            📐 Área: ${loteSeleccionado?.area}
-            💰 Precio: ${loteSeleccionado?.precio}
-            📌 Estado: ${loteSeleccionado?.estado}
-
-            Quisiera más información.`}
+              value={mensajeContacto}
+              onChange={(event) =>
+                setMensajeContacto(event.target.value)
+              }
+              maxLength={1500}
+              disabled={
+                estadoSolicitud === "ENVIANDO" ||
+                estadoSolicitud === "ENVIADA"
+              }
               style={{
                 width: "100%",
-                height: 180,
+                height: 150,
                 padding: 12,
                 borderRadius: 12,
                 border: "1px solid #ddd",
                 resize: "none",
+                boxSizing: "border-box",
               }}
             />
+
+            {estadoSolicitud === "ENVIADA" && (
+              <div
+                role="status"
+                style={{
+                  marginTop: 14,
+                  padding: "12px 14px",
+                  borderRadius: 10,
+                  border: "1px solid #9cc9a8",
+                  background: "#edf8ef",
+                  color: "#245f34",
+                  fontWeight: 700,
+                }}
+              >
+                Solicitud recibida. El asesor asignado ya la tiene en
+                su CRM y te contactará por WhatsApp.
+              </div>
+            )}
+
+            {errorSolicitud && estadoSolicitud === "ERROR" && (
+              <div
+                role="alert"
+                style={{
+                  marginTop: 14,
+                  padding: "12px 14px",
+                  borderRadius: 10,
+                  border: "1px solid #e5aaa4",
+                  background: "#fff1ef",
+                  color: "#8f2f27",
+                  fontWeight: 700,
+                }}
+              >
+                {errorSolicitud}
+              </div>
+            )}
             <div
               style={{
                 marginTop: 20,
@@ -2072,6 +2306,10 @@ export default function Home() {
                 <input
                   type="checkbox"
                   checked={aceptaDatos}
+                  disabled={
+                    estadoSolicitud === "ENVIANDO" ||
+                    estadoSolicitud === "ENVIADA"
+                  }
                   onChange={(e) =>
                     setAceptaDatos(
                       e.target.checked
@@ -2114,6 +2352,10 @@ export default function Home() {
                 <input
                   type="checkbox"
                   checked={aceptaComercial}
+                  disabled={
+                    estadoSolicitud === "ENVIANDO" ||
+                    estadoSolicitud === "ENVIADA"
+                  }
                   onChange={(e) =>
                     setAceptaComercial(
                       e.target.checked
@@ -2153,15 +2395,13 @@ export default function Home() {
                 justifyContent:
                   "flex-end",
                 gap: 10,
+                flexWrap: "wrap",
                 marginTop: 20,
               }}
             >
               <button
-                onClick={() =>
-                  setMostrarContacto(
-                    false
-                  )
-                }
+                onClick={cerrarFormularioContacto}
+                disabled={estadoSolicitud === "ENVIANDO"}
                 style={{
                   padding:
                     "12px 20px",
@@ -2170,56 +2410,101 @@ export default function Home() {
                     "1px solid #ddd",
                   background:
                     "white",
-                  cursor: "pointer",
-                }}
-              >
-                Cancelar
-              </button>
-
-              <button
-                onClick={enviarWhatsApp}
-                disabled={
-                  !aceptaDatos ||
-                  loteSeleccionado?.estado !== "DISPONIBLE"
-                }
-                style={{
-                  padding: "12px 20px",
-
-                  borderRadius: 12,
-
-                  border: "none",
-
-                  background:
-                    loteSeleccionado?.estado === "DISPONIBLE"
-                      ? "#7EA84D"
-                      : "#e5e7eb",
-
-                  color:
-                    loteSeleccionado?.estado === "DISPONIBLE"
-                      ? "#17351F"
-                      : "#777",
-
-                  fontWeight: 700,
-
-                  opacity:
-                    aceptaDatos &&
-                    loteSeleccionado?.estado === "DISPONIBLE"
-                      ? 1
-                      : 0.55,
-
                   cursor:
-                    aceptaDatos &&
-                    loteSeleccionado?.estado === "DISPONIBLE"
-                      ? "pointer"
-                      : "not-allowed",
+                    estadoSolicitud === "ENVIANDO"
+                      ? "wait"
+                      : "pointer",
                 }}
               >
-                {loteSeleccionado?.estado === "DISPONIBLE"
-                  ? "📨 Solicitar asesoría"
-                  : loteSeleccionado?.estado === "SEPARADO"
-                  ? "Lote separado"
-                  : "Lote vendido"}
+                {estadoSolicitud === "ENVIADA"
+                  ? "Cerrar"
+                  : "Cancelar"}
               </button>
+
+              {estadoSolicitud === "ENVIADA" ? (
+                <button
+                  onClick={abrirWhatsApp}
+                  style={{
+                    padding: "12px 20px",
+                    borderRadius: 12,
+                    border: "none",
+                    background: "#1f8f4d",
+                    color: "white",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Hablar ahora por WhatsApp
+                </button>
+              ) : (
+                <button
+                  onClick={registrarSolicitud}
+                  disabled={
+                    !aceptaDatos ||
+                    !nombreContacto.trim() ||
+                    !celularContacto.trim() ||
+                    estadoSolicitud === "ENVIANDO" ||
+                    loteSeleccionado?.estado !== "DISPONIBLE"
+                  }
+                  style={{
+                    padding: "12px 20px",
+                    borderRadius: 12,
+                    border: "none",
+                    background:
+                      loteSeleccionado?.estado === "DISPONIBLE"
+                        ? "#7EA84D"
+                        : "#e5e7eb",
+                    color:
+                      loteSeleccionado?.estado === "DISPONIBLE"
+                        ? "#17351F"
+                        : "#777",
+                    fontWeight: 700,
+                    opacity:
+                      aceptaDatos &&
+                      nombreContacto.trim() &&
+                      celularContacto.trim() &&
+                      estadoSolicitud !== "ENVIANDO" &&
+                      loteSeleccionado?.estado === "DISPONIBLE"
+                        ? 1
+                        : 0.55,
+                    cursor:
+                      aceptaDatos &&
+                      nombreContacto.trim() &&
+                      celularContacto.trim() &&
+                      estadoSolicitud !== "ENVIANDO" &&
+                      loteSeleccionado?.estado === "DISPONIBLE"
+                        ? "pointer"
+                        : estadoSolicitud === "ENVIANDO"
+                          ? "wait"
+                          : "not-allowed",
+                  }}
+                >
+                  {estadoSolicitud === "ENVIANDO"
+                    ? "Registrando solicitud..."
+                    : loteSeleccionado?.estado === "DISPONIBLE"
+                      ? "Solicitar asesoría"
+                      : loteSeleccionado?.estado === "SEPARADO"
+                        ? "Lote separado"
+                        : "Lote vendido"}
+                </button>
+              )}
+
+              {estadoSolicitud === "ERROR" && (
+                <button
+                  onClick={abrirWhatsApp}
+                  style={{
+                    padding: "12px 20px",
+                    borderRadius: 12,
+                    border: "1px solid #1f8f4d",
+                    background: "white",
+                    color: "#1f6f3f",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Continuar por WhatsApp
+                </button>
+              )}
             </div>      
           </div>
         </div>

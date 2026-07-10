@@ -14,6 +14,7 @@ type LotePlano = {
 };
 
 type LoteSeleccionado = {
+  id: number;
   nombre: string;
   area: string;
   precio: string;
@@ -492,6 +493,7 @@ export default function PlanoSVG({
             }
 
             setLoteSeleccionado({
+              id: lote.id,
               nombre: `MZ ${lote.mz} - LOTE ${lote.lote}`,
               area: `${formatearDecimal(
                 lote.area
