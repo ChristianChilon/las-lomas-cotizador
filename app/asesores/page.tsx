@@ -903,6 +903,11 @@ export default function AsesoresDashboard() {
                 title="Separaciones"
                 text="Gestionar vencimientos y liberaciones."
               />
+              <QuickLink
+                href="/asesores/metas"
+                title={modoGerencia ? "Metas comerciales" : "Mis metas"}
+                text="Medir objetivos mensuales y avance real."
+              />
               {modoGerencia && (
                 <QuickLink
                   href="/asesores/calidad"

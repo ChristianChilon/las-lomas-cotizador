@@ -30,6 +30,11 @@ const links = [
     asesorLabel: "Mi pronostico",
   },
   {
+    href: "/asesores/metas",
+    label: "Metas",
+    asesorLabel: "Mis metas",
+  },
+  {
     href: "/asesores/calidad",
     label: "Calidad CRM",
     gerenciaOnly: true,
