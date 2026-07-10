@@ -19,10 +19,14 @@ import {
   type LoteCrm,
   type Profile,
   type Separacion,
+  type SeguimientoCliente,
 } from "../../../lib/crm";
 import { supabase } from "../../../lib/supabase";
 
 type TipoTarea =
+  | "PRIMER_CONTACTO_PENDIENTE"
+  | "SLA_PRIMER_CONTACTO_VENCIDO"
+  | "CLIENTE_SIN_ACTIVIDAD"
   | "SEGUIMIENTO_VENCIDO"
   | "SEGUIMIENTO_HOY"
   | "LEAD_CALIENTE"
@@ -48,16 +52,44 @@ type Tarea = {
   cliente?: Cliente;
   separacion?: Separacion;
   lote?: LoteCrm;
+  actividadDetalle?: string;
 };
 
 type FiltroTareas =
   | "TODAS"
   | "CRITICAS"
+  | "SLA"
   | "HOY"
   | "PROXIMAS"
   | "CLIENTES"
   | "SEPARACIONES"
   | "APROBACIONES";
+
+type ConfiguracionComercial = {
+  project_key: string;
+  sla_primer_contacto_minutos: number;
+  cadencia_caliente_dias: number;
+  cadencia_tibio_dias: number;
+  cadencia_frio_dias: number;
+  alerta_separacion_dias: number;
+  hora_inicio: string;
+  hora_fin: string;
+  atender_sabado: boolean;
+  atender_domingo: boolean;
+};
+
+const configuracionBase: ConfiguracionComercial = {
+  project_key: "las_lomas",
+  sla_primer_contacto_minutos: 30,
+  cadencia_caliente_dias: 2,
+  cadencia_tibio_dias: 4,
+  cadencia_frio_dias: 7,
+  alerta_separacion_dias: 3,
+  hora_inicio: "08:00:00",
+  hora_fin: "20:00:00",
+  atender_sabado: true,
+  atender_domingo: true,
+};
 
 const obtenerFechaHoyISO = () => {
   const hoy = new Date();
@@ -105,6 +137,109 @@ const esClienteActivo = (cliente: Cliente) =>
   cliente.estado_lead !== "VENDIDO" &&
   cliente.estado_lead !== "PERDIDO";
 
+const minutosHora = (hora: string) => {
+  const [horas, minutos] = hora.split(":").map(Number);
+
+  return (horas || 0) * 60 + (minutos || 0);
+};
+
+const esDiaAtencion = (
+  fecha: Date,
+  configuracion: ConfiguracionComercial
+) => {
+  const dia = fecha.getDay();
+
+  if (dia === 6 && !configuracion.atender_sabado) return false;
+  if (dia === 0 && !configuracion.atender_domingo) return false;
+
+  return true;
+};
+
+const minutosAtencionTranscurridos = (
+  fechaCreacion: string | null | undefined,
+  configuracion: ConfiguracionComercial
+) => {
+  if (!fechaCreacion) return 0;
+
+  const inicio = new Date(fechaCreacion);
+  const fin = new Date();
+
+  if (
+    Number.isNaN(inicio.getTime()) ||
+    fin.getTime() <= inicio.getTime()
+  ) {
+    return 0;
+  }
+
+  const inicioMinutos = minutosHora(configuracion.hora_inicio);
+  const finMinutos = minutosHora(configuracion.hora_fin);
+  const cursor = new Date(
+    inicio.getFullYear(),
+    inicio.getMonth(),
+    inicio.getDate()
+  );
+  let total = 0;
+
+  for (let dias = 0; dias < 3700 && cursor <= fin; dias += 1) {
+    if (esDiaAtencion(cursor, configuracion)) {
+      const apertura = new Date(cursor);
+      apertura.setMinutes(inicioMinutos);
+
+      const cierre = new Date(cursor);
+      cierre.setMinutes(finMinutos);
+
+      const tramoInicio = Math.max(apertura.getTime(), inicio.getTime());
+      const tramoFin = Math.min(cierre.getTime(), fin.getTime());
+
+      if (tramoFin > tramoInicio) {
+        total += tramoFin - tramoInicio;
+      }
+    }
+
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return Math.floor(total / 60000);
+};
+
+const diasDesde = (fecha: string | null | undefined) => {
+  if (!fecha) return 0;
+
+  const inicio = new Date(fecha);
+  const fin = new Date();
+
+  if (Number.isNaN(inicio.getTime())) return 0;
+
+  return Math.max(
+    0,
+    Math.floor((fin.getTime() - inicio.getTime()) / 86400000)
+  );
+};
+
+const formatearDuracion = (minutos: number) => {
+  if (minutos < 60) return `${minutos} min`;
+
+  const horas = Math.floor(minutos / 60);
+  const resto = minutos % 60;
+
+  return resto ? `${horas} h ${resto} min` : `${horas} h`;
+};
+
+const diasCadencia = (
+  cliente: Cliente,
+  configuracion: ConfiguracionComercial
+) => {
+  if (cliente.nivel_interes === "CALIENTE") {
+    return configuracion.cadencia_caliente_dias;
+  }
+
+  if (cliente.nivel_interes === "TIBIO") {
+    return configuracion.cadencia_tibio_dias;
+  }
+
+  return configuracion.cadencia_frio_dias;
+};
+
 export default function CentroTareasPage() {
   const [profile, setProfile] =
     useState<Profile | null>(null);
@@ -113,6 +248,12 @@ export default function CentroTareasPage() {
     Separacion[]
   >([]);
   const [lotes, setLotes] = useState<LoteCrm[]>([]);
+  const [seguimientos, setSeguimientos] = useState<
+    SeguimientoCliente[]
+  >([]);
+  const [configuracion, setConfiguracion] =
+    useState<ConfiguracionComercial>(configuracionBase);
+  const [setupPendiente, setSetupPendiente] = useState(false);
   const [filtro, setFiltro] =
     useState<FiltroTareas>("TODAS");
   const [error, setError] =
@@ -181,6 +322,13 @@ export default function CentroTareasPage() {
         "id,mz,lote,area,precio,estado,svg_id,cliente_id,asesor_id,updated_at"
       );
 
+    let seguimientosQuery = supabase
+      .from("seguimientos_clientes")
+      .select(
+        "id,cliente_id,asesor_id,tipo_contacto,resultado,comentario,fecha_proximo_seguimiento,created_by,created_at"
+      )
+      .order("created_at", { ascending: true });
+
     if (!modoGerencia) {
       clientesQuery = clientesQuery.eq(
         "asesor_id",
@@ -194,12 +342,18 @@ export default function CentroTareasPage() {
         "asesor_id",
         perfil.profile.id
       );
+      seguimientosQuery = seguimientosQuery.eq(
+        "asesor_id",
+        perfil.profile.id
+      );
     }
 
     const [
       clientesResult,
       separacionesResult,
       lotesResult,
+      seguimientosResult,
+      configuracionResult,
     ] = await Promise.all([
       clientesQuery.order("fecha_proximo_seguimiento", {
         ascending: true,
@@ -212,12 +366,33 @@ export default function CentroTareasPage() {
       lotesQuery.order("updated_at", {
         ascending: false,
       }),
+      seguimientosQuery,
+      supabase
+        .from("configuracion_comercial")
+        .select(
+          "project_key,sla_primer_contacto_minutos,cadencia_caliente_dias,cadencia_tibio_dias,cadencia_frio_dias,alerta_separacion_dias,hora_inicio,hora_fin,atender_sabado,atender_domingo"
+        )
+        .eq("project_key", "las_lomas")
+        .maybeSingle(),
     ]);
+
+    const faltaConfiguracion = Boolean(
+      configuracionResult.error &&
+        (configuracionResult.error.code === "42P01" ||
+          configuracionResult.error.code === "PGRST205" ||
+          configuracionResult.error.message.includes(
+            "configuracion_comercial"
+          ))
+    );
+
+    setSetupPendiente(faltaConfiguracion);
 
     const errorActual =
       clientesResult.error ||
       separacionesResult.error ||
-      lotesResult.error;
+      lotesResult.error ||
+      seguimientosResult.error ||
+      (faltaConfiguracion ? null : configuracionResult.error);
 
     if (errorActual) {
       setError(errorActual.message);
@@ -236,6 +411,14 @@ export default function CentroTareasPage() {
     setLotes(
       (lotesResult.data || []) as unknown as LoteCrm[]
     );
+    setSeguimientos(
+      (seguimientosResult.data || []) as unknown as SeguimientoCliente[]
+    );
+    setConfiguracion(
+      faltaConfiguracion || !configuracionResult.data
+        ? configuracionBase
+        : (configuracionResult.data as unknown as ConfiguracionComercial)
+    );
     setCargando(false);
   };
 
@@ -247,21 +430,87 @@ export default function CentroTareasPage() {
 
   const tareas = useMemo<Tarea[]>(() => {
     const hoy = obtenerFechaHoyISO();
-    const pronto = sumarDiasISO(2);
+    const pronto = sumarDiasISO(configuracion.alerta_separacion_dias);
     const clientesPorId = new Map(
       clientes.map((cliente) => [cliente.id, cliente])
     );
     const lotesPorId = new Map(
       lotes.map((lote) => [lote.id, lote])
     );
+    const seguimientosPorCliente = new Map<
+      string,
+      SeguimientoCliente[]
+    >();
+
+    seguimientos.forEach((seguimiento) => {
+      const lista =
+        seguimientosPorCliente.get(seguimiento.cliente_id) || [];
+      lista.push(seguimiento);
+      seguimientosPorCliente.set(seguimiento.cliente_id, lista);
+    });
+
     const lista: Tarea[] = [];
 
     clientes.forEach((cliente) => {
-      const fecha =
-        cliente.fecha_proximo_seguimiento || "";
+      const fecha = cliente.fecha_proximo_seguimiento || "";
       const hrefCliente = `/asesores/clientes/${cliente.id}`;
+      const historial = seguimientosPorCliente.get(cliente.id) || [];
+      const primerSeguimiento = historial[0];
+      const ultimoSeguimiento = historial[historial.length - 1];
+      const minutosSinContacto = minutosAtencionTranscurridos(
+        cliente.created_at,
+        configuracion
+      );
+      const fechaUltimaActividad =
+        ultimoSeguimiento?.created_at || cliente.created_at;
+      const diasSinActividad = diasDesde(fechaUltimaActividad);
+      const limiteCadencia = diasCadencia(cliente, configuracion);
+      const detalleUltimaActividad = ultimoSeguimiento
+        ? `Ultima actividad hace ${diasSinActividad} ${
+            diasSinActividad === 1 ? "dia" : "dias"
+          }.`
+        : "Sin contacto registrado.";
 
-      if (fecha && fecha < hoy) {
+      if (!primerSeguimiento) {
+        const slaVencido =
+          minutosSinContacto >=
+          configuracion.sla_primer_contacto_minutos;
+        const minutosRestantes = Math.max(
+          configuracion.sla_primer_contacto_minutos -
+            minutosSinContacto,
+          0
+        );
+
+        lista.push({
+          id: `primer-contacto-${cliente.id}`,
+          tipo: slaVencido
+            ? "SLA_PRIMER_CONTACTO_VENCIDO"
+            : "PRIMER_CONTACTO_PENDIENTE",
+          titulo: slaVencido
+            ? "Primer contacto atrasado"
+            : "Nuevo lead por contactar",
+          descripcion: slaVencido
+            ? `${nombreCliente(
+                cliente
+              )} lleva ${formatearDuracion(
+                minutosSinContacto
+              )} de horario comercial sin contacto registrado.`
+            : `${nombreCliente(
+                cliente
+              )} debe recibir su primer contacto en los proximos ${formatearDuracion(
+                minutosRestantes
+              )}.`,
+          accion: "Registrar primer contacto",
+          href: `${hrefCliente}#registrar-seguimiento`,
+          prioridad: slaVencido ? 1 : 2,
+          fechaOrden: cliente.created_at || hoy,
+          tono: slaVencido ? "red" : "blue",
+          cliente,
+          actividadDetalle: "Sin contacto registrado",
+        });
+      }
+
+      if (primerSeguimiento && fecha && fecha < hoy) {
         lista.push({
           id: `seguimiento-vencido-${cliente.id}`,
           tipo: "SEGUIMIENTO_VENCIDO",
@@ -278,10 +527,11 @@ export default function CentroTareasPage() {
           fechaOrden: fecha,
           tono: "red",
           cliente,
+          actividadDetalle: detalleUltimaActividad,
         });
       }
 
-      if (fecha && fecha === hoy) {
+      if (primerSeguimiento && fecha && fecha === hoy) {
         lista.push({
           id: `seguimiento-hoy-${cliente.id}`,
           tipo: "SEGUIMIENTO_HOY",
@@ -296,10 +546,38 @@ export default function CentroTareasPage() {
           fechaOrden: fecha,
           tono: "blue",
           cliente,
+          actividadDetalle: detalleUltimaActividad,
         });
       }
 
       if (
+        primerSeguimiento &&
+        (!fecha || fecha > hoy) &&
+        diasSinActividad >= limiteCadencia
+      ) {
+        lista.push({
+          id: `sin-actividad-${cliente.id}`,
+          tipo: "CLIENTE_SIN_ACTIVIDAD",
+          titulo: "Cadencia comercial vencida",
+          descripcion: `${nombreCliente(
+            cliente
+          )} lleva ${diasSinActividad} ${
+            diasSinActividad === 1 ? "dia" : "dias"
+          } sin actividad. El limite para este nivel es ${limiteCadencia} ${
+            limiteCadencia === 1 ? "dia" : "dias"
+          }.`,
+          accion: "Retomar contacto",
+          href: `${hrefCliente}#registrar-seguimiento`,
+          prioridad:
+            cliente.nivel_interes === "CALIENTE" ? 1 : 2,
+          fechaOrden: fechaUltimaActividad || hoy,
+          tono:
+            cliente.nivel_interes === "CALIENTE" ? "red" : "gold",
+          cliente,
+          actividadDetalle: detalleUltimaActividad,
+        });
+      } else if (
+        primerSeguimiento &&
         cliente.nivel_interes === "CALIENTE" &&
         !fecha
       ) {
@@ -316,6 +594,7 @@ export default function CentroTareasPage() {
           fechaOrden: hoy,
           tono: "gold",
           cliente,
+          actividadDetalle: detalleUltimaActividad,
         });
       }
 
@@ -336,6 +615,7 @@ export default function CentroTareasPage() {
           fechaOrden: cliente.fecha_cita || hoy,
           tono: "gold",
           cliente,
+          actividadDetalle: detalleUltimaActividad,
         });
       }
     });
@@ -496,13 +776,27 @@ export default function CentroTareasPage() {
 
       return a.titulo.localeCompare(b.titulo);
     });
-  }, [clientes, lotes, modoGerencia, separaciones]);
+  }, [
+    clientes,
+    configuracion,
+    lotes,
+    modoGerencia,
+    seguimientos,
+    separaciones,
+  ]);
 
   const tareasFiltradas = useMemo(() => {
     return tareas.filter((tarea) => {
       if (filtro === "TODAS") return true;
       if (filtro === "CRITICAS") {
         return tarea.prioridad === 1;
+      }
+      if (filtro === "SLA") {
+        return [
+          "PRIMER_CONTACTO_PENDIENTE",
+          "SLA_PRIMER_CONTACTO_VENCIDO",
+          "CLIENTE_SIN_ACTIVIDAD",
+        ].includes(tarea.tipo);
       }
       if (filtro === "HOY") {
         return [
@@ -515,6 +809,9 @@ export default function CentroTareasPage() {
       }
       if (filtro === "CLIENTES") {
         return [
+          "PRIMER_CONTACTO_PENDIENTE",
+          "SLA_PRIMER_CONTACTO_VENCIDO",
+          "CLIENTE_SIN_ACTIVIDAD",
           "SEGUIMIENTO_VENCIDO",
           "SEGUIMIENTO_HOY",
           "LEAD_CALIENTE",
@@ -546,6 +843,15 @@ export default function CentroTareasPage() {
       criticas: tareas.filter(
         (tarea) => tarea.prioridad === 1
       ).length,
+      sla: tareas.filter((tarea) =>
+        [
+          "PRIMER_CONTACTO_PENDIENTE",
+          "SLA_PRIMER_CONTACTO_VENCIDO",
+        ].includes(tarea.tipo)
+      ).length,
+      sinActividad: tareas.filter(
+        (tarea) => tarea.tipo === "CLIENTE_SIN_ACTIVIDAD"
+      ).length,
       hoy: tareas.filter((tarea) =>
         [
           "SEGUIMIENTO_HOY",
@@ -573,6 +879,10 @@ export default function CentroTareasPage() {
     {
       id: "CRITICAS",
       label: "Criticas",
+    },
+    {
+      id: "SLA",
+      label: "SLA y cadencias",
     },
     {
       id: "HOY",
@@ -690,6 +1000,13 @@ export default function CentroTareasPage() {
             </>
           )}
 
+          {tarea.actividadDetalle && (
+            <div style={detailBoxFull}>
+              <span>Actividad comercial</span>
+              <strong>{tarea.actividadDetalle}</strong>
+            </div>
+          )}
+
           {tarea.separacion && (
             <>
               <div style={detailBox}>
@@ -757,11 +1074,50 @@ export default function CentroTareasPage() {
             <strong>{resumen.hoy}</strong>
           </div>
 
+          <div style={summaryCardBlue}>
+            <span>Primer contacto</span>
+            <strong>{resumen.sla}</strong>
+          </div>
+
+          <div style={summaryCardGold}>
+            <span>Sin actividad</span>
+            <strong>{resumen.sinActividad}</strong>
+          </div>
+
           <div style={summaryCardGold}>
             <span>Aprobaciones</span>
             <strong>{resumen.aprobaciones}</strong>
           </div>
         </div>
+
+        <div style={rulesBar}>
+          <div style={rulesList}>
+            <span>
+              Primer contacto: {configuracion.sla_primer_contacto_minutos} min
+            </span>
+            <span>
+              Cadencias: {configuracion.cadencia_caliente_dias}/
+              {configuracion.cadencia_tibio_dias}/
+              {configuracion.cadencia_frio_dias} dias
+            </span>
+            <span>
+              Horario: {configuracion.hora_inicio.slice(0, 5)} - {" "}
+              {configuracion.hora_fin.slice(0, 5)}
+            </span>
+          </div>
+          {modoGerencia && (
+            <Link href="/asesores/configuracion" style={rulesLink}>
+              Ajustar reglas
+            </Link>
+          )}
+        </div>
+
+        {setupPendiente && modoGerencia && (
+          <div style={setupAlert}>
+            Ejecuta 008_crm_reglas_comerciales.sql para guardar reglas
+            personalizadas. Hasta entonces se aplican los valores base.
+          </div>
+        )}
 
         <div style={toolbar}>
           <div style={filterGroup}>
@@ -857,6 +1213,43 @@ const summaryCardGold: React.CSSProperties = {
   borderColor: "#eed28a",
 };
 
+const rulesBar: React.CSSProperties = {
+  background: "#ffffff",
+  border: "1px solid #e5e7eb",
+  borderRadius: 14,
+  padding: "11px 14px",
+  marginBottom: 14,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 12,
+  flexWrap: "wrap",
+};
+
+const rulesList: React.CSSProperties = {
+  display: "flex",
+  gap: 8,
+  flexWrap: "wrap",
+  color: "#475569",
+  fontSize: 12,
+  fontWeight: 850,
+};
+
+const rulesLink: React.CSSProperties = {
+  minHeight: 34,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: 9,
+  padding: "0 11px",
+  background: "#eef8f1",
+  color: "#17633a",
+  border: "1px solid #c9e7d2",
+  textDecoration: "none",
+  fontSize: 12,
+  fontWeight: 950,
+};
+
 const toolbar: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
@@ -905,6 +1298,16 @@ const alert: React.CSSProperties = {
   borderRadius: 14,
   padding: 14,
   marginBottom: 18,
+  fontWeight: 800,
+};
+
+const setupAlert: React.CSSProperties = {
+  background: "#eef6ff",
+  color: "#244d77",
+  border: "1px solid #c7ddf4",
+  borderRadius: 14,
+  padding: 12,
+  marginBottom: 14,
   fontWeight: 800,
 };
 
@@ -995,6 +1398,11 @@ const detailBox: React.CSSProperties = {
   gap: 3,
   color: "#334155",
   fontSize: 13,
+};
+
+const detailBoxFull: React.CSSProperties = {
+  ...detailBox,
+  gridColumn: "1 / -1",
 };
 
 const taskActions: React.CSSProperties = {

@@ -40,6 +40,11 @@ const links = [
     gerenciaOnly: true,
   },
   {
+    href: "/asesores/configuracion",
+    label: "Reglas comerciales",
+    gerenciaOnly: true,
+  },
+  {
     href: "/asesores/lotes",
     label: "Lotes",
   },
