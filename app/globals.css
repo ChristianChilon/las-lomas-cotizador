@@ -112,7 +112,37 @@ select {
   flex: 0 0 auto;
 }
 
+.public-privacy-footer {
+  position: fixed;
+  right: 14px;
+  bottom: 12px;
+  z-index: 1200;
+  padding: 7px 11px;
+  border: 1px solid rgba(71, 111, 52, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 5px 16px rgba(25, 38, 19, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.public-privacy-footer a {
+  color: #3f642f;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.public-privacy-footer a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
+  .public-privacy-footer {
+    right: 8px;
+    bottom: 8px;
+    padding: 6px 9px;
+  }
+
   .logo-topbar {
     top: 5px !important;
     left: 3px !important;

@@ -2757,6 +2757,11 @@ Quisiera más información.`;
       </div>
     )}
 
+    <footer className="public-privacy-footer">
+      <a href="/politica-de-privacidad">
+        Política de privacidad
+      </a>
+    </footer>
   </main>
   );
 }

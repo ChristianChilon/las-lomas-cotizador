@@ -1,0 +1,156 @@
+.page {
+  min-height: 100vh;
+  padding: 32px 18px 56px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(168, 197, 125, 0.24), transparent 28rem),
+    linear-gradient(180deg, #f6f8f1 0%, #eef3e8 100%);
+  color: #24301e;
+}
+
+.card {
+  width: min(880px, 100%);
+  margin: 0 auto;
+  padding: 44px clamp(22px, 6vw, 68px);
+  border: 1px solid rgba(78, 108, 54, 0.16);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 24px 70px rgba(44, 63, 31, 0.12);
+}
+
+.back {
+  display: inline-flex;
+  margin-bottom: 32px;
+  color: #52713a;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.back:hover,
+.card a:hover {
+  text-decoration: underline;
+}
+
+.header {
+  padding-bottom: 30px;
+  border-bottom: 1px solid #dde5d6;
+}
+
+.eyebrow {
+  color: #6e8b4d;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  max-width: 720px;
+  margin: 12px 0 14px;
+  color: #26391e;
+  font-size: clamp(30px, 5vw, 48px);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.effective {
+  margin: 0;
+  color: #677060;
+  font-size: 15px;
+}
+
+.card section {
+  margin-top: 34px;
+}
+
+.card h2 {
+  margin: 0 0 12px;
+  color: #365027;
+  font-size: clamp(20px, 3vw, 25px);
+  line-height: 1.25;
+}
+
+.card p,
+.card li {
+  color: #3f473b;
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.card p {
+  margin: 10px 0;
+}
+
+.card ul {
+  margin: 10px 0 16px;
+  padding-left: 24px;
+}
+
+.card li + li {
+  margin-top: 4px;
+}
+
+.card a {
+  color: #476f34;
+  font-weight: 700;
+}
+
+.highlight {
+  padding: 22px 24px;
+  border: 1px solid #d5e3c6;
+  border-radius: 18px;
+  background: #f4f8ed;
+}
+
+.highlight h2 {
+  color: #2f5420;
+}
+
+.footer {
+  margin-top: 42px;
+  padding-top: 24px;
+  border-top: 1px solid #dde5d6;
+  text-align: center;
+}
+
+.footer p {
+  margin-bottom: 4px;
+  color: #5b6356;
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .card {
+    padding: 24px 20px 40px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .back {
+    margin-bottom: 24px;
+  }
+
+  .header {
+    padding-bottom: 24px;
+  }
+
+  .card section {
+    margin-top: 28px;
+  }
+
+  .card p,
+  .card li {
+    font-size: 15.5px;
+    line-height: 1.68;
+  }
+
+  .highlight {
+    padding: 18px;
+  }
+}
