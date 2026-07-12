@@ -54,6 +54,10 @@ const links = [
     label: "Lotes",
   },
   {
+    href: "/asesores/cotizador",
+    label: "Cotizador privado",
+  },
+  {
     href: "/asesores/clientes",
     label: "Clientes",
     asesorLabel: "Mis clientes",
@@ -83,9 +87,11 @@ const links = [
 
 type Props = {
   profile: Profile;
+  open?: boolean;
+  onClose?: () => void;
 };
 
-export default function Sidebar({ profile }: Props) {
+export default function Sidebar({ profile, open = false, onClose }: Props) {
   const pathname = usePathname();
   const modoGerencia = esGerencia(profile);
   const visibleLinks = links.filter(
@@ -94,6 +100,7 @@ export default function Sidebar({ profile }: Props) {
 
   return (
     <aside
+      className={`crm-sidebar ${open ? "is-open" : ""}`}
       style={{
         width: 260,
         minHeight: "100vh",
@@ -103,17 +110,28 @@ export default function Sidebar({ profile }: Props) {
         padding: 22,
         position: "sticky",
         top: 0,
+        height: "100vh",
+        overflowY: "auto",
       }}
     >
-      <div
-        style={{
-          fontSize: 20,
-          fontWeight: 900,
-          letterSpacing: ".4px",
-          marginBottom: 28,
-        }}
-      >
-        Las Lomas CRM
+      <div className="crm-sidebar-heading">
+        <div
+          style={{
+            fontSize: 20,
+            fontWeight: 900,
+            letterSpacing: ".4px",
+          }}
+        >
+          Las Lomas CRM
+        </div>
+        <button
+          type="button"
+          className="crm-sidebar-close"
+          onClick={onClose}
+          aria-label="Cerrar menu"
+        >
+          x
+        </button>
       </div>
 
       <nav
@@ -134,6 +152,8 @@ export default function Sidebar({ profile }: Props) {
             <Link
               key={link.href}
               href={link.href}
+              onClick={onClose}
+              className="crm-sidebar-link"
               style={{
                 textDecoration: "none",
                 color: active

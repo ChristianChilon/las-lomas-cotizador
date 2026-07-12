@@ -4,7 +4,6 @@
     "mz": "A",
     "lote": 1,
     "area": 110.86,
-    "precio": 27715,
     "estado": "DISPONIBLE",
     "svg_id": "path19862"
   },
@@ -13,7 +12,6 @@
     "mz": "A",
     "lote": 2,
     "area": 122.77,
-    "precio": 30692.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19828"
   },
@@ -22,7 +20,6 @@
     "mz": "A",
     "lote": 3,
     "area": 121.27,
-    "precio": 30317.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19829"
   },
@@ -31,7 +28,6 @@
     "mz": "A",
     "lote": 4,
     "area": 171.47,
-    "precio": 42867.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19830"
   },
@@ -40,7 +36,6 @@
     "mz": "B",
     "lote": 1,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19827"
   },
@@ -49,7 +44,6 @@
     "mz": "B",
     "lote": 2,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19826"
   },
@@ -58,7 +52,6 @@
     "mz": "B",
     "lote": 3,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19825"
   },
@@ -67,7 +60,6 @@
     "mz": "B",
     "lote": 4,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19824"
   },
@@ -76,7 +68,6 @@
     "mz": "B",
     "lote": 5,
     "area": 117.87,
-    "precio": 29467.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19823"
   },
@@ -85,7 +76,6 @@
     "mz": "B",
     "lote": 6,
     "area": 117.87,
-    "precio": 29467.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19822"
   },
@@ -94,7 +84,6 @@
     "mz": "B",
     "lote": 7,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19821"
   },
@@ -103,7 +92,6 @@
     "mz": "B",
     "lote": 8,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19820"
   },
@@ -112,7 +100,6 @@
     "mz": "B",
     "lote": 9,
     "area": 199.24,
-    "precio": 49810,
     "estado": "DISPONIBLE",
     "svg_id": "path19819"
   },
@@ -121,7 +108,6 @@
     "mz": "C",
     "lote": 1,
     "area": 166.85,
-    "precio": 41712.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19817"
   },
@@ -130,7 +116,6 @@
     "mz": "C",
     "lote": 2,
     "area": 134.95,
-    "precio": 33737.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19816"
   },
@@ -139,7 +124,6 @@
     "mz": "C",
     "lote": 3,
     "area": 144.67,
-    "precio": 36167.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19818"
   },
@@ -148,7 +132,6 @@
     "mz": "C",
     "lote": 4,
     "area": 136.76,
-    "precio": 34190,
     "estado": "DISPONIBLE",
     "svg_id": "path19802"
   },
@@ -157,7 +140,6 @@
     "mz": "C",
     "lote": 5,
     "area": 125.97,
-    "precio": 31492.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19803"
   },
@@ -166,7 +148,6 @@
     "mz": "C",
     "lote": 6,
     "area": 131.85,
-    "precio": 32962.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19804"
   },
@@ -175,7 +156,6 @@
     "mz": "C",
     "lote": 7,
     "area": 137.73,
-    "precio": 34432.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19805"
   },
@@ -184,7 +164,6 @@
     "mz": "C",
     "lote": 8,
     "area": 143.62,
-    "precio": 35905,
     "estado": "DISPONIBLE",
     "svg_id": "path19806"
   },
@@ -193,7 +172,6 @@
     "mz": "C",
     "lote": 9,
     "area": 149.5,
-    "precio": 37375,
     "estado": "DISPONIBLE",
     "svg_id": "path19807"
   },
@@ -202,7 +180,6 @@
     "mz": "C",
     "lote": 10,
     "area": 155.38,
-    "precio": 38845,
     "estado": "DISPONIBLE",
     "svg_id": "path19808"
   },
@@ -211,7 +188,6 @@
     "mz": "C",
     "lote": 11,
     "area": 161.26,
-    "precio": 40315,
     "estado": "DISPONIBLE",
     "svg_id": "path19809"
   },
@@ -220,7 +196,6 @@
     "mz": "C",
     "lote": 12,
     "area": 167.14,
-    "precio": 41785,
     "estado": "DISPONIBLE",
     "svg_id": "path19810"
   },
@@ -229,7 +204,6 @@
     "mz": "C",
     "lote": 13,
     "area": 173.03,
-    "precio": 43257.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19811"
   },
@@ -238,7 +212,6 @@
     "mz": "C",
     "lote": 14,
     "area": 178.91,
-    "precio": 44727.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19812"
   },
@@ -247,7 +220,6 @@
     "mz": "C",
     "lote": 15,
     "area": 120.12,
-    "precio": 30030,
     "estado": "DISPONIBLE",
     "svg_id": "path19813"
   },
@@ -256,7 +228,6 @@
     "mz": "C",
     "lote": 16,
     "area": 119.51,
-    "precio": 29877.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19814"
   },
@@ -265,7 +236,6 @@
     "mz": "C",
     "lote": 17,
     "area": 113.38,
-    "precio": 28345,
     "estado": "DISPONIBLE",
     "svg_id": "path19815"
   },
@@ -274,7 +244,6 @@
     "mz": "D",
     "lote": 1,
     "area": 119.57,
-    "precio": 29892.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19801"
   },
@@ -283,7 +252,6 @@
     "mz": "D",
     "lote": 2,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19800"
   },
@@ -292,7 +260,6 @@
     "mz": "D",
     "lote": 3,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19799"
   },
@@ -301,7 +268,6 @@
     "mz": "D",
     "lote": 4,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19798"
   },
@@ -310,7 +276,6 @@
     "mz": "D",
     "lote": 5,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19797"
   },
@@ -319,7 +284,6 @@
     "mz": "D",
     "lote": 6,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19796"
   },
@@ -328,7 +292,6 @@
     "mz": "D",
     "lote": 7,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19795"
   },
@@ -337,7 +300,6 @@
     "mz": "D",
     "lote": 8,
     "area": 117.87,
-    "precio": 29467.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19794"
   },
@@ -346,7 +308,6 @@
     "mz": "D",
     "lote": 9,
     "area": 117.87,
-    "precio": 29467.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19793"
   },
@@ -355,7 +316,6 @@
     "mz": "D",
     "lote": 10,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19792"
   },
@@ -364,7 +324,6 @@
     "mz": "D",
     "lote": 11,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19791"
   },
@@ -373,7 +332,6 @@
     "mz": "D",
     "lote": 12,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19790"
   },
@@ -382,7 +340,6 @@
     "mz": "D",
     "lote": 13,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19789"
   },
@@ -391,7 +348,6 @@
     "mz": "D",
     "lote": 14,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19788"
   },
@@ -400,7 +356,6 @@
     "mz": "D",
     "lote": 15,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19787"
   },
@@ -409,7 +364,6 @@
     "mz": "D",
     "lote": 16,
     "area": 119.57,
-    "precio": 29892.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19786"
   },
@@ -418,7 +372,6 @@
     "mz": "E",
     "lote": 1,
     "area": 119.57,
-    "precio": 29892.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19784"
   },
@@ -427,7 +380,6 @@
     "mz": "E",
     "lote": 2,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19783"
   },
@@ -436,7 +388,6 @@
     "mz": "E",
     "lote": 3,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19782"
   },
@@ -445,7 +396,6 @@
     "mz": "E",
     "lote": 4,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19781"
   },
@@ -454,7 +404,6 @@
     "mz": "E",
     "lote": 5,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19780"
   },
@@ -463,7 +412,6 @@
     "mz": "E",
     "lote": 6,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19779"
   },
@@ -472,7 +420,6 @@
     "mz": "E",
     "lote": 7,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19778"
   },
@@ -481,7 +428,6 @@
     "mz": "E",
     "lote": 8,
     "area": 117.87,
-    "precio": 29467.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19777"
   },
@@ -490,7 +436,6 @@
     "mz": "E",
     "lote": 9,
     "area": 117.87,
-    "precio": 29467.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19776"
   },
@@ -499,7 +444,6 @@
     "mz": "E",
     "lote": 10,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19775"
   },
@@ -508,7 +452,6 @@
     "mz": "E",
     "lote": 11,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19774"
   },
@@ -517,7 +460,6 @@
     "mz": "E",
     "lote": 12,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19773"
   },
@@ -526,7 +468,6 @@
     "mz": "E",
     "lote": 13,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19772"
   },
@@ -535,7 +476,6 @@
     "mz": "E",
     "lote": 14,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19771"
   },
@@ -544,7 +484,6 @@
     "mz": "E",
     "lote": 15,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19770"
   },
@@ -553,7 +492,6 @@
     "mz": "E",
     "lote": 16,
     "area": 119.57,
-    "precio": 29892.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19785"
   },
@@ -562,7 +500,6 @@
     "mz": "F",
     "lote": 1,
     "area": 142.15,
-    "precio": 35537.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19839"
   },
@@ -571,7 +508,6 @@
     "mz": "F",
     "lote": 2,
     "area": 146.31,
-    "precio": 36577.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19838"
   },
@@ -580,7 +516,6 @@
     "mz": "F",
     "lote": 3,
     "area": 126.88,
-    "precio": 31720,
     "estado": "DISPONIBLE",
     "svg_id": "path19837"
   },
@@ -589,7 +524,6 @@
     "mz": "F",
     "lote": 4,
     "area": 136.5,
-    "precio": 34125,
     "estado": "DISPONIBLE",
     "svg_id": "path19836"
   },
@@ -598,7 +532,6 @@
     "mz": "F",
     "lote": 5,
     "area": 142.89,
-    "precio": 35722.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19835"
   },
@@ -607,7 +540,6 @@
     "mz": "F",
     "lote": 6,
     "area": 135.8,
-    "precio": 33950,
     "estado": "DISPONIBLE",
     "svg_id": "path19834"
   },
@@ -616,7 +548,6 @@
     "mz": "F",
     "lote": 7,
     "area": 135.8,
-    "precio": 33950,
     "estado": "DISPONIBLE",
     "svg_id": "path19833"
   },
@@ -625,7 +556,6 @@
     "mz": "F",
     "lote": 8,
     "area": 135.8,
-    "precio": 33950,
     "estado": "DISPONIBLE",
     "svg_id": "path19832"
   },
@@ -634,7 +564,6 @@
     "mz": "F",
     "lote": 9,
     "area": 135.8,
-    "precio": 33950,
     "estado": "DISPONIBLE",
     "svg_id": "path19831"
   },
@@ -643,7 +572,6 @@
     "mz": "F",
     "lote": 10,
     "area": 135.8,
-    "precio": 33950,
     "estado": "DISPONIBLE",
     "svg_id": "path19846"
   },
@@ -652,7 +580,6 @@
     "mz": "F",
     "lote": 11,
     "area": 135.8,
-    "precio": 33950,
     "estado": "DISPONIBLE",
     "svg_id": "path19847"
   },
@@ -661,7 +588,6 @@
     "mz": "F",
     "lote": 12,
     "area": 135.8,
-    "precio": 33950,
     "estado": "DISPONIBLE",
     "svg_id": "path19848"
   },
@@ -670,7 +596,6 @@
     "mz": "F",
     "lote": 13,
     "area": 135.8,
-    "precio": 33950,
     "estado": "DISPONIBLE",
     "svg_id": "path19840"
   },
@@ -679,7 +604,6 @@
     "mz": "F",
     "lote": 14,
     "area": 135.8,
-    "precio": 33950,
     "estado": "DISPONIBLE",
     "svg_id": "path19841"
   },
@@ -688,7 +612,6 @@
     "mz": "F",
     "lote": 15,
     "area": 135.8,
-    "precio": 33950,
     "estado": "DISPONIBLE",
     "svg_id": "path19842"
   },
@@ -697,7 +620,6 @@
     "mz": "F",
     "lote": 16,
     "area": 135.8,
-    "precio": 33950,
     "estado": "DISPONIBLE",
     "svg_id": "path19843"
   },
@@ -706,7 +628,6 @@
     "mz": "F",
     "lote": 17,
     "area": 135.8,
-    "precio": 33950,
     "estado": "DISPONIBLE",
     "svg_id": "path19844"
   },
@@ -715,7 +636,6 @@
     "mz": "F",
     "lote": 18,
     "area": 133.19,
-    "precio": 33297.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19845"
   },
@@ -724,7 +644,6 @@
     "mz": "F",
     "lote": 19,
     "area": 190.42,
-    "precio": 47605,
     "estado": "DISPONIBLE",
     "svg_id": "path19863"
   },
@@ -733,7 +652,6 @@
     "mz": "G",
     "lote": 1,
     "area": 117.87,
-    "precio": 29467.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19855"
   },
@@ -742,7 +660,6 @@
     "mz": "G",
     "lote": 2,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19856"
   },
@@ -751,7 +668,6 @@
     "mz": "G",
     "lote": 3,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19857"
   },
@@ -760,7 +676,6 @@
     "mz": "G",
     "lote": 4,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19858"
   },
@@ -769,7 +684,6 @@
     "mz": "G",
     "lote": 5,
     "area": 162.57,
-    "precio": 40642.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19859"
   },
@@ -778,7 +692,6 @@
     "mz": "G",
     "lote": 6,
     "area": 135.87,
-    "precio": 33967.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19861"
   },
@@ -787,7 +700,6 @@
     "mz": "G",
     "lote": 7,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19849"
   },
@@ -796,7 +708,6 @@
     "mz": "G",
     "lote": 8,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19850"
   },
@@ -805,7 +716,6 @@
     "mz": "G",
     "lote": 9,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19851"
   },
@@ -814,7 +724,6 @@
     "mz": "G",
     "lote": 10,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19852"
   },
@@ -823,7 +732,6 @@
     "mz": "G",
     "lote": 11,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19853"
   },
@@ -832,7 +740,6 @@
     "mz": "G",
     "lote": 12,
     "area": 117.87,
-    "precio": 29467.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19854"
   },
@@ -841,7 +748,6 @@
     "mz": "H",
     "lote": 1,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19768"
   },
@@ -850,7 +756,6 @@
     "mz": "H",
     "lote": 2,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19767"
   },
@@ -859,7 +764,6 @@
     "mz": "H",
     "lote": 3,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19765"
   },
@@ -868,7 +772,6 @@
     "mz": "H",
     "lote": 4,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19762"
   },
@@ -877,7 +780,6 @@
     "mz": "H",
     "lote": 5,
     "area": 117.87,
-    "precio": 29467.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19761"
   },
@@ -886,7 +788,6 @@
     "mz": "H",
     "lote": 6,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19769"
   },
@@ -895,7 +796,6 @@
     "mz": "H",
     "lote": 7,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19766"
   },
@@ -904,7 +804,6 @@
     "mz": "H",
     "lote": 8,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19764"
   },
@@ -913,7 +812,6 @@
     "mz": "H",
     "lote": 9,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19763"
   },
@@ -922,7 +820,6 @@
     "mz": "H",
     "lote": 10,
     "area": 117.87,
-    "precio": 29467.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19860"
   },
@@ -931,7 +828,6 @@
     "mz": "I",
     "lote": 1,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19755"
   },
@@ -940,7 +836,6 @@
     "mz": "I",
     "lote": 2,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19754"
   },
@@ -949,7 +844,6 @@
     "mz": "I",
     "lote": 3,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19753"
   },
@@ -958,7 +852,6 @@
     "mz": "I",
     "lote": 4,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19752"
   },
@@ -967,7 +860,6 @@
     "mz": "I",
     "lote": 5,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19741"
   },
@@ -976,7 +868,6 @@
     "mz": "I",
     "lote": 6,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19742"
   },
@@ -985,7 +876,6 @@
     "mz": "I",
     "lote": 7,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19745"
   },
@@ -994,7 +884,6 @@
     "mz": "I",
     "lote": 8,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19747"
   },
@@ -1003,7 +892,6 @@
     "mz": "I",
     "lote": 9,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19749"
   },
@@ -1012,7 +900,6 @@
     "mz": "I",
     "lote": 10,
     "area": 117.86,
-    "precio": 29465,
     "estado": "DISPONIBLE",
     "svg_id": "path19750"
   },
@@ -1021,7 +908,6 @@
     "mz": "I",
     "lote": 11,
     "area": 117.86,
-    "precio": 29465,
     "estado": "DISPONIBLE",
     "svg_id": "path19751"
   },
@@ -1030,7 +916,6 @@
     "mz": "I",
     "lote": 12,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19748"
   },
@@ -1039,7 +924,6 @@
     "mz": "I",
     "lote": 13,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19746"
   },
@@ -1048,7 +932,6 @@
     "mz": "I",
     "lote": 14,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19744"
   },
@@ -1057,7 +940,6 @@
     "mz": "I",
     "lote": 15,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19743"
   },
@@ -1066,7 +948,6 @@
     "mz": "I",
     "lote": 16,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19760"
   },
@@ -1075,7 +956,6 @@
     "mz": "I",
     "lote": 17,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19759"
   },
@@ -1084,7 +964,6 @@
     "mz": "I",
     "lote": 18,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19758"
   },
@@ -1093,7 +972,6 @@
     "mz": "I",
     "lote": 19,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19757"
   },
@@ -1102,7 +980,6 @@
     "mz": "I",
     "lote": 20,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19756"
   },
@@ -1111,7 +988,6 @@
     "mz": "J",
     "lote": 1,
     "area": 148.32,
-    "precio": 37080,
     "estado": "DISPONIBLE",
     "svg_id": "path19736"
   },
@@ -1120,7 +996,6 @@
     "mz": "J",
     "lote": 2,
     "area": 127.5,
-    "precio": 31875,
     "estado": "DISPONIBLE",
     "svg_id": "path19735"
   },
@@ -1129,7 +1004,6 @@
     "mz": "J",
     "lote": 3,
     "area": 127.5,
-    "precio": 31875,
     "estado": "DISPONIBLE",
     "svg_id": "path19734"
   },
@@ -1138,7 +1012,6 @@
     "mz": "J",
     "lote": 4,
     "area": 127.5,
-    "precio": 31875,
     "estado": "DISPONIBLE",
     "svg_id": "path19719"
   },
@@ -1147,7 +1020,6 @@
     "mz": "J",
     "lote": 5,
     "area": 127.5,
-    "precio": 31875,
     "estado": "DISPONIBLE",
     "svg_id": "path19721"
   },
@@ -1156,7 +1028,6 @@
     "mz": "J",
     "lote": 6,
     "area": 127.5,
-    "precio": 31875,
     "estado": "DISPONIBLE",
     "svg_id": "path19723"
   },
@@ -1165,7 +1036,6 @@
     "mz": "J",
     "lote": 7,
     "area": 127.5,
-    "precio": 31875,
     "estado": "DISPONIBLE",
     "svg_id": "path19725"
   },
@@ -1174,7 +1044,6 @@
     "mz": "J",
     "lote": 8,
     "area": 127.5,
-    "precio": 31875,
     "estado": "DISPONIBLE",
     "svg_id": "path19727"
   },
@@ -1183,7 +1052,6 @@
     "mz": "J",
     "lote": 9,
     "area": 127.5,
-    "precio": 31875,
     "estado": "DISPONIBLE",
     "svg_id": "path19729"
   },
@@ -1192,7 +1060,6 @@
     "mz": "J",
     "lote": 10,
     "area": 127.5,
-    "precio": 31875,
     "estado": "DISPONIBLE",
     "svg_id": "path19731"
   },
@@ -1201,7 +1068,6 @@
     "mz": "J",
     "lote": 11,
     "area": 126.38,
-    "precio": 31595,
     "estado": "DISPONIBLE",
     "svg_id": "path19732"
   },
@@ -1210,7 +1076,6 @@
     "mz": "J",
     "lote": 12,
     "area": 142.67,
-    "precio": 35667.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19733"
   },
@@ -1219,7 +1084,6 @@
     "mz": "J",
     "lote": 13,
     "area": 142.24,
-    "precio": 35560,
     "estado": "DISPONIBLE",
     "svg_id": "path19730"
   },
@@ -1228,7 +1092,6 @@
     "mz": "J",
     "lote": 14,
     "area": 140.69,
-    "precio": 35172.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19728"
   },
@@ -1237,7 +1100,6 @@
     "mz": "J",
     "lote": 15,
     "area": 139.14,
-    "precio": 34785,
     "estado": "DISPONIBLE",
     "svg_id": "path19726"
   },
@@ -1246,7 +1108,6 @@
     "mz": "J",
     "lote": 16,
     "area": 137.22,
-    "precio": 34305,
     "estado": "DISPONIBLE",
     "svg_id": "path19724"
   },
@@ -1255,7 +1116,6 @@
     "mz": "J",
     "lote": 17,
     "area": 136.03,
-    "precio": 34007.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19722"
   },
@@ -1264,7 +1124,6 @@
     "mz": "J",
     "lote": 18,
     "area": 134.48,
-    "precio": 33620,
     "estado": "DISPONIBLE",
     "svg_id": "path19720"
   },
@@ -1273,7 +1132,6 @@
     "mz": "J",
     "lote": 19,
     "area": 132.93,
-    "precio": 33232.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19740"
   },
@@ -1282,7 +1140,6 @@
     "mz": "J",
     "lote": 20,
     "area": 131.38,
-    "precio": 32845,
     "estado": "DISPONIBLE",
     "svg_id": "path19739"
   },
@@ -1291,7 +1148,6 @@
     "mz": "J",
     "lote": 21,
     "area": 129.83,
-    "precio": 32457.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19738"
   },
@@ -1300,7 +1156,6 @@
     "mz": "J",
     "lote": 22,
     "area": 127.15,
-    "precio": 31787.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19737"
   },
@@ -1309,7 +1164,6 @@
     "mz": "K",
     "lote": 1,
     "area": 150.17,
-    "precio": 37542.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19678"
   },
@@ -1318,7 +1172,6 @@
     "mz": "K",
     "lote": 2,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19679"
   },
@@ -1327,7 +1180,6 @@
     "mz": "K",
     "lote": 3,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19658"
   },
@@ -1336,7 +1188,6 @@
     "mz": "K",
     "lote": 4,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19659"
   },
@@ -1345,7 +1196,6 @@
     "mz": "K",
     "lote": 5,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19660"
   },
@@ -1354,7 +1204,6 @@
     "mz": "K",
     "lote": 6,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19661"
   },
@@ -1363,7 +1212,6 @@
     "mz": "K",
     "lote": 7,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19662"
   },
@@ -1372,7 +1220,6 @@
     "mz": "K",
     "lote": 8,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19663"
   },
@@ -1381,7 +1228,6 @@
     "mz": "K",
     "lote": 9,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19664"
   },
@@ -1390,7 +1236,6 @@
     "mz": "K",
     "lote": 10,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19665"
   },
@@ -1399,7 +1244,6 @@
     "mz": "K",
     "lote": 11,
     "area": 122.19,
-    "precio": 30547.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19666"
   },
@@ -1408,7 +1252,6 @@
     "mz": "K",
     "lote": 12,
     "area": 130.84,
-    "precio": 32710,
     "estado": "DISPONIBLE",
     "svg_id": "path19667"
   },
@@ -1417,7 +1260,6 @@
     "mz": "K",
     "lote": 13,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19675"
   },
@@ -1426,7 +1268,6 @@
     "mz": "K",
     "lote": 14,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19674"
   },
@@ -1435,7 +1276,6 @@
     "mz": "K",
     "lote": 15,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19673"
   },
@@ -1444,7 +1284,6 @@
     "mz": "K",
     "lote": 16,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19672"
   },
@@ -1453,7 +1292,6 @@
     "mz": "K",
     "lote": 17,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19671"
   },
@@ -1462,7 +1300,6 @@
     "mz": "K",
     "lote": 18,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19670"
   },
@@ -1471,7 +1308,6 @@
     "mz": "K",
     "lote": 19,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19669"
   },
@@ -1480,7 +1316,6 @@
     "mz": "K",
     "lote": 20,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19668"
   },
@@ -1489,7 +1324,6 @@
     "mz": "K",
     "lote": 21,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19676"
   },
@@ -1498,7 +1332,6 @@
     "mz": "K",
     "lote": 22,
     "area": 150.17,
-    "precio": 37542.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19677"
   },
@@ -1507,7 +1340,6 @@
     "mz": "L",
     "lote": 1,
     "area": 111.76,
-    "precio": 27940,
     "estado": "DISPONIBLE",
     "svg_id": "path19696"
   },
@@ -1516,7 +1348,6 @@
     "mz": "L",
     "lote": 2,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19697"
   },
@@ -1525,7 +1356,6 @@
     "mz": "L",
     "lote": 3,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19698"
   },
@@ -1534,7 +1364,6 @@
     "mz": "L",
     "lote": 4,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19699"
   },
@@ -1543,7 +1372,6 @@
     "mz": "L",
     "lote": 5,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19700"
   },
@@ -1552,7 +1380,6 @@
     "mz": "L",
     "lote": 6,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19701"
   },
@@ -1561,7 +1388,6 @@
     "mz": "L",
     "lote": 7,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19702"
   },
@@ -1570,7 +1396,6 @@
     "mz": "L",
     "lote": 8,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19703"
   },
@@ -1579,7 +1404,6 @@
     "mz": "L",
     "lote": 9,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19704"
   },
@@ -1588,7 +1412,6 @@
     "mz": "L",
     "lote": 10,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19705"
   },
@@ -1597,7 +1420,6 @@
     "mz": "L",
     "lote": 11,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19706"
   },
@@ -1606,7 +1428,6 @@
     "mz": "L",
     "lote": 12,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19707"
   },
@@ -1615,7 +1436,6 @@
     "mz": "L",
     "lote": 13,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19708"
   },
@@ -1624,7 +1444,6 @@
     "mz": "L",
     "lote": 14,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19709"
   },
@@ -1633,7 +1452,6 @@
     "mz": "L",
     "lote": 15,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19710"
   },
@@ -1642,7 +1460,6 @@
     "mz": "L",
     "lote": 16,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19711"
   },
@@ -1651,7 +1468,6 @@
     "mz": "L",
     "lote": 17,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19712"
   },
@@ -1660,7 +1476,6 @@
     "mz": "L",
     "lote": 18,
     "area": 117.87,
-    "precio": 29467.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19713"
   },
@@ -1669,7 +1484,6 @@
     "mz": "L",
     "lote": 19,
     "area": 117.87,
-    "precio": 29467.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19694"
   },
@@ -1678,7 +1492,6 @@
     "mz": "L",
     "lote": 20,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19693"
   },
@@ -1687,7 +1500,6 @@
     "mz": "L",
     "lote": 21,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19692"
   },
@@ -1696,7 +1508,6 @@
     "mz": "L",
     "lote": 22,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19691"
   },
@@ -1705,7 +1516,6 @@
     "mz": "L",
     "lote": 23,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19690"
   },
@@ -1714,7 +1524,6 @@
     "mz": "L",
     "lote": 24,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19689"
   },
@@ -1723,7 +1532,6 @@
     "mz": "L",
     "lote": 25,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19688"
   },
@@ -1732,7 +1540,6 @@
     "mz": "L",
     "lote": 26,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19687"
   },
@@ -1741,7 +1548,6 @@
     "mz": "L",
     "lote": 27,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19686"
   },
@@ -1750,7 +1556,6 @@
     "mz": "L",
     "lote": 28,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19685"
   },
@@ -1759,7 +1564,6 @@
     "mz": "L",
     "lote": 29,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19684"
   },
@@ -1768,7 +1572,6 @@
     "mz": "L",
     "lote": 30,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19683"
   },
@@ -1777,7 +1580,6 @@
     "mz": "L",
     "lote": 31,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19682"
   },
@@ -1786,7 +1588,6 @@
     "mz": "L",
     "lote": 32,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19681"
   },
@@ -1795,7 +1596,6 @@
     "mz": "L",
     "lote": 33,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19680"
   },
@@ -1804,7 +1604,6 @@
     "mz": "L",
     "lote": 34,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19717"
   },
@@ -1813,7 +1612,6 @@
     "mz": "L",
     "lote": 35,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19718"
   },
@@ -1822,7 +1620,6 @@
     "mz": "L",
     "lote": 36,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19714"
   },
@@ -1831,7 +1628,6 @@
     "mz": "L",
     "lote": 37,
     "area": 119,
-    "precio": 29750,
     "estado": "DISPONIBLE",
     "svg_id": "path19715"
   },
@@ -1840,7 +1636,6 @@
     "mz": "L",
     "lote": 38,
     "area": 207.32,
-    "precio": 51830,
     "estado": "DISPONIBLE",
     "svg_id": "path19716"
   },
@@ -1849,7 +1644,6 @@
     "mz": "L",
     "lote": 39,
     "area": 122.25,
-    "precio": 30562.5,
     "estado": "DISPONIBLE",
     "svg_id": "path19695"
   }

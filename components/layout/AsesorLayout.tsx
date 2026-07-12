@@ -25,6 +25,34 @@ export default function AsesorLayout({
   const [loading, setLoading] = useState(true);
   const [error, setError] =
     useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [modoNoche, setModoNoche] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const preferencia = window.localStorage.getItem("las-lomas-theme");
+      const sistemaOscuro = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+
+      setModoNoche(
+        preferencia === "noche" || (!preferencia && sistemaOscuro)
+      );
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const alternarModoNoche = () => {
+    setModoNoche((actual) => {
+      const siguiente = !actual;
+      window.localStorage.setItem(
+        "las-lomas-theme",
+        siguiente ? "noche" : "dia"
+      );
+      return siguiente;
+    });
+  };
 
   useEffect(() => {
     let active = true;
@@ -127,30 +155,48 @@ export default function AsesorLayout({
 
   return (
     <div
+      className={`crm-shell ${modoNoche ? "crm-night" : ""}`}
       style={{
         minHeight: "100vh",
         display: "flex",
         background: "#f4f6f2",
       }}
     >
-      <Sidebar profile={profile} />
+      <Sidebar
+        profile={profile}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      <button
+        type="button"
+        className={`crm-sidebar-overlay ${sidebarOpen ? "is-open" : ""}`}
+        onClick={() => setSidebarOpen(false)}
+        aria-label="Cerrar menu"
+      />
       <div
+        className="crm-workspace"
         style={{
           flex: 1,
           minWidth: 0,
         }}
       >
-        <Header profile={profile} />
+        <Header
+          profile={profile}
+          onOpenMenu={() => setSidebarOpen(true)}
+          modoNoche={modoNoche}
+          onToggleNoche={alternarModoNoche}
+        />
         <main
+          className="crm-main"
           style={{
             padding: 28,
           }}
         >
           {(title || subtitle) && (
-            <div style={pageHeader}>
-              {title && <h1 style={titleStyle}>{title}</h1>}
+            <div className="crm-page-heading" style={pageHeader}>
+              {title && <h1 className="crm-page-title" style={titleStyle}>{title}</h1>}
               {subtitle && (
-                <p style={subtitleStyle}>{subtitle}</p>
+                <p className="crm-page-subtitle" style={subtitleStyle}>{subtitle}</p>
               )}
             </div>
           )}

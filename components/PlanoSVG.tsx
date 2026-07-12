@@ -25,6 +25,9 @@ type Props = {
   lotes: LotePlano[];
   loteUbicado: LotePlano | null;
   setLoteSeleccionado: (lote: LoteSeleccionado) => void;
+  mostrarArea?: boolean;
+  mostrarPrecio?: boolean;
+  modoNoche?: boolean;
 };
 
 const PLANO_WIDTH = "999.809px";
@@ -44,6 +47,9 @@ export default function PlanoSVG({
   lotes,
   loteUbicado,
   setLoteSeleccionado,
+  mostrarArea = true,
+  mostrarPrecio = true,
+  modoNoche = false,
 }: Props) {
   const svgContainer = useRef<HTMLDivElement>(null);
   const svgElementRef = useRef<SVGSVGElement | null>(null);
@@ -99,9 +105,6 @@ export default function PlanoSVG({
           tooltip.style.position = "fixed";
           tooltip.style.display = "none";
 
-          tooltip.style.background =
-            "rgba(255,255,255,0.05)";
-
           tooltip.style.backdropFilter =
             "blur(12px)";
 
@@ -133,6 +136,16 @@ export default function PlanoSVG({
             tooltip
           );
         }
+
+        tooltip.style.background = modoNoche
+          ? "rgba(10,21,33,.90)"
+          : "rgba(255,255,255,.82)";
+        tooltip.style.color = modoNoche
+          ? "#f3f7ef"
+          : "#17211b";
+        tooltip.style.borderColor = modoNoche
+          ? "rgba(216,229,203,.28)"
+          : "rgba(255,255,255,.72)";
 
         let loteActivo: HTMLElement | null = null;
         let loteClon: SVGElement | null = null;
@@ -242,7 +255,7 @@ export default function PlanoSVG({
             "non-scaling-stroke"
           );
 
-          parent.appendChild(clon);
+          capaResaltado!.appendChild(clon);
           loteHoverClon = clon;
         };
 
@@ -298,6 +311,13 @@ export default function PlanoSVG({
                 lote.estado
               ).stroke;
 
+            const detalleArea = mostrarArea
+              ? `<div>${formatearDecimal(lote.area)} m2</div>`
+              : "";
+            const detallePrecio = mostrarPrecio
+              ? `<div>S/ ${formatearDecimal(lote.precio)}</div>`
+              : "";
+
             tooltip.innerHTML = `
             <div
               style="
@@ -309,17 +329,8 @@ export default function PlanoSVG({
               ${lote.mz}-${lote.lote}
             </div>
 
-            <div>
-              ${formatearDecimal(
-                lote.area
-              )} m2
-            </div>
-
-            <div>
-              S/ ${formatearDecimal(
-                lote.precio
-              )}
-            </div>
+            ${detalleArea}
+            ${detallePrecio}
 
             <div
               style="
@@ -469,16 +480,8 @@ export default function PlanoSVG({
                 "non-scaling-stroke"
               );
 
-              capaResaltado!.innerHTML =
-                "";
-
-              const parent =
-                path.parentNode;
-
-              if (parent) {
-                parent.appendChild(clon);
-                parent.appendChild(path);
-              }
+              capaResaltado!.innerHTML = "";
+              capaResaltado!.appendChild(clon);
 
               loteClon = clon;
 
@@ -498,9 +501,9 @@ export default function PlanoSVG({
               area: `${formatearDecimal(
                 lote.area
               )} m2`,
-              precio: `S/ ${formatearDecimal(
-                lote.precio
-              )}`,
+              precio: mostrarPrecio
+                ? `S/ ${formatearDecimal(lote.precio)}`
+                : "",
               estado: lote.estado,
             });
           };
@@ -515,6 +518,9 @@ export default function PlanoSVG({
     };
   }, [
     lotes,
+    modoNoche,
+    mostrarArea,
+    mostrarPrecio,
     setLoteSeleccionado,
   ]);
 
@@ -546,7 +552,7 @@ export default function PlanoSVG({
         position: "relative",
         width: PLANO_WIDTH,
         height: PLANO_HEIGHT,
-        background: "#ffffff",
+        background: modoNoche ? "#07111f" : "#ffffff",
       }}
     >
       <Image
@@ -560,6 +566,10 @@ export default function PlanoSVG({
           objectFit: "fill",
           userSelect: "none",
           pointerEvents: "none",
+          filter: modoNoche
+            ? "brightness(.52) saturate(.78) contrast(1.08)"
+            : "none",
+          transition: "filter .25s ease",
         }}
       />
 

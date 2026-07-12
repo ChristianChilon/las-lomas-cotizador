@@ -6,9 +6,17 @@ import type { Profile } from "../../lib/crm";
 
 type Props = {
   profile: Profile;
+  onOpenMenu: () => void;
+  modoNoche: boolean;
+  onToggleNoche: () => void;
 };
 
-export default function Header({ profile }: Props) {
+export default function Header({
+  profile,
+  onOpenMenu,
+  modoNoche,
+  onToggleNoche,
+}: Props) {
   const router = useRouter();
 
   const cerrarSesion = async () => {
@@ -18,6 +26,7 @@ export default function Header({ profile }: Props) {
 
   return (
     <header
+      className="crm-header"
       style={{
         height: 72,
         display: "flex",
@@ -31,24 +40,25 @@ export default function Header({ profile }: Props) {
         zIndex: 10,
       }}
     >
-      <div>
-        <div
-          style={{
-            color: "#6b7280",
-            fontSize: 13,
-            fontWeight: 700,
-          }}
+      <div className="crm-header-leading">
+        <button
+          type="button"
+          className="crm-menu-button"
+          onClick={onOpenMenu}
+          aria-label="Abrir menu"
         >
-          Panel privado
-        </div>
-        <div
-          style={{
-            color: "#111827",
-            fontSize: 20,
-            fontWeight: 900,
-          }}
-        >
-          Gestion inmobiliaria
+          <span />
+          <span />
+          <span />
+        </button>
+
+        <div>
+          <div className="crm-header-eyebrow">
+            Panel privado
+          </div>
+          <div className="crm-header-title">
+            Gestion inmobiliaria
+          </div>
         </div>
       </div>
 
@@ -59,12 +69,19 @@ export default function Header({ profile }: Props) {
           gap: 14,
         }}
       >
-        <div
-          style={{
-            textAlign: "right",
-          }}
+        <button
+          type="button"
+          className="crm-theme-button"
+          onClick={onToggleNoche}
+          aria-label={modoNoche ? "Activar modo dia" : "Activar modo noche"}
+          title={modoNoche ? "Modo dia" : "Modo noche"}
         >
+          {modoNoche ? "☀" : "☾"}
+        </button>
+
+        <div className="crm-profile-summary">
           <div
+            className="crm-profile-name"
             style={{
               fontWeight: 900,
               color: "#111827",
@@ -75,6 +92,7 @@ export default function Header({ profile }: Props) {
               "Usuario"}
           </div>
           <div
+            className="crm-profile-role"
             style={{
               color: "#6b7280",
               fontSize: 13,
@@ -88,6 +106,7 @@ export default function Header({ profile }: Props) {
         <button
           type="button"
           onClick={cerrarSesion}
+          className="crm-logout-button"
           style={{
             border: "none",
             borderRadius: 12,

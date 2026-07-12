@@ -9,6 +9,7 @@ const outputPath =
   process.argv[3] ||
   path.join(root, "public", "lotes.json");
 const precioM2 = Number(process.env.PRECIO_M2 || "250");
+const incluirPrecios = process.argv.includes("--incluir-precios");
 
 const svg = fs.readFileSync(svgPath, "utf8");
 
@@ -386,9 +387,17 @@ const lotes = lotPaths
     id: index + 1,
   }));
 
+const lotesSalida = incluirPrecios
+  ? lotes
+  : lotes.map((lote) =>
+      Object.fromEntries(
+        Object.entries(lote).filter(([clave]) => clave !== "precio")
+      )
+    );
+
 fs.writeFileSync(
   outputPath,
-  JSON.stringify(lotes, null, 2),
+  JSON.stringify(lotesSalida, null, 2),
   "utf8"
 );
 
@@ -401,6 +410,7 @@ console.log(
       manzanas: manzanaTexts.length,
       bloques: blockPaths.length,
       precioM2,
+      incluyePrecios: incluirPrecios,
       salida: outputPath,
     },
     null,

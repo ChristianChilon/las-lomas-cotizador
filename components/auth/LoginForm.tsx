@@ -18,6 +18,33 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] =
     useState<string | null>(null);
+  const [modoNoche, setModoNoche] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const preferencia = window.localStorage.getItem("las-lomas-theme");
+      const sistemaOscuro = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+
+      setModoNoche(
+        preferencia === "noche" || (!preferencia && sistemaOscuro)
+      );
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const alternarModoNoche = () => {
+    setModoNoche((actual) => {
+      const siguiente = !actual;
+      window.localStorage.setItem(
+        "las-lomas-theme",
+        siguiente ? "noche" : "dia"
+      );
+      return siguiente;
+    });
+  };
 
   useEffect(() => {
     const revisarSesion = async () => {
@@ -64,15 +91,18 @@ export default function LoginForm() {
   };
 
   return (
-    <main style={page}>
+    <main
+      className={`crm-login ${modoNoche ? "crm-login-night" : ""}`}
+      style={page}
+    >
       <style>{`
         input:-webkit-autofill,
         input:-webkit-autofill:hover,
         input:-webkit-autofill:focus,
         input:-webkit-autofill:active {
-          -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
-          box-shadow: 0 0 0 1000px #ffffff inset !important;
-          -webkit-text-fill-color: #374151 !important;
+          -webkit-box-shadow: 0 0 0 1000px ${modoNoche ? "#162536" : "#ffffff"} inset !important;
+          box-shadow: 0 0 0 1000px ${modoNoche ? "#162536" : "#ffffff"} inset !important;
+          -webkit-text-fill-color: ${modoNoche ? "#f1f5f0" : "#374151"} !important;
           caret-color: #0f766e !important;
           transition: background-color 9999s ease-in-out 0s;
         }
@@ -88,7 +118,17 @@ export default function LoginForm() {
       <div style={shapeBottom} />
       <div style={dots} />
 
-      <section style={card}>
+      <button
+        type="button"
+        className="crm-login-theme"
+        onClick={alternarModoNoche}
+        aria-label={modoNoche ? "Activar modo dia" : "Activar modo noche"}
+        title={modoNoche ? "Modo dia" : "Modo noche"}
+      >
+        {modoNoche ? "☀" : "☾"}
+      </button>
+
+      <section className="crm-login-card" style={card}>
         <div style={cardHeader}>
           <div style={headerShapeOne} />
           <div style={headerShapeTwo} />
@@ -111,7 +151,7 @@ export default function LoginForm() {
           </div>
         </div>
 
-        <div style={cardBody}>
+        <div className="crm-login-body" style={cardBody}>
           <h1 style={welcome}>¡Bienvenido!</h1>
 
           <p style={subtitle}>
