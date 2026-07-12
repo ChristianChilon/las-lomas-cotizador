@@ -5,6 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { obtenerPerfilActual } from "../../lib/auth/clientAuth";
 import {
+  OPCIONES_CANAL_PREFERIDO,
+  OPCIONES_CAPACIDAD_CUOTA,
+  OPCIONES_SITUACION_INICIAL,
+  OPCIONES_TIEMPO_DECISION,
+  PREGUNTAS_CALIFICADOR,
   calcularCalificacionLead,
   colorNivelInteres,
   esGerencia,
@@ -12,7 +17,6 @@ import {
   etiquetaCapacidadCuota,
   etiquetaEstadoCita,
   etiquetaEstadoLead,
-  etiquetaIntencionCompra,
   etiquetaNivelInteres,
   etiquetaProximaAccion,
   etiquetaResultadoSeguimiento,
@@ -38,7 +42,6 @@ type ClienteForm = {
   situacionInicial: string;
   capacidadCuota: string;
   tiempoDecision: string;
-  intencionCompra: string;
   canalPreferido: string;
   fechaProximoSeguimiento: string;
   objecionPrincipal: string;
@@ -67,7 +70,6 @@ const clienteVacio: ClienteForm = {
   situacionInicial: "SIN_DEFINIR",
   capacidadCuota: "SIN_DEFINIR",
   tiempoDecision: "SIN_DEFINIR",
-  intencionCompra: "SIN_DEFINIR",
   canalPreferido: "SIN_DEFINIR",
   fechaProximoSeguimiento: "",
   objecionPrincipal: "",
@@ -83,127 +85,10 @@ const seguimientoVacio: SeguimientoForm = {
   fechaProximoSeguimiento: "",
 };
 
-const situacionesInicial = [
-  {
-    value: "SIN_DEFINIR",
-    label: "Sin definir",
-  },
-  {
-    value: "INICIAL_LISTA",
-    label:
-      "Tengo la inicial lista y quiero evaluar lote hoy.",
-  },
-  {
-    value: "INICIAL_PARCIAL",
-    label:
-      "Tengo parte de la inicial y puedo completarla pronto.",
-  },
-  {
-    value: "SIN_INICIAL",
-    label:
-      "Aún no tengo inicial, pero quiero información.",
-  },
-  {
-    value: "SOLO_COTIZANDO",
-    label: "Solo estoy cotizando por ahora.",
-  },
-];
-
-const capacidadesCuota = [
-  {
-    value: "SIN_DEFINIR",
-    label: "Sin definir",
-  },
-  {
-    value: "PUEDE_CUOTA",
-    label:
-      "Sí puedo asumir cuotas en ese rango.",
-  },
-  {
-    value: "EVALUAR_CUOTA",
-    label:
-      "Puedo pagar cuotas, pero necesito evaluar el monto exacto.",
-  },
-  {
-    value: "BUSCA_CUOTA_BAJA",
-    label: "Busco cuotas más bajas.",
-  },
-  {
-    value: "PAGO_CONTADO",
-    label: "Prefiero pagar al contado.",
-  },
-];
-
-const tiemposDecision = [
-  {
-    value: "SIN_DEFINIR",
-    label: "Sin definir",
-  },
-  {
-    value: "HOY",
-    label: "Hoy.",
-  },
-  {
-    value: "ESTA_SEMANA",
-    label: "Esta semana.",
-  },
-  {
-    value: "UNO_TRES_MESES",
-    label: "En 1 a 3 meses.",
-  },
-  {
-    value: "SOLO_MIRANDO",
-    label: "Solo estoy mirando opciones.",
-  },
-];
-
-const intencionesCompra = [
-  {
-    value: "SIN_DEFINIR",
-    label: "Sin definir",
-  },
-  {
-    value: "VER_LOTES_SEPARAR",
-    label:
-      "Sí, quiero ver lotes disponibles para separar.",
-  },
-  {
-    value: "RESOLVER_DUDAS",
-    label:
-      "Sí, pero primero quiero resolver algunas dudas.",
-  },
-  {
-    value: "INFO_GENERAL",
-    label: "Solo quiero recibir información general.",
-  },
-];
-
-const canalesPreferidos = [
-  {
-    value: "SIN_DEFINIR",
-    label: "Sin definir",
-  },
-  {
-    value: "WHATSAPP_RAPIDO",
-    label:
-      "WhatsApp rápido: quiero ver disponibilidad y condiciones para separar.",
-  },
-  {
-    value: "CITA_OFICINA",
-    label:
-      "Cita en oficina de ventas: quiero evaluar el proyecto con un asesor y dejaré mi WhatsApp y Nro. DNI.",
-  },
-  {
-    value: "LLAMADA",
-    label:
-      "Llamada telefónica: quiero resolver dudas antes de decidir.",
-  },
-  {
-    value: "SOLO_INFO",
-    label:
-      "Solo deseo información general por ahora.",
-  },
-];
+const situacionesInicial = OPCIONES_SITUACION_INICIAL;
+const capacidadesCuota = OPCIONES_CAPACIDAD_CUOTA;
+const tiemposDecision = OPCIONES_TIEMPO_DECISION;
+const canalesPreferidos = OPCIONES_CANAL_PREFERIDO;
 
 const tiposContacto = [
   { value: "WHATSAPP", label: "WhatsApp" },
@@ -659,7 +544,6 @@ export default function ClientesTable() {
           "situacion_inicial",
           "capacidad_cuota",
           "tiempo_decision",
-          "intencion_compra",
           "canal_preferido",
           "puntaje_lead",
           "nivel_interes",
@@ -761,14 +645,12 @@ export default function ClientesTable() {
           form.situacionInicial,
         capacidad_cuota: form.capacidadCuota,
         tiempo_decision: form.tiempoDecision,
-        intencion_compra: form.intencionCompra,
         canal_preferido: form.canalPreferido,
       }),
     [
       form.situacionInicial,
       form.capacidadCuota,
       form.tiempoDecision,
-      form.intencionCompra,
       form.canalPreferido,
     ]
   );
@@ -837,17 +719,6 @@ export default function ClientesTable() {
     setMensaje(null);
     setError(null);
 
-    if (
-      form.canalPreferido === "CITA_OFICINA" &&
-      !form.dni.trim()
-    ) {
-      setError(
-        "Para solicitar cita en oficina, registra el DNI del cliente."
-      );
-      setGuardando(false);
-      return;
-    }
-
     const asesorAsignado = modoGerencia
       ? form.asesorId || null
       : profile.id;
@@ -858,7 +729,6 @@ export default function ClientesTable() {
           form.situacionInicial,
         capacidad_cuota: form.capacidadCuota,
         tiempo_decision: form.tiempoDecision,
-        intencion_compra: form.intencionCompra,
         canal_preferido: form.canalPreferido,
       });
 
@@ -878,8 +748,6 @@ export default function ClientesTable() {
         form.situacionInicial,
       capacidad_cuota: form.capacidadCuota,
       tiempo_decision: form.tiempoDecision,
-      intencion_compra:
-        form.intencionCompra,
       canal_preferido:
         form.canalPreferido,
       puntaje_lead:
@@ -1339,12 +1207,7 @@ export default function ClientesTable() {
         <div style={questionsGrid}>
           <label style={questionBox}>
             <span style={questionTitle}>
-              1. Para acceder al precio de lanzamiento,
-              la separación se realiza desde S/ 500 y la
-              inicial referencial es desde S/ 6,000.
-            </span>
-            <span style={questionSubtitle}>
-              ¿Cuál es tu situación actual?
+              1. {PREGUNTAS_CALIFICADOR.situacionInicial}
             </span>
             <select
               value={form.situacionInicial}
@@ -1369,12 +1232,7 @@ export default function ClientesTable() {
 
           <label style={questionBox}>
             <span style={questionTitle}>
-              2. El saldo puede financiarse en cuotas
-              mensuales aproximadas entre S/ 600 y S/ 1,000,
-              según el lote elegido.
-            </span>
-            <span style={questionSubtitle}>
-              ¿Qué opción se ajusta mejor a ti?
+              2. {PREGUNTAS_CALIFICADOR.capacidadCuota}
             </span>
             <select
               value={form.capacidadCuota}
@@ -1399,8 +1257,7 @@ export default function ClientesTable() {
 
           <label style={questionBox}>
             <span style={questionTitle}>
-              3. ¿En qué plazo te gustaría separar o
-              tomar una decisión?
+              3. {PREGUNTAS_CALIFICADOR.tiempoDecision}
             </span>
             <select
               value={form.tiempoDecision}
@@ -1425,35 +1282,7 @@ export default function ClientesTable() {
 
           <label style={questionBox}>
             <span style={questionTitle}>
-              4. ¿Quieres que un asesor te envíe la
-              disponibilidad actual de lotes y las
-              condiciones para separar?
-            </span>
-            <select
-              value={form.intencionCompra}
-              onChange={(event) =>
-                actualizarForm(
-                  "intencionCompra",
-                  event.target.value
-                )
-              }
-              style={input}
-            >
-              {intencionesCompra.map((item) => (
-                <option
-                  key={item.value}
-                  value={item.value}
-                >
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label style={questionBox}>
-            <span style={questionTitle}>
-              5. ¿Cómo deseas avanzar con la atención
-              comercial?
+              4. {PREGUNTAS_CALIFICADOR.canalPreferido}
             </span>
             <select
               value={form.canalPreferido}
@@ -1679,11 +1508,6 @@ export default function ClientesTable() {
                     {etiquetaTiempoDecision(
                       cliente.tiempo_decision
                     )}
-                    <div style={muted}>
-                      {etiquetaIntencionCompra(
-                        cliente.intencion_compra
-                      )}
-                    </div>
                   </td>
 
                   <td style={td}>
@@ -2183,12 +2007,6 @@ const questionTitle: React.CSSProperties = {
   fontSize: 13,
   fontWeight: 900,
   lineHeight: 1.35,
-};
-
-const questionSubtitle: React.CSSProperties = {
-  color: "#64748b",
-  fontSize: 13,
-  fontWeight: 800,
 };
 
 const input: React.CSSProperties = {

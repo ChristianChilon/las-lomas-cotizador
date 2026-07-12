@@ -108,6 +108,152 @@ export const CANAL_PREFERIDO = [
 export type CanalPreferido =
   (typeof CANAL_PREFERIDO)[number];
 
+export const PREGUNTAS_CALIFICADOR = {
+  situacionInicial:
+    "¿Cuentas actualmente con la inicial de S/ 6,000?",
+  capacidadCuota:
+    "¿Estás preparado para asumir cuotas mensuales desde S/600?",
+  tiempoDecision:
+    "¿Cuándo te gustaría separar tu lote?",
+  canalPreferido:
+    "¿Cómo prefieres avanzar?",
+} as const;
+
+export const OPCIONES_SITUACION_INICIAL = [
+  { value: "SIN_DEFINIR", label: "Sin definir" },
+  {
+    value: "INICIAL_LISTA",
+    label: "Tengo la inicial lista y quiero evaluar lote hoy.",
+  },
+  {
+    value: "INICIAL_PARCIAL",
+    label: "Tengo parte de la inicial y puedo completarla pronto.",
+  },
+  {
+    value: "SIN_INICIAL",
+    label: "Aún no tengo inicial, pero quiero información.",
+  },
+  {
+    value: "SOLO_COTIZANDO",
+    label: "Solo estoy cotizando por ahora.",
+  },
+] as const;
+
+export const OPCIONES_CAPACIDAD_CUOTA = [
+  { value: "SIN_DEFINIR", label: "Sin definir" },
+  {
+    value: "PUEDE_CUOTA",
+    label: "Sí puedo asumir cuotas desde S/600",
+  },
+  {
+    value: "EVALUAR_CUOTA",
+    label: "Puedo pagar cuotas, pero necesito evaluar el monto exacto.",
+  },
+  {
+    value: "BUSCA_CUOTA_BAJA",
+    label: "Busco cuotas más bajas.",
+  },
+  {
+    value: "PAGO_CONTADO",
+    label: "Prefiero pagar al contado.",
+  },
+] as const;
+
+export const OPCIONES_TIEMPO_DECISION = [
+  { value: "SIN_DEFINIR", label: "Sin definir" },
+  { value: "HOY", label: "Hoy." },
+  { value: "ESTA_SEMANA", label: "Esta semana." },
+  { value: "UNO_TRES_MESES", label: "En 1 a 3 meses." },
+  {
+    value: "SOLO_MIRANDO",
+    label: "Solo estoy mirando opciones.",
+  },
+] as const;
+
+export const OPCIONES_CANAL_PREFERIDO = [
+  { value: "SIN_DEFINIR", label: "Sin definir" },
+  {
+    value: "CITA_OFICINA",
+    label: "Cita en oficina para conocer el proyecto y separar mi lote.",
+  },
+  {
+    value: "LLAMADA",
+    label: "Llamada hoy con un asesor.",
+  },
+  {
+    value: "WHATSAPP_RAPIDO",
+    label: "WhatsApp: ver lotes y condiciones.",
+  },
+  {
+    value: "SOLO_INFO",
+    label: "Solo información por ahora.",
+  },
+] as const;
+
+const etiquetaOpcion = (
+  opciones: readonly { value: string; label: string }[],
+  valor: string | null | undefined
+) => opciones.find((opcion) => opcion.value === valor)?.label || "Sin definir";
+
+const normalizarRespuestaCalificador = (valor: string) =>
+  valor
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+const encontrarRespuesta = <T extends string>(
+  respuestas: Set<string>,
+  opciones: readonly { value: T; label: string }[]
+): T | "SIN_DEFINIR" =>
+  opciones.find(
+    (opcion) =>
+      opcion.value !== "SIN_DEFINIR" &&
+      respuestas.has(normalizarRespuestaCalificador(opcion.label))
+  )?.value || "SIN_DEFINIR";
+
+export const extraerCalificacionMeta = (
+  respuestas: Record<string, string[]>
+) => {
+  const valores = new Set(
+    Object.values(respuestas)
+      .flat()
+      .map(normalizarRespuestaCalificador)
+      .filter(Boolean)
+  );
+
+  const situacion_inicial = encontrarRespuesta(
+    valores,
+    OPCIONES_SITUACION_INICIAL
+  );
+  const capacidad_cuota = encontrarRespuesta(
+    valores,
+    OPCIONES_CAPACIDAD_CUOTA
+  );
+  const tiempo_decision = encontrarRespuesta(
+    valores,
+    OPCIONES_TIEMPO_DECISION
+  );
+  const canal_preferido = encontrarRespuesta(
+    valores,
+    OPCIONES_CANAL_PREFERIDO
+  );
+
+  return {
+    situacion_inicial,
+    capacidad_cuota,
+    tiempo_decision,
+    canal_preferido,
+    tiene_respuestas: [
+      situacion_inicial,
+      capacidad_cuota,
+      tiempo_decision,
+      canal_preferido,
+    ].some((valor) => valor !== "SIN_DEFINIR"),
+  };
+};
+
 export const NIVEL_INTERES = [
   "FRIO",
   "TIBIO",
@@ -161,54 +307,15 @@ export type EstadoCita =
 
 export const etiquetaSituacionInicial = (
   valor: string | null | undefined
-) => {
-  switch (valor) {
-    case "INICIAL_LISTA":
-      return "Tiene inicial lista";
-    case "INICIAL_PARCIAL":
-      return "Tiene parte de la inicial";
-    case "SIN_INICIAL":
-      return "Aún no tiene inicial";
-    case "SOLO_COTIZANDO":
-      return "Solo está cotizando";
-    default:
-      return "Sin definir";
-  }
-};
+) => etiquetaOpcion(OPCIONES_SITUACION_INICIAL, valor);
 
 export const etiquetaCapacidadCuota = (
   valor: string | null | undefined
-) => {
-  switch (valor) {
-    case "PUEDE_CUOTA":
-      return "Puede pagar S/ 600 - S/ 1,000";
-    case "EVALUAR_CUOTA":
-      return "Quiere evaluar cuota exacta";
-    case "BUSCA_CUOTA_BAJA":
-      return "Busca cuota más baja";
-    case "PAGO_CONTADO":
-      return "Prefiere pago contado";
-    default:
-      return "Sin definir";
-  }
-};
+) => etiquetaOpcion(OPCIONES_CAPACIDAD_CUOTA, valor);
 
 export const etiquetaTiempoDecision = (
   valor: string | null | undefined
-) => {
-  switch (valor) {
-    case "HOY":
-      return "Hoy";
-    case "ESTA_SEMANA":
-      return "Esta semana";
-    case "UNO_TRES_MESES":
-      return "En 1 a 3 meses";
-    case "SOLO_MIRANDO":
-      return "Solo mirando opciones";
-    default:
-      return "Sin definir";
-  }
-};
+) => etiquetaOpcion(OPCIONES_TIEMPO_DECISION, valor);
 
 export const etiquetaIntencionCompra = (
   valor: string | null | undefined
@@ -227,20 +334,7 @@ export const etiquetaIntencionCompra = (
 
 export const etiquetaCanalPreferido = (
   valor: string | null | undefined
-) => {
-  switch (valor) {
-    case "WHATSAPP_RAPIDO":
-      return "WhatsApp rápido";
-    case "CITA_OFICINA":
-      return "Cita en oficina";
-    case "LLAMADA":
-      return "Llamada telefónica";
-    case "SOLO_INFO":
-      return "Solo información";
-    default:
-      return "Sin definir";
-  }
-};
+) => etiquetaOpcion(OPCIONES_CANAL_PREFERIDO, valor);
 
 export const etiquetaNivelInteres = (
   valor: string | null | undefined
@@ -359,7 +453,6 @@ export type DatosCalificacionLead = {
   situacion_inicial?: SituacionInicial | string | null;
   capacidad_cuota?: CapacidadCuota | string | null;
   tiempo_decision?: TiempoDecision | string | null;
-  intencion_compra?: IntencionCompra | string | null;
   canal_preferido?: CanalPreferido | string | null;
 };
 
@@ -413,27 +506,15 @@ export const calcularCalificacionLead = (
       break;
   }
 
-  switch (datos.intencion_compra) {
-    case "VER_LOTES_SEPARAR":
-      puntaje += 15;
-      break;
-    case "RESOLVER_DUDAS":
-      puntaje += 8;
-      break;
-    case "INFO_GENERAL":
-      puntaje += 0;
-      break;
-  }
-
   switch (datos.canal_preferido) {
     case "WHATSAPP_RAPIDO":
-      puntaje += 5;
+      puntaje += 10;
       break;
     case "CITA_OFICINA":
-      puntaje += 5;
+      puntaje += 20;
       break;
     case "LLAMADA":
-      puntaje += 3;
+      puntaje += 15;
       break;
     case "SOLO_INFO":
       puntaje += 0;

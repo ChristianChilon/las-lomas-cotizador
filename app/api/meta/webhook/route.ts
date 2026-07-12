@@ -1,6 +1,10 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { after } from "next/server";
+import {
+  calcularCalificacionLead,
+  extraerCalificacionMeta,
+} from "../../../../lib/crm";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -70,6 +74,37 @@ type MetaDatabase = {
         Update: {
           role?: string;
           active?: boolean;
+        };
+        Relationships: [];
+      };
+      clientes: {
+        Row: {
+          id: string;
+          situacion_inicial: string | null;
+          capacidad_cuota: string | null;
+          tiempo_decision: string | null;
+          intencion_compra: string | null;
+          canal_preferido: string | null;
+          puntaje_lead: number | null;
+          nivel_interes: string | null;
+          estado_lead: string | null;
+          proxima_accion: string | null;
+          estado_cita: string | null;
+          updated_at: string | null;
+        };
+        Insert: Record<string, never>;
+        Update: {
+          situacion_inicial?: string | null;
+          capacidad_cuota?: string | null;
+          tiempo_decision?: string | null;
+          intencion_compra?: string | null;
+          canal_preferido?: string | null;
+          puntaje_lead?: number | null;
+          nivel_interes?: string | null;
+          estado_lead?: string | null;
+          proxima_accion?: string | null;
+          estado_cita?: string | null;
+          updated_at?: string | null;
         };
         Relationships: [];
       };
@@ -156,6 +191,11 @@ type MetaWebhookPayload = {
 
 type SupabaseAdmin = ReturnType<typeof crearSupabaseAdmin>;
 
+type MetaRpcResult = {
+  cliente_id?: string;
+  cliente_reutilizado?: boolean;
+};
+
 const META_PAGE_ID_ESPERADA = "1184880321368734";
 const META_FORM_ID_ESPERADO = "884453447577874";
 
@@ -193,6 +233,21 @@ const obtenerCampos = (fieldData: MetaFieldData[] = []) => {
   });
 
   return { campos, respuestas };
+};
+
+const obtenerResultadoRpc = (valor: Json | null): MetaRpcResult => {
+  if (!valor || typeof valor !== "object" || Array.isArray(valor)) return {};
+
+  const clienteId = valor.cliente_id;
+  const clienteReutilizado = valor.cliente_reutilizado;
+
+  return {
+    cliente_id: typeof clienteId === "string" ? clienteId : undefined,
+    cliente_reutilizado:
+      typeof clienteReutilizado === "boolean"
+        ? clienteReutilizado
+        : undefined,
+  };
 };
 
 const buscarCampo = (
@@ -397,6 +452,8 @@ const procesarEvento = async (
       accessToken
     );
     const { campos, respuestas } = obtenerCampos(lead.field_data);
+    const respuestasCalificador = extraerCalificacionMeta(respuestas);
+    const calificacion = calcularCalificacionLead(respuestasCalificador);
     const nombreCompleto =
       buscarCampo(campos, ["full_name", "nombre_completo", "nombre"]) ||
       [
@@ -455,26 +512,58 @@ const procesarEvento = async (
       : evento.createdTime
         ? new Date(evento.createdTime * 1000).toISOString()
         : null;
-    const { error: rpcError } = await supabase.rpc("crm_registrar_lead_meta", {
-      p_meta_lead_id: evento.leadId,
-      p_nombre_completo: nombreCompleto,
-      p_celular: celular,
-      p_correo: correo || null,
-      p_page_id: evento.pageId,
-      p_form_id: lead.form_id || evento.formId,
-      p_ad_id: adId,
-      p_adset_id: ad.adset_id || null,
-      p_campaign_id: ad.campaign_id || null,
-      p_ad_name: ad.name || null,
-      p_adset_name: adset.name || null,
-      p_campaign_name: campaign.name || null,
-      p_respuestas: respuestas,
-      p_raw_payload: lead as unknown as Json,
-      p_acepta_comercial: aceptaContactoWhatsApp(campos),
-      p_meta_created_at: metaCreatedAt,
-    });
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+      "crm_registrar_lead_meta",
+      {
+        p_meta_lead_id: evento.leadId,
+        p_nombre_completo: nombreCompleto,
+        p_celular: celular,
+        p_correo: correo || null,
+        p_page_id: evento.pageId,
+        p_form_id: lead.form_id || evento.formId,
+        p_ad_id: adId,
+        p_adset_id: ad.adset_id || null,
+        p_campaign_id: ad.campaign_id || null,
+        p_ad_name: ad.name || null,
+        p_adset_name: adset.name || null,
+        p_campaign_name: campaign.name || null,
+        p_respuestas: respuestas,
+        p_raw_payload: lead as unknown as Json,
+        p_acepta_comercial: aceptaContactoWhatsApp(campos),
+        p_meta_created_at: metaCreatedAt,
+      }
+    );
 
     if (rpcError) throw new Error(rpcError.message);
+
+    const resultadoRpc = obtenerResultadoRpc(rpcData);
+
+    if (respuestasCalificador.tiene_respuestas && resultadoRpc.cliente_id) {
+      const actualizacionBase = {
+        situacion_inicial: respuestasCalificador.situacion_inicial,
+        capacidad_cuota: respuestasCalificador.capacidad_cuota,
+        tiempo_decision: respuestasCalificador.tiempo_decision,
+        canal_preferido: respuestasCalificador.canal_preferido,
+        puntaje_lead: calificacion.puntaje_lead,
+        nivel_interes: calificacion.nivel_interes,
+        updated_at: new Date().toISOString(),
+      };
+      const actualizacion = resultadoRpc.cliente_reutilizado
+        ? actualizacionBase
+        : {
+            ...actualizacionBase,
+            intencion_compra: null,
+            estado_lead: calificacion.estado_lead,
+            proxima_accion: calificacion.proxima_accion,
+            estado_cita: calificacion.estado_cita,
+          };
+      const { error: calificacionError } = await supabase
+        .from("clientes")
+        .update(actualizacion)
+        .eq("id", resultadoRpc.cliente_id);
+
+      if (calificacionError) throw new Error(calificacionError.message);
+    }
 
     await actualizarEvento(supabase, evento.leadId, {
       status: "COMPLETADO",

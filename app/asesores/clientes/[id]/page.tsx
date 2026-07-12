@@ -12,7 +12,6 @@ import {
   etiquetaCapacidadCuota,
   etiquetaEstadoCita,
   etiquetaEstadoLead,
-  etiquetaIntencionCompra,
   etiquetaNivelInteres,
   etiquetaProximaAccion,
   etiquetaResultadoSeguimiento,
@@ -247,7 +246,6 @@ export default function ClienteDetallePage() {
               "situacion_inicial",
               "capacidad_cuota",
               "tiempo_decision",
-              "intencion_compra",
               "canal_preferido",
               "puntaje_lead",
               "nivel_interes",
@@ -1136,13 +1134,6 @@ export default function ClienteDetallePage() {
                 label="Tiempo de decisión"
                 value={etiquetaTiempoDecision(
                   cliente.tiempo_decision
-                )}
-              />
-
-              <Info
-                label="Intención"
-                value={etiquetaIntencionCompra(
-                  cliente.intencion_compra
                 )}
               />
 
