@@ -1449,6 +1449,9 @@ Quisiera más información.`;
                   setLoteSeleccionado={
                     setLoteSeleccionado
                   }
+                  seleccionActivaId={
+                    loteSeleccionado?.id ?? null
+                  }
                   modoNoche={modoNoche}
                 />
               </TransformComponent>

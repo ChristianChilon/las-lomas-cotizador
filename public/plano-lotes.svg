@@ -40,6 +40,18 @@
       stroke-linejoin: round !important;
     }
 
+    #g19037 text#text19032 {
+      fill: #2f312c !important;
+      font-family: Arial, Helvetica, sans-serif !important;
+      font-size: 5.669px !important;
+      font-style: normal !important;
+      font-weight: 700 !important;
+      letter-spacing: 0 !important;
+      paint-order: normal !important;
+      stroke: none !important;
+      stroke-width: 0 !important;
+    }
+
     #g19281 text {
       fill: #2f312c !important;
       font-family: Arial, Helvetica, sans-serif !important;

@@ -25,6 +25,7 @@ type Props = {
   lotes: LotePlano[];
   loteUbicado: LotePlano | null;
   setLoteSeleccionado: (lote: LoteSeleccionado) => void;
+  seleccionActivaId?: number | null;
   mostrarArea?: boolean;
   mostrarPrecio?: boolean;
   modoNoche?: boolean;
@@ -47,12 +48,16 @@ export default function PlanoSVG({
   lotes,
   loteUbicado,
   setLoteSeleccionado,
+  seleccionActivaId = null,
   mostrarArea = true,
   mostrarPrecio = true,
   modoNoche = false,
 }: Props) {
   const svgContainer = useRef<HTMLDivElement>(null);
   const svgElementRef = useRef<SVGSVGElement | null>(null);
+  const limpiarSeleccionRef = useRef<() => void>(() => undefined);
+  const seleccionActivaIdRef = useRef<number | null>(seleccionActivaId);
+  const seleccionAnteriorRef = useRef<number | null>(seleccionActivaId);
 
   useEffect(() => {
     if (!lotes.length) return;
@@ -147,9 +152,9 @@ export default function PlanoSVG({
           ? "rgba(216,229,203,.28)"
           : "rgba(255,255,255,.72)";
 
-        let loteActivo: HTMLElement | null = null;
-        let loteClon: SVGElement | null = null;
-        let loteHoverClon: SVGElement | null = null;
+        let loteActivo: SVGPathElement | null = null;
+        let loteClon: SVGPathElement | null = null;
+        let loteHoverClon: SVGPathElement | null = null;
 
         let inicioClickX = 0;
         let inicioClickY = 0;
@@ -201,7 +206,7 @@ export default function PlanoSVG({
         };
 
         const restaurarLote = (
-          path: HTMLElement,
+          path: SVGPathElement,
           lote: LotePlano
         ) => {
           const color =
@@ -228,8 +233,57 @@ export default function PlanoSVG({
           }
         };
 
+        const clonarEnCapaSuperior = (
+          path: SVGPathElement
+        ) => {
+          const clon =
+            path.cloneNode(true) as SVGPathElement;
+          const matrizOrigen = path.getCTM();
+          const matrizCapa = capaResaltado!.getCTM();
+
+          clon.removeAttribute("id");
+
+          if (matrizOrigen && matrizCapa) {
+            const matrizRelativa = matrizCapa
+              .inverse()
+              .multiply(matrizOrigen);
+
+            clon.removeAttribute("transform");
+            clon.setAttribute(
+              "transform",
+              `matrix(${matrizRelativa.a} ${matrizRelativa.b} ${matrizRelativa.c} ${matrizRelativa.d} ${matrizRelativa.e} ${matrizRelativa.f})`
+            );
+          }
+
+          return clon;
+        };
+
+        const limpiarSeleccion = () => {
+          limpiarHover();
+
+          if (loteClon) {
+            loteClon.remove();
+            loteClon = null;
+          }
+
+          if (loteActivo) {
+            const loteAnterior = lotes.find(
+              (lote) => lote.svg_id === loteActivo?.id
+            );
+
+            if (loteAnterior) {
+              restaurarLote(loteActivo, loteAnterior);
+            }
+          }
+
+          loteActivo = null;
+          capaResaltado!.replaceChildren();
+        };
+
+        limpiarSeleccionRef.current = limpiarSeleccion;
+
         const resaltarHover = (
-          path: HTMLElement,
+          path: SVGPathElement,
           stroke: string
         ) => {
           const parent = path.parentNode;
@@ -238,10 +292,7 @@ export default function PlanoSVG({
 
           limpiarHover();
 
-          const clon =
-            path.cloneNode(true) as SVGElement;
-
-          clon.removeAttribute("id");
+          const clon = clonarEnCapaSuperior(path);
           clon.style.pointerEvents =
             "none";
           clon.style.fill = "none";
@@ -263,7 +314,7 @@ export default function PlanoSVG({
           const path =
             svgElement.getElementById(
               lote.svg_id
-            ) as HTMLElement | null;
+            ) as SVGPathElement | null;
 
           if (!path) return;
 
@@ -460,8 +511,7 @@ export default function PlanoSVG({
 
               loteActivo = path;
 
-              const clon =
-                path.cloneNode(true) as SVGElement;
+              const clon = clonarEnCapaSuperior(path);
 
               clon.style.pointerEvents =
                 "none";
@@ -508,6 +558,23 @@ export default function PlanoSVG({
             });
           };
         });
+
+        const loteSeleccionadoActual = lotes.find(
+          (lote) => lote.id === seleccionActivaIdRef.current
+        );
+
+        if (loteSeleccionadoActual) {
+          const pathSeleccionado = svgElement.getElementById(
+            loteSeleccionadoActual.svg_id
+          ) as SVGPathElement | null;
+
+          pathSeleccionado?.dispatchEvent(
+            new MouseEvent("click", {
+              bubbles: true,
+              cancelable: true,
+            })
+          );
+        }
       })
       .catch((error) => {
         console.error(error);
@@ -525,13 +592,23 @@ export default function PlanoSVG({
   ]);
 
   useEffect(() => {
+    const seleccionAnterior = seleccionAnteriorRef.current;
+    seleccionAnteriorRef.current = seleccionActivaId;
+    seleccionActivaIdRef.current = seleccionActivaId;
+
+    if (seleccionAnterior !== null && seleccionActivaId === null) {
+      limpiarSeleccionRef.current();
+    }
+  }, [seleccionActivaId]);
+
+  useEffect(() => {
     if (!loteUbicado) return;
 
     const timer = window.setTimeout(() => {
       const path =
         svgElementRef.current?.getElementById(
           loteUbicado.svg_id
-        ) as HTMLElement | null;
+        ) as SVGPathElement | null;
 
       if (path) {
         path.dispatchEvent(

@@ -385,6 +385,7 @@ export default function DisponibilidadPage() {
                     lotes={lotes}
                     loteUbicado={null}
                     setLoteSeleccionado={setLoteSeleccionado}
+                    seleccionActivaId={loteSeleccionado?.id ?? null}
                     mostrarArea
                     mostrarPrecio={false}
                     modoNoche={modoNoche}
