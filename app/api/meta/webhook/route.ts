@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { after } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -53,6 +54,23 @@ type MetaDatabase = {
         Row: MetaLeadEventRow;
         Insert: MetaLeadEventInsert;
         Update: Partial<MetaLeadEventInsert>;
+        Relationships: [];
+      };
+      profiles: {
+        Row: {
+          id: string;
+          role: string;
+          active: boolean;
+        };
+        Insert: {
+          id: string;
+          role: string;
+          active?: boolean;
+        };
+        Update: {
+          role?: string;
+          active?: boolean;
+        };
         Relationships: [];
       };
     };
@@ -137,6 +155,9 @@ type MetaWebhookPayload = {
 };
 
 type SupabaseAdmin = ReturnType<typeof crearSupabaseAdmin>;
+
+const META_PAGE_ID_ESPERADA = "1184880321368734";
+const META_FORM_ID_ESPERADO = "884453447577874";
 
 const normalizarClave = (valor: string) =>
   valor
@@ -475,12 +496,107 @@ const procesarEvento = async (
   }
 };
 
+const recuperarLeadAutenticado = async (
+  request: Request,
+  rawBody: string,
+  supabase: SupabaseAdmin,
+  metaAccessToken: string
+) => {
+  const authorization = request.headers.get("authorization") || "";
+  const accessToken = authorization.startsWith("Bearer ")
+    ? authorization.slice(7).trim()
+    : "";
+
+  if (!accessToken) {
+    return Response.json({ error: "Autenticacion requerida." }, { status: 401 });
+  }
+
+  const { data: authData, error: authError } =
+    await supabase.auth.getUser(accessToken);
+
+  if (authError || !authData.user) {
+    return Response.json({ error: "Sesion invalida." }, { status: 401 });
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id,role,active")
+    .eq("id", authData.user.id)
+    .single();
+
+  if (
+    profileError ||
+    !profile?.active ||
+    !["admin", "jefe_ventas"].includes(profile.role)
+  ) {
+    return Response.json({ error: "No tienes permiso para recuperar leads." }, { status: 403 });
+  }
+
+  let body: { action?: string; leadId?: string };
+
+  try {
+    body = JSON.parse(rawBody) as { action?: string; leadId?: string };
+  } catch {
+    return Response.json({ error: "Solicitud invalida." }, { status: 400 });
+  }
+
+  const leadId = String(body.leadId || "").trim();
+
+  if (body.action !== "RECUPERAR_LEAD" || !/^\d{8,30}$/.test(leadId)) {
+    return Response.json({ error: "Meta Lead ID invalido." }, { status: 400 });
+  }
+
+  const resultado = await procesarEvento(
+    supabase,
+    {
+      leadId,
+      pageId: META_PAGE_ID_ESPERADA,
+      formId: META_FORM_ID_ESPERADO,
+      adId: null,
+      createdTime: null,
+      payload: {
+        recuperacion_manual: true,
+        solicitado_por: authData.user.id,
+      },
+    },
+    metaAccessToken
+  );
+
+  return Response.json({
+    ok: true,
+    leadId,
+    deduplicado: resultado.deduplicado,
+  });
+};
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const mode = url.searchParams.get("hub.mode");
   const token = url.searchParams.get("hub.verify_token");
   const challenge = url.searchParams.get("hub.challenge");
-  const verifyToken = process.env.META_WEBHOOK_VERIFY_TOKEN;
+  const verifyToken =
+    process.env.META_WEBHOOK_VERIFY_TOKEN || process.env.META_VERIFY_TOKEN;
+
+  if (url.searchParams.get("health") === "1") {
+    return Response.json(
+      {
+        ok: true,
+        callback: new URL("/api/meta/webhook", url.origin).toString(),
+        page_id: META_PAGE_ID_ESPERADA,
+        form_id: META_FORM_ID_ESPERADO,
+        configured: {
+          verify_token: Boolean(verifyToken),
+          app_secret: Boolean(process.env.META_APP_SECRET),
+          page_access_token: Boolean(process.env.META_PAGE_ACCESS_TOKEN),
+          supabase_url: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
+          supabase_service_role: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+        },
+      },
+      {
+        headers: { "Cache-Control": "no-store" },
+      }
+    );
+  }
 
   if (
     mode === "subscribe" &&
@@ -503,12 +619,42 @@ export async function POST(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!appSecret || !accessToken || !supabaseUrl || !serviceRoleKey) {
-    console.error("La integracion Meta Lead Ads no tiene todas sus variables.");
+  const faltantes = [
+    !appSecret && "META_APP_SECRET",
+    !accessToken && "META_PAGE_ACCESS_TOKEN",
+    !supabaseUrl && "NEXT_PUBLIC_SUPABASE_URL",
+    !serviceRoleKey && "SUPABASE_SERVICE_ROLE_KEY",
+  ].filter(Boolean);
+
+  if (faltantes.length > 0 || !appSecret || !accessToken || !supabaseUrl || !serviceRoleKey) {
+    console.error("La integracion Meta Lead Ads no tiene todas sus variables.", {
+      faltantes,
+    });
     return Response.json({ error: "Integracion no configurada." }, { status: 503 });
   }
 
   const rawBody = await request.text();
+  const supabase = crearSupabaseAdmin(supabaseUrl, serviceRoleKey);
+
+  if (request.headers.get("authorization")?.startsWith("Bearer ")) {
+    try {
+      return await recuperarLeadAutenticado(
+        request,
+        rawBody,
+        supabase,
+        accessToken
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Error desconocido";
+
+      console.error("No se pudo recuperar manualmente el lead de Meta:", {
+        message,
+      });
+
+      return Response.json({ error: message }, { status: 500 });
+    }
+  }
 
   if (
     !verificarFirma(
@@ -517,6 +663,9 @@ export async function POST(request: Request) {
       appSecret
     )
   ) {
+    console.warn("Meta webhook rechazado por firma invalida.", {
+      tiene_firma: Boolean(request.headers.get("x-hub-signature-256")),
+    });
     return Response.json({ error: "Firma de Meta invalida." }, { status: 401 });
   }
 
@@ -534,15 +683,29 @@ export async function POST(request: Request) {
     return Response.json({ received: true, processed: 0 });
   }
 
-  const supabase = crearSupabaseAdmin(supabaseUrl, serviceRoleKey);
-  const resultados = await Promise.allSettled(
-    eventos.map((evento) => procesarEvento(supabase, evento, accessToken))
-  );
-  const failed = resultados.filter(
-    (resultado) => resultado.status === "rejected"
-  );
+  try {
+    await Promise.all(eventos.map((evento) => guardarEvento(supabase, evento)));
+  } catch (error) {
+    console.error("No se pudo registrar la entrega inicial de Meta:", {
+      message: error instanceof Error ? error.message : "error desconocido",
+    });
 
-  if (failed.length > 0) {
+    return Response.json({ received: false }, { status: 500 });
+  }
+
+  console.info("Meta webhook recibido.", {
+    eventos: eventos.map((evento) => ({
+      lead_id: evento.leadId,
+      page_id: evento.pageId,
+      form_id: evento.formId,
+    })),
+  });
+
+  after(async () => {
+    const resultados = await Promise.allSettled(
+      eventos.map((evento) => procesarEvento(supabase, evento, accessToken))
+    );
+
     resultados.forEach((resultado, index) => {
       if (resultado.status !== "rejected") return;
 
@@ -554,21 +717,10 @@ export async function POST(request: Request) {
             : "error desconocido",
       });
     });
-
-    // Meta reintentara el webhook; la restriccion external_id evita duplicados.
-    return Response.json(
-      {
-        received: true,
-        processed: resultados.length - failed.length,
-        failed: failed.length,
-      },
-      { status: 500 }
-    );
-  }
+  });
 
   return Response.json({
     received: true,
-    processed: resultados.length,
-    failed: 0,
+    queued: eventos.length,
   });
 }

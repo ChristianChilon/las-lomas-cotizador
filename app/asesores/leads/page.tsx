@@ -144,6 +144,8 @@ export default function LeadsEntrantesPage() {
   const [filtroAsesor, setFiltroAsesor] = useState("TODOS");
   const [cargando, setCargando] = useState(true);
   const [actualizando, setActualizando] = useState<string | null>(null);
+  const [metaLeadId, setMetaLeadId] = useState("");
+  const [recuperandoMeta, setRecuperandoMeta] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mensaje, setMensaje] = useState<string | null>(null);
 
@@ -435,6 +437,70 @@ export default function LeadsEntrantesPage() {
     setActualizando(null);
   };
 
+  const recuperarLeadMeta = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!supabase || !modoGerencia) return;
+
+    const leadId = metaLeadId.trim();
+
+    if (!/^\d{8,30}$/.test(leadId)) {
+      setError("Ingresa un Meta Lead ID valido.");
+      return;
+    }
+
+    setRecuperandoMeta(true);
+    setError(null);
+    setMensaje(null);
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+
+    if (!accessToken) {
+      setError("Tu sesion expiro. Vuelve a iniciar sesion.");
+      setRecuperandoMeta(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/meta/webhook", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "RECUPERAR_LEAD",
+          leadId,
+        }),
+      });
+      const result = (await response.json()) as {
+        error?: string;
+        deduplicado?: boolean;
+      };
+
+      if (!response.ok) {
+        throw new Error(result.error || "No se pudo recuperar el lead.");
+      }
+
+      setMensaje(
+        result.deduplicado
+          ? `El lead ${leadId} ya estaba registrado.`
+          : `Lead ${leadId} recuperado desde Meta Ads.`
+      );
+      setMetaLeadId("");
+      await cargar(true);
+    } catch (recoveryError) {
+      setError(
+        recoveryError instanceof Error
+          ? recoveryError.message
+          : "No se pudo recuperar el lead."
+      );
+      await cargar(true);
+    } finally {
+      setRecuperandoMeta(false);
+    }
+  };
+
   const limpiarFiltros = () => {
     setBusqueda("");
     setFiltroEstado("TODOS");
@@ -483,6 +549,36 @@ export default function LeadsEntrantesPage() {
 
       {error && <div style={errorBanner}>{error}</div>}
       {mensaje && <div style={successBanner}>{mensaje}</div>}
+
+      {modoGerencia && (
+        <section style={recoveryPanel}>
+          <div>
+            <strong>Recuperar un lead entregado por Meta</strong>
+            <p style={recoveryText}>
+              Usa el Lead ID cuando Meta creo el registro, pero el webhook no
+              alcanzo a ingresarlo al CRM. La operacion conserva la deduplicacion
+              y el reparto comercial existente.
+            </p>
+          </div>
+          <form style={recoveryForm} onSubmit={recuperarLeadMeta}>
+            <input
+              value={metaLeadId}
+              onChange={(event) => setMetaLeadId(event.target.value)}
+              placeholder="Meta Lead ID"
+              inputMode="numeric"
+              aria-label="Meta Lead ID"
+              style={recoveryInput}
+            />
+            <button
+              type="submit"
+              disabled={recuperandoMeta}
+              style={primaryButton}
+            >
+              {recuperandoMeta ? "Recuperando..." : "Recuperar lead"}
+            </button>
+          </form>
+        </section>
+      )}
 
       <section style={summaryGrid}>
         <article style={summaryCard}>
@@ -877,6 +973,43 @@ const successBanner: React.CSSProperties = {
   background: "#ebf7ef",
   color: "#17603a",
   fontWeight: 800,
+};
+
+const recoveryPanel: React.CSSProperties = {
+  marginBottom: 16,
+  padding: "15px 16px",
+  borderRadius: 8,
+  border: "1px solid #cbd9c7",
+  background: "#f7faf5",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 18,
+  flexWrap: "wrap",
+};
+
+const recoveryText: React.CSSProperties = {
+  maxWidth: 720,
+  margin: "4px 0 0",
+  color: "#64748b",
+  lineHeight: 1.45,
+};
+
+const recoveryForm: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  flexWrap: "wrap",
+};
+
+const recoveryInput: React.CSSProperties = {
+  width: 220,
+  height: 42,
+  borderRadius: 7,
+  border: "1px solid #cbd5d1",
+  background: "#ffffff",
+  padding: "0 12px",
+  color: "#17211b",
 };
 
 const summaryGrid: React.CSSProperties = {
