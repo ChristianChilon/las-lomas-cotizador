@@ -33,6 +33,21 @@ type SeparacionDirectaForm = {
   observaciones: string;
 };
 
+type CotizacionOrigen = {
+  id: string;
+  numero: string;
+  version: number;
+  cliente_id: string;
+  lote_id: number;
+  asesor_id: string;
+  estado: string;
+  precio_ofertado: number;
+  monto_separacion: number;
+  inicial: number;
+  meses: number;
+  observaciones: string | null;
+};
+
 const separacionDirectaVacia: SeparacionDirectaForm = {
   nombres: "",
   apellidos: "",
@@ -70,6 +85,9 @@ export default function LotesTable() {
 
   const clienteSepararDesdeUrl =
     searchParams.get("cliente");
+
+  const cotizacionDesdeUrl =
+    searchParams.get("cotizacion");
   
   const loteDesdeUrl =
    searchParams.get("lote");
@@ -115,6 +133,8 @@ export default function LotesTable() {
     useState(false);
   const [creandoSeparacion, setCreandoSeparacion] =
     useState(false);
+  const [cotizacionOrigen, setCotizacionOrigen] =
+    useState<CotizacionOrigen | null>(null);
   
   const [
     clienteSeparacionExistenteId,
@@ -473,10 +493,19 @@ export default function LotesTable() {
 
   const abrirSeparacionConClienteExistente = (
     lote: LoteCrm,
-    cliente: Cliente
+    cliente: Cliente,
+    cotizacion?: CotizacionOrigen | null
   ) => {
     setClienteSeparacionExistenteId(cliente.id);
-    setLoteSeparacion(lote);
+    setCotizacionOrigen(cotizacion || null);
+    setLoteSeparacion(
+      cotizacion
+        ? {
+            ...lote,
+            precio: Number(cotizacion.precio_ofertado),
+          }
+        : lote
+    );
 
     setFormSeparacion({
       ...separacionDirectaVacia,
@@ -487,10 +516,25 @@ export default function LotesTable() {
       correo: cliente.correo || "",
       direccion: cliente.direccion || "",
       ocupacion: "",
-      inicial: "6000",
+      montoSeparacion: cotizacion
+        ? String(cotizacion.monto_separacion)
+        : "",
+      inicial: cotizacion
+        ? String(cotizacion.inicial)
+        : "6000",
       fechaPagoInicial: fechaVencimientoSeparacionIso(),
-      meses: "24",
-      observaciones: cliente.observaciones || "",
+      meses: cotizacion
+        ? String(cotizacion.meses)
+        : "24",
+      observaciones: [
+        cotizacion
+          ? `Cotizacion aceptada: ${cotizacion.numero} v${cotizacion.version}`
+          : "",
+        cotizacion?.observaciones || "",
+        cliente.observaciones || "",
+      ]
+        .filter(Boolean)
+        .join("\n"),
     });
 
     setPdfGenerado(null);
@@ -516,26 +560,71 @@ export default function LotesTable() {
     if (!loteEncontrado || !clienteEncontrado) return;
 
     const timer = window.setTimeout(() => {
-    if (loteEncontrado.estado !== "DISPONIBLE") {
-      setError(
-        `No se puede separar el lote MZ ${loteEncontrado.mz} - Lote ${loteEncontrado.lote}, porque está en estado ${loteEncontrado.estado}.`
-      );
-      setSeparacionUrlProcesada(true);
-      return;
-    }
+      void (async () => {
+        if (
+          !["DISPONIBLE", "EN_NEGOCIACION"].includes(
+            loteEncontrado.estado
+          )
+        ) {
+          setError(
+            `No se puede separar el lote MZ ${loteEncontrado.mz} - Lote ${loteEncontrado.lote}, porque está en estado ${loteEncontrado.estado}.`
+          );
+          setSeparacionUrlProcesada(true);
+          return;
+        }
 
-    abrirSeparacionConClienteExistente(
-      loteEncontrado,
-      clienteEncontrado
-    );
+        let cotizacion: CotizacionOrigen | null = null;
 
-    setSeparacionUrlProcesada(true);
+        if (cotizacionDesdeUrl && supabase) {
+          const { data, error: cotizacionError } = await supabase
+            .from("cotizaciones")
+            .select(
+              "id,numero,version,cliente_id,lote_id,asesor_id,estado,precio_ofertado,monto_separacion,inicial,meses,observaciones"
+            )
+            .eq("id", cotizacionDesdeUrl)
+            .single();
+
+          if (cotizacionError || !data) {
+            setError(
+              cotizacionError?.message || "No se pudo cargar la cotizacion."
+            );
+            setSeparacionUrlProcesada(true);
+            return;
+          }
+
+          cotizacion = data as CotizacionOrigen;
+
+          if (
+            cotizacion.cliente_id !== clienteEncontrado.id ||
+            Number(cotizacion.lote_id) !== loteEncontrado.id
+          ) {
+            setError("La cotizacion no corresponde al cliente y lote seleccionados.");
+            setSeparacionUrlProcesada(true);
+            return;
+          }
+
+          if (cotizacion.estado !== "ACEPTADA") {
+            setError("La cotizacion debe estar aceptada antes de crear la separacion.");
+            setSeparacionUrlProcesada(true);
+            return;
+          }
+        }
+
+        abrirSeparacionConClienteExistente(
+          loteEncontrado,
+          clienteEncontrado,
+          cotizacion
+        );
+
+        setSeparacionUrlProcesada(true);
+      })();
     }, 0);
 
     return () => window.clearTimeout(timer);
   }, [
     loteSepararDesdeUrl,
     clienteSepararDesdeUrl,
+    cotizacionDesdeUrl,
     separacionUrlProcesada,
     lotes,
     clientes,
@@ -544,6 +633,7 @@ export default function LotesTable() {
   const cerrarSeparacionDirecta = () => {
     setLoteSeparacion(null);
     setClienteSeparacionExistenteId(null);
+    setCotizacionOrigen(null);
     setPdfGenerado(null);
     setPdfDescargado(false);
     setPdfEnviado(false);
@@ -793,24 +883,33 @@ export default function LotesTable() {
         : null;
 
     if (clienteExistente) {
-      const { error: rpcError } = await supabase.rpc(
-        "crm_crear_separacion",
-        {
-          p_lote_id: loteSeparacion.id,
-          p_cliente_id: clienteExistente.id,
-          p_monto: Number(
-            formSeparacion.montoSeparacion || 0
-          ),
-          p_fecha_limite:
-            fechaVencimientoSeparacionIso(),
-          p_observaciones:
-            construirObservacionesFicha(),
-          p_asesor_id:
-            clienteExistente.asesor_id ||
-            profile?.id ||
-            null,
-        }
-      );
+      const { error: rpcError } = cotizacionOrigen
+        ? await supabase.rpc(
+            "crm_convertir_cotizacion_en_separacion",
+            {
+              p_cotizacion_id: cotizacionOrigen.id,
+              p_fecha_limite: fechaVencimientoSeparacionIso(),
+              p_observaciones: construirObservacionesFicha(),
+            }
+          )
+        : await supabase.rpc(
+            "crm_crear_separacion",
+            {
+              p_lote_id: loteSeparacion.id,
+              p_cliente_id: clienteExistente.id,
+              p_monto: Number(
+                formSeparacion.montoSeparacion || 0
+              ),
+              p_fecha_limite:
+                fechaVencimientoSeparacionIso(),
+              p_observaciones:
+                construirObservacionesFicha(),
+              p_asesor_id:
+                clienteExistente.asesor_id ||
+                profile?.id ||
+                null,
+            }
+          );
 
       if (rpcError) {
         setError(rpcError.message);
@@ -818,26 +917,30 @@ export default function LotesTable() {
         return;
       }
 
-      const { error: clienteUpdateError } =
-        await supabase
-          .from("clientes")
-          .update({
-            lote_interes_id: null,
-            estado_lead: "SEPARADO",
-            proxima_accion: "ESPERAR_PAGO",
-          })
-          .eq("id", clienteExistente.id);
+      if (!cotizacionOrigen) {
+        const { error: clienteUpdateError } =
+          await supabase
+            .from("clientes")
+            .update({
+              lote_interes_id: null,
+              estado_lead: "SEPARADO",
+              proxima_accion: "ESPERAR_PAGO",
+            })
+            .eq("id", clienteExistente.id);
 
-      if (clienteUpdateError) {
-        setError(clienteUpdateError.message);
-        setCreandoSeparacion(false);
-        return;
+        if (clienteUpdateError) {
+          setError(clienteUpdateError.message);
+          setCreandoSeparacion(false);
+          return;
+        }
       }
 
       setMensaje(
-        `Separación creada para cliente existente: ${nombreCliente(
-          clienteExistente
-        )}.`
+        cotizacionOrigen
+          ? `${cotizacionOrigen.numero} convertida en separacion correctamente.`
+          : `Separación creada para cliente existente: ${nombreCliente(
+              clienteExistente
+            )}.`
       );
 
       cerrarSeparacionDirecta();
@@ -1181,6 +1284,23 @@ export default function LotesTable() {
               </button>
             </div>
 
+            {cotizacionOrigen && (
+              <div
+                style={{
+                  background: "#eef7f1",
+                  border: "1px solid #b9d8c5",
+                  color: "#174c35",
+                  padding: 12,
+                  marginBottom: 14,
+                  fontWeight: 700,
+                }}
+              >
+                Conversión de {cotizacionOrigen.numero} v
+                {cotizacionOrigen.version}. Las condiciones económicas están
+                bloqueadas para que la ficha coincida con la propuesta aceptada.
+              </div>
+            )}
+
             <div style={modalSection}>
               <div style={sectionTitle}>
                 Datos del comprador
@@ -1329,6 +1449,7 @@ export default function LotesTable() {
                     type="number"
                     min="0"
                     step="0.01"
+                    disabled={Boolean(cotizacionOrigen)}
                     value={
                       formSeparacion.montoSeparacion
                     }
@@ -1339,7 +1460,11 @@ export default function LotesTable() {
                       )
                     }
                     placeholder="Ej. 1000.00"
-                    style={input}
+                    style={
+                      cotizacionOrigen
+                        ? { ...input, background: "#eef1ef" }
+                        : input
+                    }
                   />
                 </label>
                 <label style={fieldGroup}>
@@ -1351,6 +1476,7 @@ export default function LotesTable() {
                     type="number"
                     min="0"
                     step="0.01"
+                    disabled={Boolean(cotizacionOrigen)}
                     value={formSeparacion.inicial}
                     onChange={(event) =>
                       actualizarSeparacionForm(
@@ -1359,7 +1485,11 @@ export default function LotesTable() {
                       )
                     }
                     placeholder="Ej. 6000.00"
-                    style={input}
+                    style={
+                      cotizacionOrigen
+                        ? { ...input, background: "#eef1ef" }
+                        : input
+                    }
                   />
                 </label>
                 <label style={fieldGroup}>
@@ -1389,6 +1519,7 @@ export default function LotesTable() {
                     required
                     type="number"
                     min="1"
+                    disabled={Boolean(cotizacionOrigen)}
                     value={formSeparacion.meses}
                     onChange={(event) =>
                       actualizarSeparacionForm(
@@ -1397,7 +1528,11 @@ export default function LotesTable() {
                       )
                     }
                     placeholder="Ej. 24"
-                    style={input}
+                    style={
+                      cotizacionOrigen
+                        ? { ...input, background: "#eef1ef" }
+                        : input
+                    }
                   />
                 </label>
               </div>

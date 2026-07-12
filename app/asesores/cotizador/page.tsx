@@ -2111,6 +2111,11 @@ Quisiera más información.`;
             setLoteSeleccionado(null)
           }
           onHablarAsesor={abrirFormularioContacto}
+          onCrearCotizacion={({ inicial, meses }) =>
+            router.push(
+              `/asesores/cotizaciones?nueva=1&lote=${loteSeleccionado.id}&inicial=${inicial}&meses=${meses}`
+            )
+          }
         />
       )}
 

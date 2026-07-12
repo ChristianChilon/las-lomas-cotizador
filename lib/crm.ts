@@ -615,6 +615,82 @@ export type LoteCrm = {
   updated_at?: string | null;
 };
 
+export const ESTADOS_COTIZACION = [
+  "PENDIENTE_APROBACION",
+  "BORRADOR",
+  "ENVIADA",
+  "ACEPTADA",
+  "RECHAZADA",
+  "VENCIDA",
+  "ANULADA",
+  "REEMPLAZADA",
+  "CONVERTIDA",
+] as const;
+
+export type EstadoCotizacion =
+  (typeof ESTADOS_COTIZACION)[number];
+
+export const etiquetaEstadoCotizacion = (
+  estado: string | null | undefined
+) => {
+  switch (estado) {
+    case "PENDIENTE_APROBACION":
+      return "Pendiente de aprobación";
+    case "BORRADOR":
+      return "Borrador";
+    case "ENVIADA":
+      return "Enviada";
+    case "ACEPTADA":
+      return "Aceptada";
+    case "RECHAZADA":
+      return "Rechazada";
+    case "VENCIDA":
+      return "Vencida";
+    case "ANULADA":
+      return "Anulada";
+    case "REEMPLAZADA":
+      return "Reemplazada";
+    case "CONVERTIDA":
+      return "Convertida";
+    default:
+      return estado || "Sin estado";
+  }
+};
+
+export type Cotizacion = {
+  id: string;
+  numero: string;
+  grupo_id: string;
+  version: number;
+  cotizacion_anterior_id: string | null;
+  cliente_id: string;
+  lote_id: number;
+  asesor_id: string;
+  created_by: string | null;
+  estado: EstadoCotizacion | string;
+  precio_lista: number;
+  precio_ofertado: number;
+  descuento_monto: number;
+  descuento_porcentaje: number;
+  monto_separacion: number;
+  inicial: number;
+  meses: number;
+  saldo_financiar: number;
+  cuota_mensual: number;
+  valida_hasta: string;
+  observaciones: string | null;
+  aprobacion_solicitada_at: string | null;
+  aprobada_por: string | null;
+  aprobada_at: string | null;
+  enviada_at: string | null;
+  aceptada_at: string | null;
+  rechazada_at: string | null;
+  convertida_at: string | null;
+  separacion_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Separacion = {
   id: string;
   cliente_id: string | null;

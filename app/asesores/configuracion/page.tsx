@@ -25,6 +25,10 @@ type ConfigDraft = {
   hora_fin: string;
   atender_sabado: boolean;
   atender_domingo: boolean;
+  descuento_asesor_max_porcentaje: string;
+  vigencia_cotizacion_dias: string;
+  monto_separacion_referencial: string;
+  inicial_minima: string;
 };
 
 const valoresIniciales: ConfigDraft = {
@@ -47,6 +51,16 @@ const valoresIniciales: ConfigDraft = {
   hora_fin: CONFIGURACION_COMERCIAL_BASE.hora_fin.slice(0, 5),
   atender_sabado: CONFIGURACION_COMERCIAL_BASE.atender_sabado,
   atender_domingo: CONFIGURACION_COMERCIAL_BASE.atender_domingo,
+  descuento_asesor_max_porcentaje: String(
+    CONFIGURACION_COMERCIAL_BASE.descuento_asesor_max_porcentaje
+  ),
+  vigencia_cotizacion_dias: String(
+    CONFIGURACION_COMERCIAL_BASE.vigencia_cotizacion_dias
+  ),
+  monto_separacion_referencial: String(
+    CONFIGURACION_COMERCIAL_BASE.monto_separacion_referencial
+  ),
+  inicial_minima: String(CONFIGURACION_COMERCIAL_BASE.inicial_minima),
 };
 
 const horaCorta = (hora: string | null | undefined) =>
@@ -95,9 +109,7 @@ export default function ConfiguracionPage() {
 
     const { data, error: configError } = await supabase
       .from("configuracion_comercial")
-      .select(
-        "project_key,sla_primer_contacto_minutos,cadencia_caliente_dias,cadencia_tibio_dias,cadencia_frio_dias,alerta_separacion_dias,hora_inicio,hora_fin,atender_sabado,atender_domingo,updated_by,updated_at"
-      )
+      .select("*")
       .eq("project_key", "las_lomas")
       .maybeSingle();
 
@@ -116,7 +128,12 @@ export default function ConfiguracionPage() {
       return;
     }
 
-    const actual = data as unknown as ConfiguracionGuardada | null;
+    const actual = data
+      ? ({
+          ...CONFIGURACION_COMERCIAL_BASE,
+          ...data,
+        } as unknown as ConfiguracionGuardada)
+      : null;
     setConfiguracion(actual);
 
     if (actual) {
@@ -132,6 +149,14 @@ export default function ConfiguracionPage() {
         hora_fin: horaCorta(actual.hora_fin),
         atender_sabado: actual.atender_sabado,
         atender_domingo: actual.atender_domingo,
+        descuento_asesor_max_porcentaje: String(
+          actual.descuento_asesor_max_porcentaje
+        ),
+        vigencia_cotizacion_dias: String(actual.vigencia_cotizacion_dias),
+        monto_separacion_referencial: String(
+          actual.monto_separacion_referencial
+        ),
+        inicial_minima: String(actual.inicial_minima),
       });
     }
 
@@ -187,15 +212,26 @@ export default function ConfiguracionPage() {
       hora_fin: draft.hora_fin,
       atender_sabado: draft.atender_sabado,
       atender_domingo: draft.atender_domingo,
+      descuento_asesor_max_porcentaje: Math.min(
+        30,
+        Math.max(0, Number(draft.descuento_asesor_max_porcentaje) || 0)
+      ),
+      vigencia_cotizacion_dias: Math.min(
+        30,
+        enteroPositivo(draft.vigencia_cotizacion_dias)
+      ),
+      monto_separacion_referencial: Math.max(
+        0,
+        Number(draft.monto_separacion_referencial) || 0
+      ),
+      inicial_minima: Math.max(0, Number(draft.inicial_minima) || 0),
       updated_by: profile.id,
     };
 
     const { data, error: saveError } = await supabase
       .from("configuracion_comercial")
       .upsert(payload, { onConflict: "project_key" })
-      .select(
-        "project_key,sla_primer_contacto_minutos,cadencia_caliente_dias,cadencia_tibio_dias,cadencia_frio_dias,alerta_separacion_dias,hora_inicio,hora_fin,atender_sabado,atender_domingo,updated_by,updated_at"
-      )
+      .select("*")
       .single();
 
     if (saveError) {
@@ -428,6 +464,71 @@ export default function ConfiguracionPage() {
                   />
                 </div>
               </article>
+
+              <article style={panel}>
+                <div style={panelHeader}>
+                  <div>
+                    <h2 style={panelTitle}>Cotizaciones</h2>
+                    <p style={panelText}>
+                      Define los limites que Supabase aplicara a las propuestas de los asesores.
+                    </p>
+                  </div>
+                </div>
+
+                <div style={formGrid}>
+                  <NumberField
+                    label="Descuento maximo del asesor (%)"
+                    value={draft.descuento_asesor_max_porcentaje}
+                    min={0}
+                    max={30}
+                    step="0.01"
+                    onChange={(value) =>
+                      setDraft((actual) => ({
+                        ...actual,
+                        descuento_asesor_max_porcentaje: value,
+                      }))
+                    }
+                  />
+                  <NumberField
+                    label="Vigencia de la cotizacion (dias)"
+                    value={draft.vigencia_cotizacion_dias}
+                    min={1}
+                    max={30}
+                    onChange={(value) =>
+                      setDraft((actual) => ({
+                        ...actual,
+                        vigencia_cotizacion_dias: value,
+                      }))
+                    }
+                  />
+                  <NumberField
+                    label="Monto referencial de separacion"
+                    value={draft.monto_separacion_referencial}
+                    min={0}
+                    max={100000}
+                    step="0.01"
+                    onChange={(value) =>
+                      setDraft((actual) => ({
+                        ...actual,
+                        monto_separacion_referencial: value,
+                      }))
+                    }
+                  />
+                  <NumberField
+                    label="Inicial minima"
+                    value={draft.inicial_minima}
+                    min={0}
+                    max={1000000}
+                    step="0.01"
+                    onChange={(value) =>
+                      setDraft((actual) => ({
+                        ...actual,
+                        inicial_minima: value,
+                      }))
+                    }
+                  />
+                </div>
+              </article>
             </div>
 
             <div style={footerBar}>
@@ -504,6 +605,7 @@ function NumberField({
   max,
   onChange,
   full = false,
+  step = "1",
 }: {
   label: string;
   value: string;
@@ -511,6 +613,7 @@ function NumberField({
   max?: number;
   onChange: (value: string) => void;
   full?: boolean;
+  step?: string;
 }) {
   return (
     <label style={{ ...field, ...(full ? fieldFull : {}) }}>
@@ -519,7 +622,7 @@ function NumberField({
         type="number"
         min={min}
         max={max}
-        step="1"
+        step={step}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         style={input}

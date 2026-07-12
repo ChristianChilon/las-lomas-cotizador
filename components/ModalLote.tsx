@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 type LoteModal = {
+  id?: number;
   nombre?: string;
   area?: string | number;
   precio?: string | number;
@@ -13,6 +14,11 @@ type Props = {
   lote: LoteModal;
   onClose: () => void;
   onHablarAsesor: () => void;
+  onCrearCotizacion?: (valores: {
+    inicial: number;
+    meses: number;
+    precio: number;
+  }) => void;
   modoNoche?: boolean;
 };
 
@@ -40,6 +46,7 @@ export default function ModalLote({
   lote,
   onClose,
   onHablarAsesor,
+  onCrearCotizacion,
   modoNoche = false,
 }: Props) {
   const [pos, setPos] = useState({
@@ -1051,6 +1058,15 @@ export default function ModalLote({
               return;
             }
 
+            if (onCrearCotizacion) {
+              onCrearCotizacion({
+                inicial,
+                meses,
+                precio: precioNumero,
+              });
+              return;
+            }
+
             onHablarAsesor();
           }}
           disabled={estadoVisible !== "DISPONIBLE"}
@@ -1092,7 +1108,9 @@ export default function ModalLote({
           }}
         >
           {estadoVisible === "DISPONIBLE"
-            ? "🗩     Hablar con un asesor"
+            ? onCrearCotizacion
+              ? "Crear cotizacion"
+              : "Hablar con un asesor"
             : estadoVisible === "SEPARADO"
             ? "Lote separado"
             : "Lote vendido"}

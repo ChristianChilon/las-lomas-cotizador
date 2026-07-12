@@ -1481,13 +1481,21 @@ export default function ClienteDetallePage() {
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={iniciarSeparacionLote}
-                    style={separarButton}
-                  >
-                    Separar este lote
-                  </button>
+                  <div style={loteActions}>
+                    <Link
+                      href={`/asesores/cotizaciones?nueva=1&cliente=${cliente.id}&lote=${loteInteres.id}`}
+                      style={secondaryMiniLink}
+                    >
+                      Cotizar este lote
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={iniciarSeparacionLote}
+                      style={separarButton}
+                    >
+                      Separar este lote
+                    </button>
+                  </div>
                 </div>
               )}
 

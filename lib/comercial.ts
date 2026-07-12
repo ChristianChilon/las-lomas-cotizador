@@ -11,6 +11,10 @@ export type ConfiguracionComercial = {
   hora_fin: string;
   atender_sabado: boolean;
   atender_domingo: boolean;
+  descuento_asesor_max_porcentaje: number;
+  vigencia_cotizacion_dias: number;
+  monto_separacion_referencial: number;
+  inicial_minima: number;
 };
 
 export const CONFIGURACION_COMERCIAL_BASE: ConfiguracionComercial = {
@@ -24,6 +28,10 @@ export const CONFIGURACION_COMERCIAL_BASE: ConfiguracionComercial = {
   hora_fin: "20:00:00",
   atender_sabado: true,
   atender_domingo: true,
+  descuento_asesor_max_porcentaje: 5,
+  vigencia_cotizacion_dias: 7,
+  monto_separacion_referencial: 500,
+  inicial_minima: 6000,
 };
 
 const minutosHora = (hora: string) => {

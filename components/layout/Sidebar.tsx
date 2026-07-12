@@ -58,6 +58,11 @@ const links = [
     label: "Cotizador privado",
   },
   {
+    href: "/asesores/cotizaciones",
+    label: "Cotizaciones",
+    asesorLabel: "Mis cotizaciones",
+  },
+  {
     href: "/asesores/clientes",
     label: "Clientes",
     asesorLabel: "Mis clientes",
