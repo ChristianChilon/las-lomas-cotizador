@@ -13,6 +13,7 @@ import {
   formatearMoneda,
   nombreCliente,
   type Cliente,
+  type Cotizacion,
   type LoteCrm,
   type Profile,
   type Separacion,
@@ -22,6 +23,7 @@ type DashboardData = {
   lotes: LoteCrm[];
   clientes: Cliente[];
   separaciones: Separacion[];
+  cotizaciones: Cotizacion[];
   asesores: Profile[];
 };
 
@@ -52,6 +54,7 @@ const dataVacia: DashboardData = {
   lotes: [],
   clientes: [],
   separaciones: [],
+  cotizaciones: [],
   asesores: [],
 };
 
@@ -176,6 +179,12 @@ export default function AsesoresDashboard() {
         "id,lote_id,cliente_id,asesor_id,monto_separacion,fecha_limite,estado,observaciones,created_at,updated_at,liberacion_solicitada,motivo_liberacion,fecha_solicitud_liberacion,solicitado_liberacion_por,fecha_liberacion_resuelta,resuelto_liberacion_por"
       );
 
+    let cotizacionesQuery = supabase
+      .from("cotizaciones")
+      .select(
+        "id,numero,cliente_id,lote_id,asesor_id,estado,precio_ofertado,valida_hasta,aprobacion_solicitada_at,enviada_at,aceptada_at,created_at,updated_at"
+      );
+
     if (!modoGerencia) {
       clientesQuery = clientesQuery.eq(
         "asesor_id",
@@ -189,17 +198,23 @@ export default function AsesoresDashboard() {
         "asesor_id",
         perfil.profile.id
       );
+      cotizacionesQuery = cotizacionesQuery.eq(
+        "asesor_id",
+        perfil.profile.id
+      );
     }
 
     const [
       clientesResult,
       lotesResult,
       separacionesResult,
+      cotizacionesResult,
       asesoresResult,
     ] = await Promise.all([
       clientesQuery,
       lotesQuery,
       separacionesQuery,
+      cotizacionesQuery,
       modoGerencia
         ? supabase
             .from("profiles")
@@ -212,6 +227,7 @@ export default function AsesoresDashboard() {
       clientesResult.error ||
       lotesResult.error ||
       separacionesResult.error ||
+      cotizacionesResult.error ||
       asesoresResult.error;
 
     if (errorActual) {
@@ -226,6 +242,8 @@ export default function AsesoresDashboard() {
       lotes: (lotesResult.data || []) as unknown as LoteCrm[],
       separaciones:
         (separacionesResult.data || []) as unknown as Separacion[],
+      cotizaciones:
+        (cotizacionesResult.data || []) as unknown as Cotizacion[],
       asesores:
         (asesoresResult.data || []) as unknown as Profile[],
     });
@@ -335,6 +353,24 @@ export default function AsesoresDashboard() {
     const leadsCalientesSinFecha = leadsCalientes.filter(
       (cliente) => !cliente.fecha_proximo_seguimiento
     );
+    const cotizacionesVigentes = data.cotizaciones.filter(
+      (cotizacion) =>
+        cotizacion.estado === "ENVIADA" &&
+        cotizacion.valida_hasta >= hoy
+    );
+    const cotizacionesAceptadas = data.cotizaciones.filter(
+      (cotizacion) => cotizacion.estado === "ACEPTADA"
+    );
+    const cotizacionesEvaluadas = data.cotizaciones.filter(
+      (cotizacion) =>
+        ["ENVIADA", "ACEPTADA", "RECHAZADA", "CONVERTIDA"].includes(
+          cotizacion.estado
+        )
+    );
+    const cotizacionesGanadas = cotizacionesEvaluadas.filter(
+      (cotizacion) =>
+        ["ACEPTADA", "CONVERTIDA"].includes(cotizacion.estado)
+    );
 
     return {
       totalLotes: data.lotes.length,
@@ -361,8 +397,20 @@ export default function AsesoresDashboard() {
       separacionesPronto: separacionesPronto.length,
       seguimientosVencidos: seguimientosVencidos.length,
       leadsCalientesSinFecha: leadsCalientesSinFecha.length,
+      cotizacionesPendientes: data.cotizaciones.filter(
+        (cotizacion) => cotizacion.estado === "PENDIENTE_APROBACION"
+      ).length,
+      cotizacionesVigentes: cotizacionesVigentes.length,
+      cotizacionesAceptadas: cotizacionesAceptadas.length,
+      montoCotizado: [...cotizacionesVigentes, ...cotizacionesAceptadas].reduce(
+        (acc, cotizacion) => acc + Number(cotizacion.precio_ofertado || 0),
+        0
+      ),
+      conversionCotizaciones: cotizacionesEvaluadas.length
+        ? (cotizacionesGanadas.length / cotizacionesEvaluadas.length) * 100
+        : 0,
     };
-  }, [data.clientes, data.lotes, data.separaciones]);
+  }, [data.clientes, data.cotizaciones, data.lotes, data.separaciones]);
 
   const alertas = useMemo<AlertaEjecutiva[]>(() => {
     const hoy = obtenerFechaHoyISO();
@@ -485,10 +533,87 @@ export default function AsesoresDashboard() {
         });
       });
 
+    if (modoGerencia) {
+      data.cotizaciones
+        .filter(
+          (cotizacion) => cotizacion.estado === "PENDIENTE_APROBACION"
+        )
+        .slice(0, 5)
+        .forEach((cotizacion) => {
+          const lote = lotesPorId.get(Number(cotizacion.lote_id));
+
+          lista.push({
+            id: `quote-approval-${cotizacion.id}`,
+            titulo: "Cotizacion por aprobar",
+            descripcion: `${cotizacion.numero} de ${nombreLote(
+              lote
+            )} espera decision comercial.`,
+            href: "/asesores/cotizaciones?estado=PENDIENTE_APROBACION",
+            accion: "Revisar",
+            prioridad: 1,
+            tono: "red",
+          });
+        });
+    }
+
+    data.cotizaciones
+      .filter((cotizacion) => cotizacion.estado === "ACEPTADA")
+      .slice(0, 5)
+      .forEach((cotizacion) => {
+        const lote = lotesPorId.get(Number(cotizacion.lote_id));
+
+        lista.push({
+          id: `quote-accepted-${cotizacion.id}`,
+          titulo: "Cotizacion aceptada",
+          descripcion: `${cotizacion.numero} de ${nombreLote(
+            lote
+          )} debe convertirse en separacion.`,
+          href: "/asesores/cotizaciones?estado=ACEPTADA",
+          accion: "Formalizar",
+          prioridad: 1,
+          tono: "blue",
+        });
+      });
+
+    data.cotizaciones
+      .filter(
+        (cotizacion) =>
+          cotizacion.estado === "ENVIADA" &&
+          cotizacion.valida_hasta <= sumarDiasISO(2)
+      )
+      .slice(0, 5)
+      .forEach((cotizacion) => {
+        const lote = lotesPorId.get(Number(cotizacion.lote_id));
+        const vencida = cotizacion.valida_hasta < hoy;
+
+        lista.push({
+          id: `quote-expiry-${cotizacion.id}`,
+          titulo: vencida
+            ? "Cotizacion vencida sin respuesta"
+            : "Cotizacion por vencer",
+          descripcion: `${cotizacion.numero} de ${nombreLote(lote)} ${
+            vencida ? "vencio" : "vence"
+          } el ${cotizacion.valida_hasta}.`,
+          href: vencida
+            ? "/asesores/cotizaciones?estado=VENCIDA"
+            : "/asesores/cotizaciones?estado=ENVIADA",
+          accion: "Dar seguimiento",
+          prioridad: vencida ? 1 : 2,
+          tono: vencida ? "red" : "gold",
+        });
+      });
+
     return lista
       .sort((a, b) => a.prioridad - b.prioridad)
       .slice(0, 8);
-  }, [data.clientes, data.lotes, data.separaciones, lotesPorId, modoGerencia]);
+  }, [
+    data.clientes,
+    data.cotizaciones,
+    data.lotes,
+    data.separaciones,
+    lotesPorId,
+    modoGerencia,
+  ]);
 
   const pulsoAsesores = useMemo<AsesorPulso[]>(() => {
     if (!modoGerencia) return [];
@@ -702,6 +827,37 @@ export default function AsesoresDashboard() {
                 }
                 tone="green"
                 href="/asesores/lotes"
+              />
+            </div>
+
+            <div style={quickGrid}>
+              <MetricCard
+                label="Cotizaciones vigentes"
+                value={resumen.cotizacionesVigentes}
+                detail={formatearMoneda(resumen.montoCotizado)}
+                tone="blue"
+                href="/asesores/cotizaciones?estado=ENVIADA"
+              />
+              <MetricCard
+                label="Aceptadas por formalizar"
+                value={resumen.cotizacionesAceptadas}
+                detail="Pendientes de separacion"
+                tone="green"
+                href="/asesores/cotizaciones?estado=ACEPTADA"
+              />
+              <MetricCard
+                label="Conversion cotizada"
+                value={`${resumen.conversionCotizaciones.toFixed(1)}%`}
+                detail="Aceptadas y convertidas"
+                tone="gray"
+                href="/asesores/cotizaciones"
+              />
+              <MetricCard
+                label={modoGerencia ? "Aprobaciones comerciales" : "En aprobacion"}
+                value={resumen.cotizacionesPendientes}
+                detail="Cotizaciones fuera de autonomia"
+                tone="gold"
+                href="/asesores/cotizaciones?estado=PENDIENTE_APROBACION"
               />
             </div>
 

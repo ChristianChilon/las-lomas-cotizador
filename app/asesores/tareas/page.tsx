@@ -10,12 +10,14 @@ import {
   colorNivelInteres,
   esGerencia,
   etiquetaEstado,
+  etiquetaEstadoCotizacion,
   etiquetaEstadoLead,
   etiquetaNivelInteres,
   etiquetaProximaAccion,
   formatearMoneda,
   nombreCliente,
   type Cliente,
+  type Cotizacion,
   type LoteCrm,
   type Profile,
   type Separacion,
@@ -43,7 +45,13 @@ type TipoTarea =
   | "SEPARACION_HOY"
   | "SEPARACION_PRONTO"
   | "LIBERACION_SOLICITADA"
-  | "CIERRE_SOLICITADO";
+  | "CIERRE_SOLICITADO"
+  | "COTIZACION_APROBACION"
+  | "COTIZACION_VENCIDA"
+  | "COTIZACION_HOY"
+  | "COTIZACION_PRONTO"
+  | "COTIZACION_SIN_RESPUESTA"
+  | "COTIZACION_ACEPTADA";
 
 type TonoTarea = "red" | "gold" | "blue" | "green";
 
@@ -59,6 +67,7 @@ type Tarea = {
   tono: TonoTarea;
   cliente?: Cliente;
   separacion?: Separacion;
+  cotizacion?: Cotizacion;
   lote?: LoteCrm;
   actividadDetalle?: string;
 };
@@ -71,6 +80,7 @@ type FiltroTareas =
   | "PROXIMAS"
   | "CLIENTES"
   | "SEPARACIONES"
+  | "COTIZACIONES"
   | "APROBACIONES";
 
 const obtenerFechaHoyISO = () => {
@@ -119,6 +129,22 @@ const esClienteActivo = (cliente: Cliente) =>
   cliente.estado_lead !== "VENDIDO" &&
   cliente.estado_lead !== "PERDIDO";
 
+const colorCotizacion = (estado: string) => {
+  switch (estado) {
+    case "ACEPTADA":
+    case "CONVERTIDA":
+      return { bg: "#e5f4e9", fg: "#17603a" };
+    case "PENDIENTE_APROBACION":
+      return { bg: "#fff0c2", fg: "#7a4b00" };
+    case "ENVIADA":
+      return { bg: "#e8f0ff", fg: "#1d4ed8" };
+    case "VENCIDA":
+      return { bg: "#fee2e2", fg: "#991b1b" };
+    default:
+      return { bg: "#f1f5f9", fg: "#475569" };
+  }
+};
+
 export default function CentroTareasPage() {
   const [profile, setProfile] =
     useState<Profile | null>(null);
@@ -130,6 +156,7 @@ export default function CentroTareasPage() {
   const [seguimientos, setSeguimientos] = useState<
     SeguimientoCliente[]
   >([]);
+  const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
   const [configuracion, setConfiguracion] =
     useState<ConfiguracionComercial>(CONFIGURACION_COMERCIAL_BASE);
   const [setupPendiente, setSetupPendiente] = useState(false);
@@ -208,6 +235,12 @@ export default function CentroTareasPage() {
       )
       .order("created_at", { ascending: true });
 
+    let cotizacionesQuery = supabase
+      .from("cotizaciones")
+      .select(
+        "id,numero,cliente_id,lote_id,asesor_id,estado,precio_ofertado,valida_hasta,aprobacion_solicitada_at,enviada_at,aceptada_at,created_at,updated_at"
+      );
+
     if (!modoGerencia) {
       clientesQuery = clientesQuery.eq(
         "asesor_id",
@@ -225,6 +258,10 @@ export default function CentroTareasPage() {
         "asesor_id",
         perfil.profile.id
       );
+      cotizacionesQuery = cotizacionesQuery.eq(
+        "asesor_id",
+        perfil.profile.id
+      );
     }
 
     const [
@@ -232,6 +269,7 @@ export default function CentroTareasPage() {
       separacionesResult,
       lotesResult,
       seguimientosResult,
+      cotizacionesResult,
       configuracionResult,
     ] = await Promise.all([
       clientesQuery.order("fecha_proximo_seguimiento", {
@@ -246,6 +284,7 @@ export default function CentroTareasPage() {
         ascending: false,
       }),
       seguimientosQuery,
+      cotizacionesQuery.order("updated_at", { ascending: false }),
       supabase
         .from("configuracion_comercial")
         .select(
@@ -271,6 +310,7 @@ export default function CentroTareasPage() {
       separacionesResult.error ||
       lotesResult.error ||
       seguimientosResult.error ||
+      cotizacionesResult.error ||
       (faltaConfiguracion ? null : configuracionResult.error);
 
     if (errorActual) {
@@ -292,6 +332,9 @@ export default function CentroTareasPage() {
     );
     setSeguimientos(
       (seguimientosResult.data || []) as unknown as SeguimientoCliente[]
+    );
+    setCotizaciones(
+      (cotizacionesResult.data || []) as unknown as Cotizacion[]
     );
     setConfiguracion(
       faltaConfiguracion || !configuracionResult.data
@@ -610,6 +653,129 @@ export default function CentroTareasPage() {
         }
       });
 
+    cotizaciones.forEach((cotizacion) => {
+      const cliente = clientesPorId.get(cotizacion.cliente_id);
+      const lote = lotesPorId.get(Number(cotizacion.lote_id));
+      const href = `/asesores/cotizaciones?estado=${cotizacion.estado}`;
+
+      if (
+        cotizacion.estado === "PENDIENTE_APROBACION" &&
+        modoGerencia
+      ) {
+        lista.push({
+          id: `cotizacion-aprobacion-${cotizacion.id}`,
+          tipo: "COTIZACION_APROBACION",
+          titulo: "Cotizacion por aprobar",
+          descripcion: `${cotizacion.numero} requiere validar sus condiciones comerciales antes de enviarse.`,
+          accion: "Revisar y decidir",
+          href,
+          prioridad: 1,
+          fechaOrden:
+            cotizacion.aprobacion_solicitada_at || cotizacion.created_at,
+          tono: "red",
+          cliente,
+          lote,
+          cotizacion,
+        });
+        return;
+      }
+
+      if (cotizacion.estado === "ACEPTADA") {
+        lista.push({
+          id: `cotizacion-aceptada-${cotizacion.id}`,
+          tipo: "COTIZACION_ACEPTADA",
+          titulo: "Cotizacion aceptada por formalizar",
+          descripcion: `${cotizacion.numero} ya fue aceptada. Completa la ficha para reservar el lote.`,
+          accion: "Crear separacion",
+          href,
+          prioridad: 1,
+          fechaOrden: cotizacion.aceptada_at || cotizacion.updated_at,
+          tono: "green",
+          cliente,
+          lote,
+          cotizacion,
+        });
+        return;
+      }
+
+      if (cotizacion.estado !== "ENVIADA") return;
+
+      if (cotizacion.valida_hasta < hoy) {
+        lista.push({
+          id: `cotizacion-vencida-${cotizacion.id}`,
+          tipo: "COTIZACION_VENCIDA",
+          titulo: "Cotizacion vencida sin respuesta",
+          descripcion: `${cotizacion.numero} vencio el ${formatearFechaLocal(
+            cotizacion.valida_hasta
+          )}. Contacta al cliente y genera una nueva version si corresponde.`,
+          accion: "Retomar propuesta",
+          href: "/asesores/cotizaciones?estado=VENCIDA",
+          prioridad: 1,
+          fechaOrden: cotizacion.valida_hasta,
+          tono: "red",
+          cliente,
+          lote,
+          cotizacion,
+        });
+        return;
+      }
+
+      if (cotizacion.valida_hasta === hoy) {
+        lista.push({
+          id: `cotizacion-hoy-${cotizacion.id}`,
+          tipo: "COTIZACION_HOY",
+          titulo: "Cotizacion vence hoy",
+          descripcion: `${cotizacion.numero} necesita seguimiento antes de perder vigencia.`,
+          accion: "Contactar ahora",
+          href,
+          prioridad: 1,
+          fechaOrden: cotizacion.valida_hasta,
+          tono: "gold",
+          cliente,
+          lote,
+          cotizacion,
+        });
+        return;
+      }
+
+      if (cotizacion.valida_hasta <= sumarDiasISO(2)) {
+        lista.push({
+          id: `cotizacion-pronto-${cotizacion.id}`,
+          tipo: "COTIZACION_PRONTO",
+          titulo: "Cotizacion por vencer",
+          descripcion: `${cotizacion.numero} vence el ${formatearFechaLocal(
+            cotizacion.valida_hasta
+          )}. Confirma dudas y siguiente paso con el cliente.`,
+          accion: "Dar seguimiento",
+          href,
+          prioridad: 2,
+          fechaOrden: cotizacion.valida_hasta,
+          tono: "gold",
+          cliente,
+          lote,
+          cotizacion,
+        });
+        return;
+      }
+
+      if (diasDesde(cotizacion.enviada_at || cotizacion.created_at) >= 2) {
+        lista.push({
+          id: `cotizacion-sin-respuesta-${cotizacion.id}`,
+          tipo: "COTIZACION_SIN_RESPUESTA",
+          titulo: "Propuesta sin respuesta",
+          descripcion: `${cotizacion.numero} lleva al menos 2 dias enviada sin decision registrada.`,
+          accion: "Contactar cliente",
+          href,
+          prioridad: 2,
+          fechaOrden: cotizacion.enviada_at || cotizacion.created_at,
+          tono: "blue",
+          cliente,
+          lote,
+          cotizacion,
+        });
+      }
+    });
+
     lotes
       .filter(
         (lote) => lote.estado === "CIERRE_SOLICITADO"
@@ -658,6 +824,7 @@ export default function CentroTareasPage() {
   }, [
     clientes,
     configuracion,
+    cotizaciones,
     lotes,
     modoGerencia,
     seguimientos,
@@ -681,10 +848,13 @@ export default function CentroTareasPage() {
         return [
           "SEGUIMIENTO_HOY",
           "SEPARACION_HOY",
+          "COTIZACION_HOY",
         ].includes(tarea.tipo);
       }
       if (filtro === "PROXIMAS") {
-        return tarea.tipo === "SEPARACION_PRONTO";
+        return ["SEPARACION_PRONTO", "COTIZACION_PRONTO"].includes(
+          tarea.tipo
+        );
       }
       if (filtro === "CLIENTES") {
         return [
@@ -705,10 +875,14 @@ export default function CentroTareasPage() {
           "LIBERACION_SOLICITADA",
         ].includes(tarea.tipo);
       }
+      if (filtro === "COTIZACIONES") {
+        return tarea.tipo.startsWith("COTIZACION_");
+      }
       if (filtro === "APROBACIONES") {
         return [
           "LIBERACION_SOLICITADA",
           "CIERRE_SOLICITADO",
+          "COTIZACION_APROBACION",
         ].includes(tarea.tipo);
       }
 
@@ -735,13 +909,18 @@ export default function CentroTareasPage() {
         [
           "SEGUIMIENTO_HOY",
           "SEPARACION_HOY",
+          "COTIZACION_HOY",
         ].includes(tarea.tipo)
       ).length,
       aprobaciones: tareas.filter((tarea) =>
         [
           "LIBERACION_SOLICITADA",
           "CIERRE_SOLICITADO",
+          "COTIZACION_APROBACION",
         ].includes(tarea.tipo)
+      ).length,
+      cotizaciones: tareas.filter((tarea) =>
+        tarea.tipo.startsWith("COTIZACION_")
       ).length,
     }),
     [tareas]
@@ -780,6 +959,10 @@ export default function CentroTareasPage() {
       label: "Separaciones",
     },
     {
+      id: "COTIZACIONES",
+      label: "Cotizaciones",
+    },
+    {
       id: "APROBACIONES",
       label: "Aprobaciones",
     },
@@ -787,7 +970,13 @@ export default function CentroTareasPage() {
 
   const renderTarea = (tarea: Tarea) => {
     const color =
-      tarea.lote && tarea.tipo === "CIERRE_SOLICITADO"
+      tarea.cotizacion
+        ? colorCotizacion(
+            tarea.tipo === "COTIZACION_VENCIDA"
+              ? "VENCIDA"
+              : tarea.cotizacion.estado
+          )
+        : tarea.lote && tarea.tipo === "CIERRE_SOLICITADO"
         ? colorEstado(tarea.lote.estado)
         : tarea.cliente
           ? colorNivelInteres(tarea.cliente.nivel_interes)
@@ -828,7 +1017,13 @@ export default function CentroTareasPage() {
               color: color.fg,
             }}
           >
-            {tarea.lote
+            {tarea.cotizacion
+              ? etiquetaEstadoCotizacion(
+                  tarea.tipo === "COTIZACION_VENCIDA"
+                    ? "VENCIDA"
+                    : tarea.cotizacion.estado
+                )
+              : tarea.lote
               ? etiquetaEstado(tarea.lote.estado)
               : tarea.cliente
                 ? etiquetaNivelInteres(
@@ -907,6 +1102,27 @@ export default function CentroTareasPage() {
               </div>
             </>
           )}
+
+          {tarea.cotizacion && (
+            <>
+              <div style={detailBox}>
+                <span>Propuesta</span>
+                <strong>{tarea.cotizacion.numero}</strong>
+              </div>
+              <div style={detailBox}>
+                <span>Importe</span>
+                <strong>
+                  {formatearMoneda(tarea.cotizacion.precio_ofertado)}
+                </strong>
+              </div>
+              <div style={detailBox}>
+                <span>Vigencia</span>
+                <strong>
+                  {formatearFechaLocal(tarea.cotizacion.valida_hasta)}
+                </strong>
+              </div>
+            </>
+          )}
         </div>
 
         <div style={taskActions}>
@@ -966,6 +1182,11 @@ export default function CentroTareasPage() {
           <div style={summaryCardGold}>
             <span>Aprobaciones</span>
             <strong>{resumen.aprobaciones}</strong>
+          </div>
+
+          <div style={summaryCardBlue}>
+            <span>Cotizaciones</span>
+            <strong>{resumen.cotizaciones}</strong>
           </div>
         </div>
 

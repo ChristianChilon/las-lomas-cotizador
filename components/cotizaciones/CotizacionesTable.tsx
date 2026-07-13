@@ -136,7 +136,12 @@ export default function CotizacionesTable() {
   );
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [consultaProcesada, setConsultaProcesada] = useState(false);
-  const [filtroEstado, setFiltroEstado] = useState("TODOS");
+  const [filtroEstado, setFiltroEstado] = useState(() => {
+    const estado = searchParams.get("estado");
+    return estado && ESTADOS_COTIZACION.some((item) => item === estado)
+      ? estado
+      : "TODOS";
+  });
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);

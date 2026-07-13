@@ -12,6 +12,7 @@ import {
   formatearMoneda,
   nombreCliente,
   type Cliente,
+  type Cotizacion,
   type LoteCrm,
   type Profile,
   type Separacion,
@@ -46,6 +47,13 @@ type ForecastAsesor = {
   montoVendido: number;
   forecastPonderado: number;
   riesgo: number;
+  cotizacionesEnviadas: number;
+  cotizacionesAceptadas: number;
+  cotizacionesRechazadas: number;
+  cotizacionesConvertidas: number;
+  cotizacionesPendientes: number;
+  montoCotizado: number;
+  montoAceptado: number;
 };
 
 type SeparacionRiesgo = {
@@ -136,6 +144,13 @@ const crearForecastVacio = (
   montoVendido: 0,
   forecastPonderado: 0,
   riesgo: 0,
+  cotizacionesEnviadas: 0,
+  cotizacionesAceptadas: 0,
+  cotizacionesRechazadas: 0,
+  cotizacionesConvertidas: 0,
+  cotizacionesPendientes: 0,
+  montoCotizado: 0,
+  montoAceptado: 0,
 });
 
 const obtenerRiesgoSeparacion = (
@@ -242,6 +257,7 @@ export default function PronosticoPage() {
   const [separaciones, setSeparaciones] = useState<
     Separacion[]
   >([]);
+  const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
   const [asesorFiltro, setAsesorFiltro] = useState("TODOS");
   const [cargando, setCargando] = useState(true);
   const [error, setError] =
@@ -301,6 +317,12 @@ export default function PronosticoPage() {
         "id,lote_id,cliente_id,asesor_id,monto_separacion,fecha_limite,estado,observaciones,created_at,updated_at,liberacion_solicitada,motivo_liberacion,fecha_solicitud_liberacion,solicitado_liberacion_por,fecha_liberacion_resuelta,resuelto_liberacion_por"
       );
 
+    let cotizacionesQuery = supabase
+      .from("cotizaciones")
+      .select(
+        "id,numero,cliente_id,lote_id,asesor_id,estado,precio_ofertado,valida_hasta,created_at,updated_at"
+      );
+
     if (!modoGerencia) {
       clientesQuery = clientesQuery.eq(
         "asesor_id",
@@ -314,6 +336,10 @@ export default function PronosticoPage() {
         "asesor_id",
         perfil.profile.id
       );
+      cotizacionesQuery = cotizacionesQuery.eq(
+        "asesor_id",
+        perfil.profile.id
+      );
     }
 
     const [
@@ -321,6 +347,7 @@ export default function PronosticoPage() {
       clientesResult,
       lotesResult,
       separacionesResult,
+      cotizacionesResult,
     ] = await Promise.all([
       modoGerencia
         ? supabase
@@ -335,13 +362,15 @@ export default function PronosticoPage() {
       clientesQuery,
       lotesQuery,
       separacionesQuery,
+      cotizacionesQuery,
     ]);
 
     const errorActual =
       asesoresResult.error ||
       clientesResult.error ||
       lotesResult.error ||
-      separacionesResult.error;
+      separacionesResult.error ||
+      cotizacionesResult.error;
 
     if (errorActual) {
       setError(errorActual.message);
@@ -360,6 +389,9 @@ export default function PronosticoPage() {
     );
     setSeparaciones(
       (separacionesResult.data || []) as unknown as Separacion[]
+    );
+    setCotizaciones(
+      (cotizacionesResult.data || []) as unknown as Cotizacion[]
     );
     setCargando(false);
   };
@@ -390,6 +422,7 @@ export default function PronosticoPage() {
         clientes,
         lotes,
         separaciones,
+        cotizaciones,
       };
     }
 
@@ -401,10 +434,14 @@ export default function PronosticoPage() {
       separaciones: separaciones.filter(
         (separacion) => separacion.asesor_id === asesorFiltro
       ),
+      cotizaciones: cotizaciones.filter(
+        (cotizacion) => cotizacion.asesor_id === asesorFiltro
+      ),
     };
   }, [
     asesorFiltro,
     clientes,
+    cotizaciones,
     lotes,
     modoGerencia,
     separaciones,
@@ -502,6 +539,36 @@ export default function PronosticoPage() {
       }
     });
 
+    datosFiltrados.cotizaciones.forEach((cotizacion) => {
+      const item = asegurar(cotizacion.asesor_id);
+      const monto = Number(cotizacion.precio_ofertado || 0);
+
+      if (cotizacion.estado === "PENDIENTE_APROBACION") {
+        item.cotizacionesPendientes += 1;
+      }
+
+      if (cotizacion.estado === "ENVIADA") {
+        item.cotizacionesEnviadas += 1;
+        if (cotizacion.valida_hasta >= new Date().toISOString().slice(0, 10)) {
+          item.montoCotizado += monto;
+        }
+      }
+
+      if (cotizacion.estado === "ACEPTADA") {
+        item.cotizacionesAceptadas += 1;
+        item.montoCotizado += monto;
+        item.montoAceptado += monto;
+      }
+
+      if (cotizacion.estado === "RECHAZADA") {
+        item.cotizacionesRechazadas += 1;
+      }
+
+      if (cotizacion.estado === "CONVERTIDA") {
+        item.cotizacionesConvertidas += 1;
+      }
+    });
+
     return Array.from(mapa.values())
       .map((item) => ({
         ...item,
@@ -521,6 +588,7 @@ export default function PronosticoPage() {
     asesoresPorId,
     datosFiltrados.clientes,
     datosFiltrados.lotes,
+    datosFiltrados.cotizaciones,
     datosFiltrados.separaciones,
   ]);
 
@@ -543,6 +611,18 @@ export default function PronosticoPage() {
             acc.forecastPonderado + item.forecastPonderado,
           montoVendido: acc.montoVendido + item.montoVendido,
           riesgo: acc.riesgo + item.riesgo,
+          cotizacionesEnviadas:
+            acc.cotizacionesEnviadas + item.cotizacionesEnviadas,
+          cotizacionesAceptadas:
+            acc.cotizacionesAceptadas + item.cotizacionesAceptadas,
+          cotizacionesRechazadas:
+            acc.cotizacionesRechazadas + item.cotizacionesRechazadas,
+          cotizacionesConvertidas:
+            acc.cotizacionesConvertidas + item.cotizacionesConvertidas,
+          cotizacionesPendientes:
+            acc.cotizacionesPendientes + item.cotizacionesPendientes,
+          montoCotizado: acc.montoCotizado + item.montoCotizado,
+          montoAceptado: acc.montoAceptado + item.montoAceptado,
         }),
         {
           clientes: 0,
@@ -555,6 +635,13 @@ export default function PronosticoPage() {
           forecastPonderado: 0,
           montoVendido: 0,
           riesgo: 0,
+          cotizacionesEnviadas: 0,
+          cotizacionesAceptadas: 0,
+          cotizacionesRechazadas: 0,
+          cotizacionesConvertidas: 0,
+          cotizacionesPendientes: 0,
+          montoCotizado: 0,
+          montoAceptado: 0,
         }
       ),
     [forecastPorAsesor]
@@ -601,6 +688,17 @@ export default function PronosticoPage() {
   const eficiencia = resumen.montoPipeline
     ? (resumen.forecastPonderado / resumen.montoPipeline) * 100
     : 0;
+  const cotizacionesEvaluadas =
+    resumen.cotizacionesEnviadas +
+    resumen.cotizacionesAceptadas +
+    resumen.cotizacionesRechazadas +
+    resumen.cotizacionesConvertidas;
+  const conversionCotizaciones = cotizacionesEvaluadas
+    ? ((resumen.cotizacionesAceptadas +
+        resumen.cotizacionesConvertidas) /
+        cotizacionesEvaluadas) *
+      100
+    : 0;
 
   return (
     <AsesorLayout
@@ -618,7 +716,8 @@ export default function PronosticoPage() {
             <p style={subtitle}>
               Mide el valor real del pipeline usando pesos por etapa:
               negociacion 35%, separado 70% y cierre solicitado
-              95%.
+              95%. Las cotizaciones se muestran aparte para no duplicar
+              el valor de los lotes.
             </p>
           </div>
 
@@ -684,6 +783,16 @@ export default function PronosticoPage() {
               )}
             </strong>
           </div>
+
+          <div style={summaryCardBlue}>
+            <span>Valor cotizado activo</span>
+            <strong>{formatearMoneda(resumen.montoCotizado)}</strong>
+          </div>
+
+          <div style={summaryCardGreen}>
+            <span>Aceptado por formalizar</span>
+            <strong>{formatearMoneda(resumen.montoAceptado)}</strong>
+          </div>
         </div>
 
         <div style={insightGrid}>
@@ -716,6 +825,15 @@ export default function PronosticoPage() {
               separacion o cierre en los proximos dias.
             </p>
           </article>
+
+          <article style={insightBox}>
+            <span>Conversion de cotizaciones</span>
+            <strong>{porcentaje(conversionCotizaciones)}</strong>
+            <p>
+              Propuestas aceptadas o convertidas frente a las propuestas
+              que ya recibieron una decision comercial.
+            </p>
+          </article>
         </div>
 
         {error && <div style={alert}>{error}</div>}
@@ -743,6 +861,8 @@ export default function PronosticoPage() {
                     <th style={th}>Neg.</th>
                     <th style={th}>Sep.</th>
                     <th style={th}>Cierres</th>
+                    <th style={th}>Cotiz.</th>
+                    <th style={th}>Acept.</th>
                     <th style={th}>Vendido</th>
                     <th style={th}>Pipeline</th>
                     <th style={th}>Forecast</th>
@@ -765,6 +885,8 @@ export default function PronosticoPage() {
                         <td style={td}>{item.negociacion}</td>
                         <td style={td}>{item.separados}</td>
                         <td style={td}>{item.cierres}</td>
+                        <td style={td}>{item.cotizacionesEnviadas}</td>
+                        <td style={td}>{item.cotizacionesAceptadas}</td>
                         <td style={td}>
                           {formatearMoneda(item.montoVendido)}
                         </td>
@@ -790,7 +912,7 @@ export default function PronosticoPage() {
 
                   {forecastPorAsesor.length === 0 && (
                     <tr>
-                      <td colSpan={10} style={emptyTable}>
+                      <td colSpan={12} style={emptyTable}>
                         Todavia no hay datos suficientes para el
                         pronostico.
                       </td>
