@@ -14,8 +14,10 @@ import {
   formatearMoneda,
   nombreCliente,
   type Cliente,
+  type ExpedienteSeparacion,
   type LoteCrm,
   type Profile,
+  type Separacion,
 } from "../../lib/crm";
 
 type SeparacionDirectaForm = {
@@ -48,6 +50,21 @@ type CotizacionOrigen = {
   observaciones: string | null;
 };
 
+type SeparacionCierre = Pick<
+  Separacion,
+  | "id"
+  | "lote_id"
+  | "cliente_id"
+  | "asesor_id"
+  | "estado"
+  | "created_at"
+>;
+
+type ExpedienteCierre = Pick<
+  ExpedienteSeparacion,
+  "separacion_id" | "estado" | "motivo_revision"
+>;
+
 const separacionDirectaVacia: SeparacionDirectaForm = {
   nombres: "",
   apellidos: "",
@@ -77,6 +94,63 @@ const EMPRESA_EMAIL = "inmobiliariakomodo@gmail.com";
 const DIAS_VIGENCIA_SEPARACION = 7;
 const LOGO_LAS_LOMAS = "/las-lomas-logo.png";
 
+const obtenerEstadoExpedienteCierre = (
+  separacion: SeparacionCierre | null,
+  expediente: ExpedienteCierre | null
+) => {
+  if (!separacion) {
+    return {
+      label: "Sin separacion activa",
+      bg: "#fbe9e7",
+      fg: "#9f2f23",
+      border: "#efb4ad",
+    };
+  }
+
+  if (!expediente) {
+    return {
+      label: "Expediente no iniciado",
+      bg: "#fff5d9",
+      fg: "#795414",
+      border: "#e7cc83",
+    };
+  }
+
+  if (expediente.estado === "VALIDADO") {
+    return {
+      label: "Expediente validado",
+      bg: "#e4f3e8",
+      fg: "#1f6a3a",
+      border: "#a9d3b5",
+    };
+  }
+
+  if (expediente.estado === "EN_REVISION") {
+    return {
+      label: "Expediente en revision",
+      bg: "#e9f1fb",
+      fg: "#245b8f",
+      border: "#b4cce6",
+    };
+  }
+
+  if (expediente.estado === "OBSERVADO") {
+    return {
+      label: "Expediente observado",
+      bg: "#fcebe5",
+      fg: "#9a3f24",
+      border: "#e7b6a4",
+    };
+  }
+
+  return {
+    label: "Expediente incompleto",
+    bg: "#fff5d9",
+    fg: "#795414",
+    border: "#e7cc83",
+  };
+};
+
 export default function LotesTable() {
   const searchParams = useSearchParams();
   
@@ -101,6 +175,10 @@ export default function LotesTable() {
   const [asesores, setAsesores] = useState<
     Record<string, Profile>
   >({});
+  const [separacionesActivas, setSeparacionesActivas] =
+    useState<SeparacionCierre[]>([]);
+  const [expedientesCierre, setExpedientesCierre] =
+    useState<ExpedienteCierre[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [estado, setEstado] = useState("TODOS");
   const [asesorFiltro, setAsesorFiltro] =
@@ -117,6 +195,11 @@ export default function LotesTable() {
     useState<number | null>(null);
   const [aprobando, setAprobando] =
     useState<number | null>(null);
+  const [devolviendoCierre, setDevolviendoCierre] =
+    useState<number | null>(null);
+  const [motivosCierre, setMotivosCierre] = useState<
+    Record<number, string>
+  >({});
   const [loteSeparacion, setLoteSeparacion] =
     useState<LoteCrm | null>(null);
   const [formSeparacion, setFormSeparacion] =
@@ -156,6 +239,8 @@ export default function LotesTable() {
       lotesRes,
       clientesRes,
       perfilesRes,
+      separacionesRes,
+      expedientesRes,
     ] = await Promise.all([
       supabase
         .from(LOTES_TABLE)
@@ -177,6 +262,18 @@ export default function LotesTable() {
         .from("profiles")
         .select(
           "id,full_name,email,role,phone,active"
+        ),
+      supabase
+        .from("separaciones")
+        .select(
+          "id,lote_id,cliente_id,asesor_id,estado,created_at"
+        )
+        .eq("estado", "ACTIVA")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("separacion_expedientes")
+        .select(
+          "separacion_id,estado,motivo_revision"
         ),
     ]);
 
@@ -205,6 +302,17 @@ export default function LotesTable() {
       }
     );
     setAsesores(asesoresMap);
+
+    setSeparacionesActivas(
+      separacionesRes.error
+        ? []
+        : ((separacionesRes.data || []) as SeparacionCierre[])
+    );
+    setExpedientesCierre(
+      expedientesRes.error
+        ? []
+        : ((expedientesRes.data || []) as ExpedienteCierre[])
+    );
   };
 
   useEffect(() => {
@@ -291,6 +399,31 @@ export default function LotesTable() {
     [asesores]
   );
 
+  const separacionActivaPorLote = useMemo(() => {
+    const map: Record<number, SeparacionCierre> = {};
+
+    separacionesActivas.forEach((separacion) => {
+      if (
+        separacion.lote_id &&
+        !map[separacion.lote_id]
+      ) {
+        map[separacion.lote_id] = separacion;
+      }
+    });
+
+    return map;
+  }, [separacionesActivas]);
+
+  const expedientePorSeparacion = useMemo(() => {
+    const map: Record<string, ExpedienteCierre> = {};
+
+    expedientesCierre.forEach((expediente) => {
+      map[expediente.separacion_id] = expediente;
+    });
+
+    return map;
+  }, [expedientesCierre]);
+
   const lotesFiltrados = useMemo(() => {
     const texto = busqueda
       .trim()
@@ -347,10 +480,29 @@ export default function LotesTable() {
     if (!profile) return [lote.estado];
 
     if (modoGerencia) {
-      return Array.from(CRM_ESTADOS).filter(
-        (estadoItem) =>
-          estadoItem !== "SEPARADO" ||
-          lote.estado === "SEPARADO"
+      if (
+        lote.estado === "CIERRE_SOLICITADO" ||
+        lote.estado === "VENDIDO"
+      ) {
+        return [lote.estado];
+      }
+
+      if (lote.estado === "SEPARADO") {
+        return ["SEPARADO", "CIERRE_SOLICITADO"];
+      }
+
+      return Array.from(
+        new Set([
+          lote.estado,
+          ...CRM_ESTADOS.filter(
+            (estadoItem) =>
+              ![
+                "SEPARADO",
+                "CIERRE_SOLICITADO",
+                "VENDIDO",
+              ].includes(estadoItem)
+          ),
+        ])
       );
     }
 
@@ -365,7 +517,6 @@ export default function LotesTable() {
       return [
         "DISPONIBLE",
         "EN_NEGOCIACION",
-        "CIERRE_SOLICITADO",
       ];
     }
 
@@ -373,7 +524,6 @@ export default function LotesTable() {
       return [
         "EN_NEGOCIACION",
         "DISPONIBLE",
-        "CIERRE_SOLICITADO",
       ];
     }
 
@@ -451,6 +601,25 @@ export default function LotesTable() {
   const aprobarCierre = async (lote: LoteCrm) => {
     if (!supabase || !modoGerencia) return;
 
+    const separacion = separacionActivaPorLote[lote.id];
+    const expediente = separacion
+      ? expedientePorSeparacion[separacion.id]
+      : null;
+
+    if (!separacion) {
+      setError(
+        "La venta no puede aprobarse porque el lote no tiene una separacion activa."
+      );
+      return;
+    }
+
+    if (expediente?.estado !== "VALIDADO") {
+      setError(
+        "La venta no puede aprobarse hasta que gerencia valide el expediente."
+      );
+      return;
+    }
+
     setAprobando(lote.id);
     setMensaje(null);
     setError(null);
@@ -459,7 +628,8 @@ export default function LotesTable() {
       await supabase.rpc("crm_aprobar_cierre_lote", {
         p_lote_id: lote.id,
         p_motivo:
-          "Venta aprobada desde panel CRM",
+          motivosCierre[lote.id]?.trim() ||
+          "Venta aprobada con expediente validado",
       });
 
     if (rpcError) {
@@ -468,10 +638,61 @@ export default function LotesTable() {
       setMensaje(
         `Venta aprobada para ${lote.mz}-${lote.lote}.`
       );
+      setMotivosCierre((actual) => ({
+        ...actual,
+        [lote.id]: "",
+      }));
       await cargar();
     }
 
     setAprobando(null);
+  };
+
+  const devolverCierre = async (lote: LoteCrm) => {
+    if (!supabase || !modoGerencia) return;
+
+    const motivo = motivosCierre[lote.id]?.trim() || "";
+    const tieneSeparacion = Boolean(
+      separacionActivaPorLote[lote.id]
+    );
+
+    if (motivo.length < 5) {
+      setError(
+        `Escribe el motivo antes de devolver el cierre a ${
+          tieneSeparacion ? "separado" : "disponible"
+        }.`
+      );
+      return;
+    }
+
+    setDevolviendoCierre(lote.id);
+    setMensaje(null);
+    setError(null);
+
+    const { error: rpcError } = await supabase.rpc(
+      "crm_devolver_cierre_lote",
+      {
+        p_lote_id: lote.id,
+        p_motivo: motivo,
+      }
+    );
+
+    if (rpcError) {
+      setError(rpcError.message);
+    } else {
+      setMensaje(
+        `El cierre de ${lote.mz}-${lote.lote} volvio a ${
+          tieneSeparacion ? "separado" : "disponible"
+        }.`
+      );
+      setMotivosCierre((actual) => ({
+        ...actual,
+        [lote.id]: "",
+      }));
+      await cargar();
+    }
+
+    setDevolviendoCierre(null);
   };
 
   const abrirSeparacionDirecta = (lote: LoteCrm) => {
@@ -1114,6 +1335,20 @@ export default function LotesTable() {
                 estadosPermitidos(lote);
               const puedeCambiar =
                 opciones.length > 1;
+              const separacionActiva =
+                separacionActivaPorLote[lote.id] || null;
+              const expedienteCierre = separacionActiva
+                ? expedientePorSeparacion[
+                    separacionActiva.id
+                  ] || null
+                : null;
+              const expedienteValidado =
+                expedienteCierre?.estado === "VALIDADO";
+              const estadoExpediente =
+                obtenerEstadoExpedienteCierre(
+                  separacionActiva,
+                  expedienteCierre
+                );
 
               return (
                 <tr
@@ -1219,22 +1454,103 @@ export default function LotesTable() {
                       {modoGerencia &&
                         lote.estado ===
                           "CIERRE_SOLICITADO" && (
-                          <button
-                            type="button"
-                            disabled={
-                              aprobando ===
-                              lote.id
-                            }
-                            onClick={() =>
-                              aprobarCierre(lote)
-                            }
-                            style={primarySmall}
-                          >
-                            {aprobando ===
-                            lote.id
-                              ? "Aprobando..."
-                              : "Aprobar venta"}
-                          </button>
+                          <div style={cierrePanel}>
+                            <span
+                              style={{
+                                ...cierreStatus,
+                                color:
+                                  estadoExpediente.fg,
+                                background:
+                                  estadoExpediente.bg,
+                                borderColor:
+                                  estadoExpediente.border,
+                              }}
+                            >
+                              {estadoExpediente.label}
+                            </span>
+                            {expedienteCierre
+                              ?.motivo_revision && (
+                              <span style={cierreNote}>
+                                {
+                                  expedienteCierre.motivo_revision
+                                }
+                              </span>
+                            )}
+                            <textarea
+                              value={
+                                motivosCierre[lote.id] || ""
+                              }
+                              onChange={(event) =>
+                                setMotivosCierre(
+                                  (actual) => ({
+                                    ...actual,
+                                    [lote.id]:
+                                      event.target.value,
+                                  })
+                                )
+                              }
+                              rows={2}
+                              aria-label={`Motivo de revision para ${lote.mz}-${lote.lote}`}
+                              placeholder="Motivo u observacion de gerencia"
+                              style={cierreTextarea}
+                            />
+                            <div style={cierreActions}>
+                              {separacionActiva && (
+                                <a
+                                  href={`/asesores/separaciones?separacion=${separacionActiva.id}`}
+                                  style={reviewLink}
+                                >
+                                  Revisar expediente
+                                </a>
+                              )}
+                              <button
+                                type="button"
+                                disabled={
+                                  !expedienteValidado ||
+                                  aprobando === lote.id ||
+                                  devolviendoCierre === lote.id
+                                }
+                                onClick={() =>
+                                  aprobarCierre(lote)
+                                }
+                                title={
+                                  expedienteValidado
+                                    ? "Aprobar venta"
+                                    : "Valida primero el expediente"
+                                }
+                                style={{
+                                  ...primarySmall,
+                                  opacity:
+                                    expedienteValidado ? 1 : 0.5,
+                                  cursor:
+                                    expedienteValidado
+                                      ? "pointer"
+                                      : "not-allowed",
+                                }}
+                              >
+                                {aprobando === lote.id
+                                  ? "Aprobando..."
+                                  : "Aprobar venta"}
+                              </button>
+                              <button
+                                type="button"
+                                disabled={
+                                  aprobando === lote.id ||
+                                  devolviendoCierre === lote.id
+                                }
+                                onClick={() =>
+                                  devolverCierre(lote)
+                                }
+                                style={returnSmall}
+                              >
+                                {devolviendoCierre === lote.id
+                                  ? "Devolviendo..."
+                                  : separacionActiva
+                                    ? "Devolver a separado"
+                                    : "Devolver a disponible"}
+                              </button>
+                            </div>
+                          </div>
                         )}
                       {profile &&
                         !modoGerencia &&
@@ -1725,6 +2041,79 @@ const actionStack: React.CSSProperties = {
   gap: 8,
   alignItems: "center",
   flexWrap: "wrap",
+};
+
+const cierrePanel: React.CSSProperties = {
+  width: 300,
+  display: "grid",
+  gap: 8,
+  padding: 10,
+  border: "1px solid #d8dfd8",
+  borderRadius: 8,
+  background: "#fbfcfa",
+};
+
+const cierreStatus: React.CSSProperties = {
+  width: "fit-content",
+  display: "inline-flex",
+  alignItems: "center",
+  minHeight: 28,
+  border: "1px solid",
+  borderRadius: 999,
+  padding: "4px 9px",
+  fontSize: 11,
+  fontWeight: 900,
+};
+
+const cierreNote: React.CSSProperties = {
+  color: "#7a3d2b",
+  fontSize: 12,
+  lineHeight: 1.35,
+};
+
+const cierreTextarea: React.CSSProperties = {
+  width: "100%",
+  minHeight: 54,
+  resize: "vertical",
+  border: "1px solid #cfd6cf",
+  borderRadius: 8,
+  padding: "8px 9px",
+  background: "#ffffff",
+  color: "#111827",
+  font: "inherit",
+  fontSize: 12,
+};
+
+const cierreActions: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 7,
+  flexWrap: "wrap",
+};
+
+const reviewLink: React.CSSProperties = {
+  minHeight: 34,
+  display: "inline-flex",
+  alignItems: "center",
+  border: "1px solid #aeb9ae",
+  borderRadius: 8,
+  padding: "0 10px",
+  background: "#ffffff",
+  color: "#294f35",
+  textDecoration: "none",
+  fontSize: 12,
+  fontWeight: 900,
+};
+
+const returnSmall: React.CSSProperties = {
+  minHeight: 36,
+  borderRadius: 8,
+  border: "1px solid #d9a59c",
+  padding: "0 11px",
+  background: "#fff4f1",
+  color: "#8f3428",
+  fontWeight: 900,
+  cursor: "pointer",
 };
 
 const primarySmall: React.CSSProperties = {
