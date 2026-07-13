@@ -711,6 +711,103 @@ export type Separacion = {
   resuelto_liberacion_por?: string | null;
 };
 
+export const ESTADOS_EXPEDIENTE_SEPARACION = [
+  "INCOMPLETO",
+  "EN_REVISION",
+  "VALIDADO",
+  "OBSERVADO",
+] as const;
+
+export type EstadoExpedienteSeparacion =
+  (typeof ESTADOS_EXPEDIENTE_SEPARACION)[number];
+
+export const TIPOS_DOCUMENTO_SEPARACION = [
+  "DNI",
+  "VOUCHER_SEPARACION",
+  "VOUCHER_INICIAL",
+  "CONTRATO",
+  "OTRO",
+] as const;
+
+export type TipoDocumentoSeparacion =
+  (typeof TIPOS_DOCUMENTO_SEPARACION)[number];
+
+export type ExpedienteSeparacion = {
+  separacion_id: string;
+  cliente_id: string;
+  lote_id: number;
+  asesor_id: string | null;
+  estado: EstadoExpedienteSeparacion | string;
+  pago_monto: number | null;
+  pago_fecha: string | null;
+  pago_banco: string | null;
+  pago_operacion: string | null;
+  observaciones: string | null;
+  enviado_revision_at: string | null;
+  revisado_por: string | null;
+  revisado_at: string | null;
+  motivo_revision: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DocumentoSeparacion = {
+  id: string;
+  separacion_id: string;
+  cliente_id: string;
+  lote_id: number;
+  asesor_id: string | null;
+  tipo: TipoDocumentoSeparacion | string;
+  storage_path: string;
+  nombre_archivo: string;
+  mime_type: string;
+  tamano_bytes: number;
+  estado: string;
+  observaciones: string | null;
+  subido_por: string | null;
+  revisado_por: string | null;
+  revisado_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export const etiquetaEstadoExpediente = (
+  estado?: string | null
+) => {
+  switch (estado) {
+    case "INCOMPLETO":
+      return "Incompleto";
+    case "EN_REVISION":
+      return "En revision";
+    case "VALIDADO":
+      return "Validado";
+    case "OBSERVADO":
+      return "Observado";
+    default:
+      return "Sin expediente";
+  }
+};
+
+export const etiquetaTipoDocumentoSeparacion = (
+  tipo?: string | null
+) => {
+  switch (tipo) {
+    case "DNI":
+      return "DNI del comprador";
+    case "VOUCHER_SEPARACION":
+      return "Voucher de separacion";
+    case "VOUCHER_INICIAL":
+      return "Voucher de inicial";
+    case "CONTRATO":
+      return "Contrato";
+    case "OTRO":
+      return "Otro documento";
+    default:
+      return tipo || "Documento";
+  }
+};
+
 export const TIPOS_CONTACTO = [
   "WHATSAPP",
   "LLAMADA",

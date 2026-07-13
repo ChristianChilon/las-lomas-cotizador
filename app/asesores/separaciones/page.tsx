@@ -5,7 +5,7 @@ export default function AsesoresSeparacionesPage() {
   return (
     <AsesorLayout
       title="Separaciones"
-      subtitle="Crea separaciones y cambia el estado del lote en una sola operacion."
+      subtitle="Controla vencimientos, liberaciones y el expediente documental de cada separacion."
     >
       <SeparacionesTable />
     </AsesorLayout>

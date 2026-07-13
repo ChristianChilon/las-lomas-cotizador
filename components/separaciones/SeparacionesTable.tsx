@@ -4,15 +4,18 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { obtenerPerfilActual } from "../../lib/auth/clientAuth";
+import ExpedienteSeparacionModal from "./ExpedienteSeparacionModal";
 import {
   LOTES_TABLE,
   colorEstado,
   esAdmin,
   esGerencia,
+  etiquetaEstadoExpediente,
   formatearArea,
   formatearMoneda,
   nombreCliente,
   type Cliente,
+  type ExpedienteSeparacion,
   type LoteCrm,
   type Profile,
   type Separacion,
@@ -40,7 +43,8 @@ type FiltroSeparaciones =
   | "TODAS"
   | "ACTIVAS"
   | "VENCIDAS"
-  | "LIBERACION";
+  | "LIBERACION"
+  | "REVISION";
 
 type EstadoVencimiento = {
   clave:
@@ -177,12 +181,41 @@ const formatearFechaLocal = (fecha?: string | null) => {
   return fechaLocal.toLocaleDateString("es-PE");
 };
 
+const estiloEstadoExpediente = (estado?: string | null) => {
+  switch (estado) {
+    case "VALIDADO":
+      return {
+        background: "#e7f4eb",
+        color: "#17633a",
+        borderColor: "#b8dbc4",
+      };
+    case "EN_REVISION":
+      return {
+        background: "#eaf2ff",
+        color: "#1d4f91",
+        borderColor: "#bfd3ef",
+      };
+    case "OBSERVADO":
+      return {
+        background: "#fbe0dc",
+        color: "#8b2f25",
+        borderColor: "#f4b9b0",
+      };
+    default:
+      return {
+        background: "#fff7dc",
+        color: "#7a4b12",
+        borderColor: "#f2d17a",
+      };
+  }
+};
+
 export default function SeparacionesTable() {
   const searchParams = useSearchParams();
 
   const separacionDesdeUrl =
     searchParams.get("separacion");
-    
+
   const [profile, setProfile] =
     useState<Profile | null>(null);
   const [clientes, setClientes] = useState<Cliente[]>(
@@ -195,6 +228,13 @@ export default function SeparacionesTable() {
   const [separaciones, setSeparaciones] = useState<
     Separacion[]
   >([]);
+  const [expedientes, setExpedientes] = useState<
+    ExpedienteSeparacion[]
+  >([]);
+  const [expedienteDisponible, setExpedienteDisponible] =
+    useState(true);
+  const [separacionExpediente, setSeparacionExpediente] =
+    useState<Separacion | null>(null);
   const [form, setForm] =
     useState<SeparacionForm>(formVacio);
   const [mensaje, setMensaje] =
@@ -207,7 +247,7 @@ export default function SeparacionesTable() {
     useState<string | null>(null);
   const [filtroSeparaciones, setFiltroSeparaciones] =
     useState<FiltroSeparaciones>("TODAS");
-  
+
   const [solicitandoLiberacion, setSolicitandoLiberacion] =
     useState<string | null>(null);
 
@@ -228,6 +268,7 @@ export default function SeparacionesTable() {
       lotesRes,
       separacionesRes,
       perfilesRes,
+      expedientesRes,
     ] = await Promise.all([
       supabase
         .from("clientes")
@@ -261,6 +302,11 @@ export default function SeparacionesTable() {
         .select(
           "id,full_name,email,role,phone,active"
         ),
+      supabase
+        .from("separacion_expedientes")
+        .select(
+          "separacion_id,cliente_id,lote_id,asesor_id,estado,pago_monto,pago_fecha,pago_banco,pago_operacion,observaciones,enviado_revision_at,revisado_por,revisado_at,motivo_revision,created_by,created_at,updated_at"
+        ),
     ]);
 
     if (
@@ -282,6 +328,12 @@ export default function SeparacionesTable() {
     setLotes((lotesRes.data || []) as LoteCrm[]);
     setSeparaciones(
       (separacionesRes.data || []) as Separacion[]
+    );
+    setExpedienteDisponible(!expedientesRes.error);
+    setExpedientes(
+      expedientesRes.error
+        ? []
+        : ((expedientesRes.data || []) as ExpedienteSeparacion[])
     );
     setAsesores(
       ((perfilesRes.data || []) as Profile[]).filter(
@@ -363,6 +415,14 @@ export default function SeparacionesTable() {
     return map;
   }, [asesores, profile]);
 
+  const expedientesMap = useMemo(() => {
+    const map: Record<string, ExpedienteSeparacion> = {};
+    expedientes.forEach((expediente) => {
+      map[expediente.separacion_id] = expediente;
+    });
+    return map;
+  }, [expedientes]);
+
   const resumenSeparaciones = useMemo(() => {
     return separaciones.reduce(
       (acumulado, separacion) => {
@@ -389,6 +449,12 @@ export default function SeparacionesTable() {
           acumulado.liberacion += 1;
         }
 
+        if (
+          expedientesMap[separacion.id]?.estado === "EN_REVISION"
+        ) {
+          acumulado.revision += 1;
+        }
+
         return acumulado;
       },
       {
@@ -397,9 +463,10 @@ export default function SeparacionesTable() {
         hoy: 0,
         pronto: 0,
         liberacion: 0,
+        revision: 0,
       }
     );
-  }, [separaciones]);
+  }, [expedientesMap, separaciones]);
 
   const separacionesFiltradas = useMemo(() => {
     return separaciones.filter((separacion) => {
@@ -418,9 +485,15 @@ export default function SeparacionesTable() {
         return Boolean(separacion.liberacion_solicitada);
       }
 
+      if (filtroSeparaciones === "REVISION") {
+        return (
+          expedientesMap[separacion.id]?.estado === "EN_REVISION"
+        );
+      }
+
       return true;
     });
-  }, [filtroSeparaciones, separaciones]);
+  }, [expedientesMap, filtroSeparaciones, separaciones]);
 
   const filtros = [
     {
@@ -442,6 +515,11 @@ export default function SeparacionesTable() {
       key: "LIBERACION" as const,
       label: "Liberacion solicitada",
       count: resumenSeparaciones.liberacion,
+    },
+    {
+      key: "REVISION" as const,
+      label: "Expediente en revision",
+      count: resumenSeparaciones.revision,
     },
   ];
 
@@ -832,6 +910,10 @@ export default function SeparacionesTable() {
           <strong>{resumenSeparaciones.liberacion}</strong>
           <span>Liberacion solicitada</span>
         </div>
+        <div style={resumenItem}>
+          <strong>{resumenSeparaciones.revision}</strong>
+          <span>Expedientes por revisar</span>
+        </div>
       </div>
 
       <div style={filtrosBar}>
@@ -870,6 +952,7 @@ export default function SeparacionesTable() {
                 "Vencimiento",
                 "Estado",
                 "Registro",
+                "Expediente",
                 "Accion",
               ].map((head) => (
                 <th key={head} style={th}>
@@ -897,6 +980,10 @@ export default function SeparacionesTable() {
                 obtenerVencimientoSeparacion(
                   separacion
                 );
+              const expediente =
+                expedientesMap[separacion.id] || null;
+              const expedienteStyle =
+                estiloEstadoExpediente(expediente?.estado);
 
               return (
                 <tr
@@ -966,6 +1053,35 @@ export default function SeparacionesTable() {
                           separacion.created_at
                         ).toLocaleDateString("es-PE")
                       : "-"}
+                  </td>
+                  <td style={td}>
+                    <div style={expedienteCell}>
+                      <span
+                        style={{
+                          ...expedienteBadge,
+                          ...expedienteStyle,
+                        }}
+                      >
+                        {etiquetaEstadoExpediente(
+                          expediente?.estado
+                        )}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={!expedienteDisponible}
+                        title={
+                          expedienteDisponible
+                            ? "Abrir expediente"
+                            : "Ejecuta la migracion 013 para habilitar expedientes"
+                        }
+                        onClick={() =>
+                          setSeparacionExpediente(separacion)
+                        }
+                        style={expedienteButton}
+                      >
+                        Abrir
+                      </button>
+                    </div>
                   </td>
                   <td style={td}>
                     {separacion.estado === "ACTIVA" ? (
@@ -1069,7 +1185,7 @@ export default function SeparacionesTable() {
             })}
             {separacionesFiltradas.length === 0 && (
               <tr>
-                <td colSpan={8} style={emptyState}>
+                <td colSpan={9} style={emptyState}>
                   No hay separaciones para este filtro.
                 </td>
               </tr>
@@ -1077,6 +1193,25 @@ export default function SeparacionesTable() {
           </tbody>
         </table>
       </div>
+
+      {separacionExpediente && profile && (
+        <ExpedienteSeparacionModal
+          separacion={separacionExpediente}
+          lote={
+            separacionExpediente.lote_id
+              ? lotesMap[separacionExpediente.lote_id] || null
+              : null
+          }
+          cliente={
+            separacionExpediente.cliente_id
+              ? clientesMap[separacionExpediente.cliente_id] || null
+              : null
+          }
+          profile={profile}
+          onClose={() => setSeparacionExpediente(null)}
+          onChanged={cargar}
+        />
+      )}
     </section>
   );
 }
@@ -1304,6 +1439,34 @@ const badge: React.CSSProperties = {
   padding: "6px 10px",
   fontWeight: 900,
   fontSize: 12,
+};
+
+const expedienteCell: React.CSSProperties = {
+  display: "grid",
+  gap: 7,
+  minWidth: 126,
+  justifyItems: "start",
+};
+
+const expedienteBadge: React.CSSProperties = {
+  display: "inline-flex",
+  borderRadius: 999,
+  border: "1px solid",
+  padding: "5px 9px",
+  fontSize: 11,
+  fontWeight: 900,
+  whiteSpace: "nowrap",
+};
+
+const expedienteButton: React.CSSProperties = {
+  minHeight: 32,
+  border: "1px solid #b8cbbf",
+  borderRadius: 9,
+  padding: "0 11px",
+  background: "#f6faf7",
+  color: "#165c38",
+  fontWeight: 900,
+  cursor: "pointer",
 };
 
 const success: React.CSSProperties = {
