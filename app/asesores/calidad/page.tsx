@@ -4,12 +4,16 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import AsesorLayout from "../../../components/layout/AsesorLayout";
 import { obtenerPerfilActual } from "../../../lib/auth/clientAuth";
+import type { ConfiguracionComercial } from "../../../lib/comercial";
 import {
   LOTES_TABLE,
   esGerencia,
   etiquetaEstado,
   nombreCliente,
   type Cliente,
+  type Cotizacion,
+  type DocumentoSeparacion,
+  type ExpedienteSeparacion,
   type LoteCrm,
   type Profile,
   type Separacion,
@@ -23,7 +27,11 @@ type Categoria =
   | "SEGUIMIENTO"
   | "SEPARACIONES"
   | "LOTES"
-  | "PERMISOS";
+  | "PERMISOS"
+  | "COTIZACIONES"
+  | "EXPEDIENTES"
+  | "INTEGRACIONES"
+  | "CONFIGURACION";
 
 type Hallazgo = {
   id: string;
@@ -40,6 +48,83 @@ type Hallazgo = {
 
 type FiltroCategoria = Categoria | "TODAS";
 type FiltroSeveridad = Severidad | "TODAS";
+
+type CotizacionAuditoria = Pick<
+  Cotizacion,
+  | "id"
+  | "numero"
+  | "cliente_id"
+  | "lote_id"
+  | "asesor_id"
+  | "estado"
+  | "valida_hasta"
+  | "aprobacion_solicitada_at"
+  | "aprobada_at"
+  | "enviada_at"
+  | "aceptada_at"
+  | "separacion_id"
+  | "created_at"
+  | "updated_at"
+>;
+
+type ExpedienteAuditoria = Pick<
+  ExpedienteSeparacion,
+  | "separacion_id"
+  | "cliente_id"
+  | "lote_id"
+  | "asesor_id"
+  | "estado"
+  | "pago_monto"
+  | "pago_fecha"
+  | "pago_banco"
+  | "pago_operacion"
+  | "motivo_revision"
+>;
+
+type DocumentoAuditoria = Pick<
+  DocumentoSeparacion,
+  | "id"
+  | "separacion_id"
+  | "tipo"
+  | "estado"
+  | "nombre_archivo"
+>;
+
+type LeadPublicoAuditoria = {
+  id: string;
+  cliente_id: string | null;
+  lote_id: number | null;
+  asesor_id: string | null;
+  nombre_completo: string;
+  celular_normalizado: string;
+  origen: string;
+  estado: string;
+  external_id: string | null;
+  created_at: string;
+};
+
+type MetaEventoAuditoria = {
+  id: string;
+  meta_lead_id: string;
+  status: string;
+  attempts: number;
+  last_error: string | null;
+  received_at: string;
+  last_attempt_at: string | null;
+  processed_at: string | null;
+};
+
+type ConfiguracionAuditoria = Pick<
+  ConfiguracionComercial,
+  | "project_key"
+  | "sla_primer_contacto_minutos"
+  | "hora_inicio"
+  | "hora_fin"
+  | "descuento_asesor_max_porcentaje"
+  | "vigencia_cotizacion_dias"
+  | "monto_separacion_referencial"
+  | "inicial_minima"
+>;
 
 const obtenerFechaHoyISO = () => {
   const hoy = new Date();
@@ -131,6 +216,14 @@ const etiquetaCategoria = (categoria: Categoria) => {
       return "Lotes";
     case "PERMISOS":
       return "Permisos";
+    case "COTIZACIONES":
+      return "Cotizaciones";
+    case "EXPEDIENTES":
+      return "Expedientes";
+    case "INTEGRACIONES":
+      return "Integraciones";
+    case "CONFIGURACION":
+      return "Configuracion";
   }
 };
 
@@ -142,7 +235,27 @@ export default function CalidadPage() {
   const [separaciones, setSeparaciones] = useState<
     Separacion[]
   >([]);
+  const [cotizaciones, setCotizaciones] = useState<
+    CotizacionAuditoria[]
+  >([]);
+  const [expedientes, setExpedientes] = useState<
+    ExpedienteAuditoria[]
+  >([]);
+  const [documentos, setDocumentos] = useState<
+    DocumentoAuditoria[]
+  >([]);
+  const [leadsPublicos, setLeadsPublicos] = useState<
+    LeadPublicoAuditoria[]
+  >([]);
+  const [eventosMeta, setEventosMeta] = useState<
+    MetaEventoAuditoria[]
+  >([]);
+  const [configuracion, setConfiguracion] =
+    useState<ConfiguracionAuditoria | null>(null);
   const [asesores, setAsesores] = useState<Profile[]>([]);
+  const [fechaAuditoria, setFechaAuditoria] = useState(() =>
+    new Date().toISOString()
+  );
   const [categoria, setCategoria] =
     useState<FiltroCategoria>("TODAS");
   const [severidad, setSeveridad] =
@@ -183,6 +296,12 @@ export default function CalidadPage() {
       lotesResult,
       separacionesResult,
       asesoresResult,
+      cotizacionesResult,
+      expedientesResult,
+      documentosResult,
+      leadsResult,
+      eventosMetaResult,
+      configuracionResult,
     ] = await Promise.all([
       supabase.from("clientes").select(
         [
@@ -224,13 +343,56 @@ export default function CalidadPage() {
           ascending: true,
           nullsFirst: false,
         }),
+      supabase
+        .from("cotizaciones")
+        .select(
+          "id,numero,cliente_id,lote_id,asesor_id,estado,valida_hasta,aprobacion_solicitada_at,aprobada_at,enviada_at,aceptada_at,separacion_id,created_at,updated_at"
+        )
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("separacion_expedientes")
+        .select(
+          "separacion_id,cliente_id,lote_id,asesor_id,estado,pago_monto,pago_fecha,pago_banco,pago_operacion,motivo_revision"
+        ),
+      supabase
+        .from("separacion_documentos")
+        .select(
+          "id,separacion_id,tipo,estado,nombre_archivo"
+        ),
+      supabase
+        .from("leads_publicos")
+        .select(
+          "id,cliente_id,lote_id,asesor_id,nombre_completo,celular_normalizado,origen,estado,external_id,created_at"
+        )
+        .order("created_at", { ascending: false })
+        .limit(1000),
+      supabase
+        .from("meta_lead_events")
+        .select(
+          "id,meta_lead_id,status,attempts,last_error,received_at,last_attempt_at,processed_at"
+        )
+        .order("received_at", { ascending: false })
+        .limit(500),
+      supabase
+        .from("configuracion_comercial")
+        .select(
+          "project_key,sla_primer_contacto_minutos,hora_inicio,hora_fin,descuento_asesor_max_porcentaje,vigencia_cotizacion_dias,monto_separacion_referencial,inicial_minima"
+        )
+        .eq("project_key", "las_lomas")
+        .maybeSingle(),
     ]);
 
     const errorActual =
       clientesResult.error ||
       lotesResult.error ||
       separacionesResult.error ||
-      asesoresResult.error;
+      asesoresResult.error ||
+      cotizacionesResult.error ||
+      expedientesResult.error ||
+      documentosResult.error ||
+      leadsResult.error ||
+      eventosMetaResult.error ||
+      configuracionResult.error;
 
     if (errorActual) {
       setError(errorActual.message);
@@ -247,9 +409,30 @@ export default function CalidadPage() {
     setSeparaciones(
       (separacionesResult.data || []) as unknown as Separacion[]
     );
+    setCotizaciones(
+      (cotizacionesResult.data || []) as unknown as CotizacionAuditoria[]
+    );
+    setExpedientes(
+      (expedientesResult.data || []) as unknown as ExpedienteAuditoria[]
+    );
+    setDocumentos(
+      (documentosResult.data || []) as unknown as DocumentoAuditoria[]
+    );
+    setLeadsPublicos(
+      (leadsResult.data || []) as unknown as LeadPublicoAuditoria[]
+    );
+    setEventosMeta(
+      (eventosMetaResult.data || []) as unknown as MetaEventoAuditoria[]
+    );
+    setConfiguracion(
+      configuracionResult.data
+        ? (configuracionResult.data as unknown as ConfiguracionAuditoria)
+        : null
+    );
     setAsesores(
       (asesoresResult.data || []) as unknown as Profile[]
     );
+    setFechaAuditoria(new Date().toISOString());
     setCargando(false);
   };
 
@@ -304,6 +487,40 @@ export default function CalidadPage() {
 
     return mapa;
   }, [separaciones]);
+
+  const separacionesPorId = useMemo(
+    () =>
+      new Map(
+        separaciones.map((separacion) => [
+          separacion.id,
+          separacion,
+        ])
+      ),
+    [separaciones]
+  );
+
+  const expedientesPorSeparacion = useMemo(
+    () =>
+      new Map(
+        expedientes.map((expediente) => [
+          expediente.separacion_id,
+          expediente,
+        ])
+      ),
+    [expedientes]
+  );
+
+  const documentosPorSeparacion = useMemo(() => {
+    const mapa = new Map<string, DocumentoAuditoria[]>();
+
+    documentos.forEach((documento) => {
+      const lista = mapa.get(documento.separacion_id) || [];
+      lista.push(documento);
+      mapa.set(documento.separacion_id, lista);
+    });
+
+    return mapa;
+  }, [documentos]);
 
   const hallazgos = useMemo<Hallazgo[]>(() => {
     const hoy = obtenerFechaHoyISO();
@@ -601,6 +818,22 @@ export default function CalidadPage() {
       const separacionesActivas =
         separacionesActivasPorLote.get(lote.id) || [];
 
+      if (separacionesActivas.length > 1) {
+        lista.push({
+          id: `lote-separaciones-duplicadas-${lote.id}`,
+          severidad: "CRITICA",
+          categoria: "SEPARACIONES",
+          titulo: "Lote con varias separaciones activas",
+          descripcion: `${entidad} tiene ${separacionesActivas.length} separaciones activas al mismo tiempo.`,
+          recomendacion:
+            "Conserva una sola separacion y resuelve las duplicadas antes de continuar la venta.",
+          href: "/asesores/separaciones",
+          accion: "Revisar separaciones",
+          entidad,
+          responsable: asesor,
+        });
+      }
+
       if (
         ["SEPARADO", "CIERRE_SOLICITADO", "VENDIDO"].includes(estado) &&
         !lote.cliente_id
@@ -673,6 +906,41 @@ export default function CalidadPage() {
         });
       }
 
+      if (
+        estado === "CIERRE_SOLICITADO" &&
+        separacionesActivas.length === 0
+      ) {
+        lista.push({
+          id: `cierre-sin-separacion-${lote.id}`,
+          severidad: "CRITICA",
+          categoria: "EXPEDIENTES",
+          titulo: "Cierre solicitado sin separacion activa",
+          descripcion: `${entidad} solicita cierre, pero no existe una separacion activa que sustente la venta.`,
+          recomendacion:
+            "Devuelve el cierre a disponible y registra primero al comprador con su separacion.",
+          href: `/asesores/lotes?lote=${lote.id}`,
+          accion: "Regularizar cierre",
+          entidad,
+          responsable: asesor,
+        });
+      }
+
+      if (estado === "VENDIDO" && separacionesActivas.length > 0) {
+        lista.push({
+          id: `vendido-separacion-activa-${lote.id}`,
+          severidad: "CRITICA",
+          categoria: "EXPEDIENTES",
+          titulo: "Venta cerrada con separacion aun activa",
+          descripcion: `${entidad} esta vendido, pero su separacion no fue convertida o cerrada.`,
+          recomendacion:
+            "Revisa el cierre y convierte la separacion para que reportes y expediente coincidan.",
+          href: "/asesores/separaciones",
+          accion: "Revisar expediente",
+          entidad,
+          responsable: asesor,
+        });
+      }
+
       if (lote.cliente_id && !clientesPorId.has(lote.cliente_id)) {
         lista.push({
           id: `lote-cliente-inexistente-${lote.id}`,
@@ -715,6 +983,528 @@ export default function CalidadPage() {
       }
     });
 
+    cotizaciones.forEach((cotizacion) => {
+      const entidad = cotizacion.numero || `Cotizacion ${cotizacion.id}`;
+      const asesor = nombreAsesor(
+        cotizacion.asesor_id,
+        asesoresPorId
+      );
+      const separacion = cotizacion.separacion_id
+        ? separacionesPorId.get(cotizacion.separacion_id)
+        : undefined;
+
+      if (!clientesPorId.has(cotizacion.cliente_id)) {
+        lista.push({
+          id: `cotizacion-cliente-${cotizacion.id}`,
+          severidad: "CRITICA",
+          categoria: "COTIZACIONES",
+          titulo: "Cotizacion sin cliente valido",
+          descripcion: `${entidad} apunta a un cliente inexistente.`,
+          recomendacion:
+            "Corrige la relacion antes de enviar o convertir la propuesta.",
+          href: "/asesores/cotizaciones",
+          accion: "Revisar cotizacion",
+          entidad,
+          responsable: asesor,
+        });
+      }
+
+      if (!lotesPorId.has(Number(cotizacion.lote_id))) {
+        lista.push({
+          id: `cotizacion-lote-${cotizacion.id}`,
+          severidad: "CRITICA",
+          categoria: "COTIZACIONES",
+          titulo: "Cotizacion sin lote valido",
+          descripcion: `${entidad} apunta a un lote inexistente.`,
+          recomendacion:
+            "Anula la propuesta o vincula el lote correcto antes de continuar.",
+          href: "/asesores/cotizaciones",
+          accion: "Revisar cotizacion",
+          entidad,
+          responsable: asesor,
+        });
+      }
+
+      if (!asesoresPorId.has(cotizacion.asesor_id)) {
+        lista.push({
+          id: `cotizacion-asesor-${cotizacion.id}`,
+          severidad: "ALTA",
+          categoria: "COTIZACIONES",
+          titulo: "Cotizacion sin responsable valido",
+          descripcion: `${entidad} no tiene un usuario responsable disponible.`,
+          recomendacion:
+            "Reasigna la propuesta para conservar trazabilidad y seguimiento.",
+          href: "/asesores/cotizaciones",
+          accion: "Revisar cotizacion",
+          entidad,
+          responsable: asesor,
+        });
+      }
+
+      if (
+        ["BORRADOR", "PENDIENTE_APROBACION", "ENVIADA"].includes(
+          String(cotizacion.estado)
+        ) &&
+        cotizacion.valida_hasta < hoy
+      ) {
+        lista.push({
+          id: `cotizacion-vencida-${cotizacion.id}`,
+          severidad:
+            cotizacion.estado === "BORRADOR" ? "MEDIA" : "ALTA",
+          categoria: "COTIZACIONES",
+          titulo: "Cotizacion vencida sin resolver",
+          descripcion: `${entidad} vencio el ${cotizacion.valida_hasta} y continua en estado ${cotizacion.estado}.`,
+          recomendacion:
+            "Renueva la propuesta, marcala vencida o registra la decision del cliente.",
+          href: "/asesores/cotizaciones",
+          accion: "Gestionar cotizacion",
+          entidad,
+          responsable: asesor,
+        });
+      }
+
+      if (
+        cotizacion.estado === "PENDIENTE_APROBACION" &&
+        !cotizacion.aprobacion_solicitada_at
+      ) {
+        lista.push({
+          id: `cotizacion-aprobacion-${cotizacion.id}`,
+          severidad: "ALTA",
+          categoria: "COTIZACIONES",
+          titulo: "Aprobacion sin fecha de solicitud",
+          descripcion: `${entidad} espera aprobacion, pero no registra cuando fue solicitada.`,
+          recomendacion:
+            "Revisa la propuesta y vuelve a registrar el flujo de aprobacion.",
+          href: "/asesores/cotizaciones?estado=PENDIENTE_APROBACION",
+          accion: "Revisar aprobacion",
+          entidad,
+          responsable: asesor,
+        });
+      }
+
+      if (cotizacion.estado === "ENVIADA" && !cotizacion.enviada_at) {
+        lista.push({
+          id: `cotizacion-envio-${cotizacion.id}`,
+          severidad: "ALTA",
+          categoria: "COTIZACIONES",
+          titulo: "Cotizacion enviada sin fecha",
+          descripcion: `${entidad} figura enviada, pero no tiene evidencia temporal del envio.`,
+          recomendacion:
+            "Confirma el envio y registra nuevamente el estado de la propuesta.",
+          href: "/asesores/cotizaciones",
+          accion: "Revisar envio",
+          entidad,
+          responsable: asesor,
+        });
+      }
+
+      if (cotizacion.estado === "ACEPTADA" && !cotizacion.aceptada_at) {
+        lista.push({
+          id: `cotizacion-aceptacion-${cotizacion.id}`,
+          severidad: "ALTA",
+          categoria: "COTIZACIONES",
+          titulo: "Cotizacion aceptada sin fecha",
+          descripcion: `${entidad} figura aceptada, pero no registra la fecha de aceptacion.`,
+          recomendacion:
+            "Regulariza la aceptacion antes de generar la separacion.",
+          href: "/asesores/cotizaciones",
+          accion: "Revisar aceptacion",
+          entidad,
+          responsable: asesor,
+        });
+      }
+
+      if (cotizacion.estado === "CONVERTIDA") {
+        if (!cotizacion.separacion_id || !separacion) {
+          lista.push({
+            id: `cotizacion-convertida-${cotizacion.id}`,
+            severidad: "CRITICA",
+            categoria: "COTIZACIONES",
+            titulo: "Cotizacion convertida sin separacion",
+            descripcion: `${entidad} figura convertida, pero no existe su separacion vinculada.`,
+            recomendacion:
+              "Reconstruye la relacion antes de cerrar la venta o emitir documentos.",
+            href: "/asesores/cotizaciones",
+            accion: "Revisar conversion",
+            entidad,
+            responsable: asesor,
+          });
+        } else if (
+          separacion.cliente_id !== cotizacion.cliente_id ||
+          Number(separacion.lote_id) !== Number(cotizacion.lote_id) ||
+          separacion.asesor_id !== cotizacion.asesor_id
+        ) {
+          lista.push({
+            id: `cotizacion-conversion-inconsistente-${cotizacion.id}`,
+            severidad: "CRITICA",
+            categoria: "COTIZACIONES",
+            titulo: "Conversion con datos inconsistentes",
+            descripcion: `${entidad} y su separacion no coinciden en cliente, lote o asesor.`,
+            recomendacion:
+              "Deten el cierre y corrige la relacion comercial antes de continuar.",
+            href: `/asesores/separaciones?separacion=${separacion.id}`,
+            accion: "Revisar separacion",
+            entidad,
+            responsable: asesor,
+          });
+        }
+      }
+    });
+
+    separaciones.forEach((separacion) => {
+      const expediente = expedientesPorSeparacion.get(separacion.id);
+      const lote = separacion.lote_id
+        ? lotesPorId.get(Number(separacion.lote_id))
+        : undefined;
+      const entidad = lote ? nombreLote(lote) : `Separacion ${separacion.id}`;
+      const asesor = nombreAsesor(
+        separacion.asesor_id,
+        asesoresPorId
+      );
+
+      if (
+        separacion.estado === "ACTIVA" &&
+        lote?.estado === "CIERRE_SOLICITADO" &&
+        !expediente
+      ) {
+        lista.push({
+          id: `cierre-expediente-ausente-${separacion.id}`,
+          severidad: "CRITICA",
+          categoria: "EXPEDIENTES",
+          titulo: "Cierre sin expediente iniciado",
+          descripcion: `${entidad} solicita cierre sin pago ni documentos registrados.`,
+          recomendacion:
+            "Inicia el expediente, carga DNI y voucher y envialo a revision.",
+          href: `/asesores/separaciones?separacion=${separacion.id}`,
+          accion: "Completar expediente",
+          entidad,
+          responsable: asesor,
+        });
+      }
+
+      if (
+        separacion.estado === "ACTIVA" &&
+        lote?.estado === "CIERRE_SOLICITADO" &&
+        expediente &&
+        expediente.estado !== "VALIDADO"
+      ) {
+        lista.push({
+          id: `cierre-expediente-pendiente-${separacion.id}`,
+          severidad: "ALTA",
+          categoria: "EXPEDIENTES",
+          titulo: "Cierre esperando validacion documental",
+          descripcion: `${entidad} no puede venderse porque el expediente esta ${expediente.estado}.`,
+          recomendacion:
+            "Resuelve observaciones o valida documentos antes de aprobar la venta.",
+          href: `/asesores/separaciones?separacion=${separacion.id}`,
+          accion: "Revisar expediente",
+          entidad,
+          responsable: asesor,
+        });
+      }
+    });
+
+    expedientes.forEach((expediente) => {
+      const separacion = separacionesPorId.get(expediente.separacion_id);
+      const lote = lotesPorId.get(Number(expediente.lote_id));
+      const entidad = lote
+        ? nombreLote(lote)
+        : `Expediente ${expediente.separacion_id}`;
+      const asesor = nombreAsesor(expediente.asesor_id, asesoresPorId);
+      const documentosExpediente =
+        documentosPorSeparacion.get(expediente.separacion_id) || [];
+
+      if (!separacion) {
+        lista.push({
+          id: `expediente-separacion-${expediente.separacion_id}`,
+          severidad: "CRITICA",
+          categoria: "EXPEDIENTES",
+          titulo: "Expediente sin separacion valida",
+          descripcion: `${entidad} no tiene una separacion asociada disponible.`,
+          recomendacion:
+            "Revisa la integridad del registro antes de usar sus documentos.",
+          href: "/asesores/separaciones",
+          accion: "Revisar expedientes",
+          entidad,
+          responsable: asesor,
+        });
+        return;
+      }
+
+      if (
+        separacion.cliente_id !== expediente.cliente_id ||
+        Number(separacion.lote_id) !== Number(expediente.lote_id) ||
+        separacion.asesor_id !== expediente.asesor_id
+      ) {
+        lista.push({
+          id: `expediente-datos-${expediente.separacion_id}`,
+          severidad: "CRITICA",
+          categoria: "EXPEDIENTES",
+          titulo: "Expediente no coincide con la separacion",
+          descripcion: `${entidad} tiene diferencias de cliente, lote o asesor.`,
+          recomendacion:
+            "Deten el cierre y corrige la relacion antes de validar documentos.",
+          href: `/asesores/separaciones?separacion=${expediente.separacion_id}`,
+          accion: "Revisar expediente",
+          entidad,
+          responsable: asesor,
+        });
+      }
+
+      if (expediente.estado === "VALIDADO") {
+        const dniValidado = documentosExpediente.some(
+          (documento) =>
+            documento.tipo === "DNI" && documento.estado === "VALIDADO"
+        );
+        const voucherValidado = documentosExpediente.some(
+          (documento) =>
+            ["VOUCHER_SEPARACION", "VOUCHER_INICIAL"].includes(
+              documento.tipo
+            ) && documento.estado === "VALIDADO"
+        );
+        const pagoCompleto =
+          Number(expediente.pago_monto || 0) > 0 &&
+          Boolean(expediente.pago_fecha) &&
+          Boolean(expediente.pago_banco?.trim()) &&
+          Boolean(expediente.pago_operacion?.trim());
+
+        if (!dniValidado || !voucherValidado || !pagoCompleto) {
+          lista.push({
+            id: `expediente-validado-incompleto-${expediente.separacion_id}`,
+            severidad: "CRITICA",
+            categoria: "EXPEDIENTES",
+            titulo: "Expediente validado con requisitos incompletos",
+            descripcion: `${entidad} figura validado, pero falta pago, DNI o voucher aprobado.`,
+            recomendacion:
+              "Reabre la revision documental y completa los requisitos antes de vender.",
+            href: `/asesores/separaciones?separacion=${expediente.separacion_id}`,
+            accion: "Auditar expediente",
+            entidad,
+            responsable: asesor,
+          });
+        }
+      }
+
+      if (
+        expediente.estado === "OBSERVADO" &&
+        !expediente.motivo_revision?.trim()
+      ) {
+        lista.push({
+          id: `expediente-observado-sin-motivo-${expediente.separacion_id}`,
+          severidad: "MEDIA",
+          categoria: "EXPEDIENTES",
+          titulo: "Expediente observado sin motivo",
+          descripcion: `${entidad} fue observado sin indicar que debe corregirse.`,
+          recomendacion:
+            "Registra una observacion concreta para que el asesor pueda subsanarla.",
+          href: `/asesores/separaciones?separacion=${expediente.separacion_id}`,
+          accion: "Completar observacion",
+          entidad,
+          responsable: asesor,
+        });
+      }
+    });
+
+    const limiteEventoMeta = new Date(
+      new Date(fechaAuditoria).getTime() - 5 * 60 * 1000
+    ).toISOString();
+    const eventosMetaCompletados = eventosMeta.filter(
+      (evento) => evento.status === "COMPLETADO"
+    );
+
+    eventosMeta.forEach((evento) => {
+      if (evento.status === "ERROR") {
+        lista.push({
+          id: `meta-error-${evento.id}`,
+          severidad: "ALTA",
+          categoria: "INTEGRACIONES",
+          titulo: "Meta entrego un lead con error",
+          descripcion: `El lead ${evento.meta_lead_id} no completo su ingreso al CRM: ${
+            evento.last_error || "error sin detalle"
+          }`,
+          recomendacion:
+            "Corrige el error o recupera el Lead ID desde Leads entrantes antes de activar campanas.",
+          href: "/asesores/leads",
+          accion: "Revisar Meta",
+          entidad: evento.meta_lead_id,
+          responsable: "Gerencia",
+        });
+      }
+
+      if (
+        ["PENDIENTE", "PROCESANDO"].includes(evento.status) &&
+        evento.received_at < limiteEventoMeta
+      ) {
+        lista.push({
+          id: `meta-atascado-${evento.id}`,
+          severidad: "ALTA",
+          categoria: "INTEGRACIONES",
+          titulo: "Evento Meta atascado",
+          descripcion: `El lead ${evento.meta_lead_id} lleva mas de 5 minutos en ${evento.status}.`,
+          recomendacion:
+            "Revisa el webhook y recupera el lead para no perder el SLA comercial.",
+          href: "/asesores/leads",
+          accion: "Revisar evento",
+          entidad: evento.meta_lead_id,
+          responsable: "Gerencia",
+        });
+      }
+    });
+
+    if (eventosMetaCompletados.length === 0) {
+      lista.push({
+        id: "meta-sin-prueba-completa",
+        severidad: eventosMeta.length > 0 ? "ALTA" : "MEDIA",
+        categoria: "INTEGRACIONES",
+        titulo: "Meta Lead Ads aun no esta validado extremo a extremo",
+        descripcion:
+          "No existe un evento Meta completado que confirme webhook, Graph API, Supabase y CRM.",
+        recomendacion:
+          "Realiza una sola prueba oficial antes de publicar la primera campana pagada.",
+        href: "/asesores/leads",
+        accion: "Abrir Leads entrantes",
+        entidad: "Meta Lead Ads",
+        responsable: "Gerencia",
+      });
+    }
+
+    leadsPublicos
+      .filter((lead) => lead.origen === "META_LEAD_ADS")
+      .forEach((lead) => {
+        const entidad = lead.nombre_completo || lead.external_id || lead.id;
+
+        if (lead.estado !== "DESCARTADO" && !lead.cliente_id) {
+          lista.push({
+            id: `meta-lead-sin-cliente-${lead.id}`,
+            severidad: "CRITICA",
+            categoria: "INTEGRACIONES",
+            titulo: "Lead Meta sin cliente creado",
+            descripcion: `${entidad} ingreso desde Meta, pero no tiene cliente vinculado.`,
+            recomendacion:
+              "Recupera el lead y verifica que la captura cree o reutilice al cliente.",
+            href: "/asesores/leads",
+            accion: "Revisar lead",
+            entidad,
+            responsable: "Gerencia",
+          });
+        }
+
+        if (lead.estado === "NUEVO" && !lead.asesor_id) {
+          lista.push({
+            id: `meta-lead-sin-asesor-${lead.id}`,
+            severidad: "ALTA",
+            categoria: "INTEGRACIONES",
+            titulo: "Lead Meta nuevo sin asesor",
+            descripcion: `${entidad} no tiene responsable para el primer contacto.`,
+            recomendacion:
+              "Asigna el lead o revisa la distribucion automatica antes de aumentar presupuesto.",
+            href: "/asesores/leads",
+            accion: "Asignar lead",
+            entidad,
+            responsable: "Sin asesor",
+          });
+        }
+      });
+
+    if (!configuracion) {
+      lista.push({
+        id: "configuracion-comercial-ausente",
+        severidad: "CRITICA",
+        categoria: "CONFIGURACION",
+        titulo: "Falta configuracion comercial",
+        descripcion:
+          "No existe la configuracion del proyecto Las Lomas para SLA, inicial y cotizaciones.",
+        recomendacion:
+          "Completa Reglas comerciales antes de permitir cotizaciones y reparto de leads.",
+        href: "/asesores/configuracion",
+        accion: "Configurar CRM",
+        entidad: "Las Lomas",
+        responsable: "Gerencia",
+      });
+    } else {
+      if (
+        configuracion.sla_primer_contacto_minutos <= 0 ||
+        configuracion.vigencia_cotizacion_dias <= 0 ||
+        configuracion.inicial_minima <= 0 ||
+        configuracion.monto_separacion_referencial < 0 ||
+        configuracion.hora_inicio >= configuracion.hora_fin
+      ) {
+        lista.push({
+          id: "configuracion-comercial-invalida",
+          severidad: "CRITICA",
+          categoria: "CONFIGURACION",
+          titulo: "Reglas comerciales invalidas",
+          descripcion:
+            "SLA, horario, vigencia, inicial o separacion contienen valores que impiden operar correctamente.",
+          recomendacion:
+            "Corrige los valores desde Reglas comerciales y vuelve a ejecutar la auditoria.",
+          href: "/asesores/configuracion",
+          accion: "Corregir reglas",
+          entidad: "Las Lomas",
+          responsable: "Gerencia",
+        });
+      }
+
+      if (
+        configuracion.descuento_asesor_max_porcentaje < 0 ||
+        configuracion.descuento_asesor_max_porcentaje > 30
+      ) {
+        lista.push({
+          id: "descuento-asesor-invalido",
+          severidad: "ALTA",
+          categoria: "CONFIGURACION",
+          titulo: "Limite de descuento fuera de rango",
+          descripcion:
+            "El descuento permitido al asesor no es consistente con las reglas del CRM.",
+          recomendacion:
+            "Define un porcentaje entre 0 y 30 antes de emitir propuestas.",
+          href: "/asesores/configuracion",
+          accion: "Revisar descuentos",
+          entidad: "Reglas comerciales",
+          responsable: "Gerencia",
+        });
+      }
+    }
+
+    const gerentesActivos = asesores.filter(
+      (asesor) =>
+        asesor.active !== false &&
+        ["admin", "jefe_ventas"].includes(asesor.role)
+    );
+    const asesoresActivos = asesores.filter(
+      (asesor) => asesor.active !== false && asesor.role === "asesor"
+    );
+
+    if (gerentesActivos.length === 0) {
+      lista.push({
+        id: "equipo-sin-gerencia",
+        severidad: "CRITICA",
+        categoria: "PERMISOS",
+        titulo: "No hay gerencia activa",
+        descripcion:
+          "El CRM no tiene admin o jefe de ventas activo para aprobar cierres y expedientes.",
+        recomendacion:
+          "Activa al menos un responsable de gerencia antes de iniciar operaciones.",
+        entidad: "Equipo CRM",
+        responsable: "Gerencia",
+      });
+    }
+
+    if (asesoresActivos.length === 0) {
+      lista.push({
+        id: "equipo-sin-asesores",
+        severidad: "CRITICA",
+        categoria: "PERMISOS",
+        titulo: "No hay asesores activos",
+        descripcion:
+          "No existe un asesor habilitado para recibir leads y gestionar ventas.",
+        recomendacion:
+          "Crea o activa las cuentas comerciales antes de lanzar publicidad.",
+        entidad: "Equipo CRM",
+        responsable: "Gerencia",
+      });
+    }
+
     return lista.sort((a, b) => {
       const severidadOrden =
         pesoSeveridad[a.severidad] - pesoSeveridad[b.severidad];
@@ -728,10 +1518,19 @@ export default function CalidadPage() {
     asesoresPorId,
     clientes,
     clientesPorId,
+    configuracion,
+    cotizaciones,
+    documentosPorSeparacion,
+    eventosMeta,
+    expedientes,
+    expedientesPorSeparacion,
+    fechaAuditoria,
+    leadsPublicos,
     lotes,
     lotesPorId,
     separaciones,
     separacionesActivasPorLote,
+    separacionesPorId,
   ]);
 
   const hallazgosFiltrados = useMemo(() => {
@@ -773,18 +1572,121 @@ export default function CalidadPage() {
       altas: hallazgos.filter(
         (hallazgo) => hallazgo.severidad === "ALTA"
       ).length,
-      duplicados: hallazgos.filter(
-        (hallazgo) => hallazgo.categoria === "DUPLICADOS"
+      cotizaciones: hallazgos.filter(
+        (hallazgo) => hallazgo.categoria === "COTIZACIONES"
       ).length,
-      lotes: hallazgos.filter(
-        (hallazgo) => hallazgo.categoria === "LOTES"
+      expedientes: hallazgos.filter(
+        (hallazgo) => hallazgo.categoria === "EXPEDIENTES"
       ).length,
-      separaciones: hallazgos.filter(
-        (hallazgo) => hallazgo.categoria === "SEPARACIONES"
+      integraciones: hallazgos.filter(
+        (hallazgo) => hallazgo.categoria === "INTEGRACIONES"
       ).length,
     }),
     [hallazgos]
   );
+
+  const controlesLanzamiento = useMemo(() => {
+    const tieneCritico = (...categoriasAuditadas: Categoria[]) =>
+      hallazgos.some(
+        (hallazgo) =>
+          hallazgo.severidad === "CRITICA" &&
+          categoriasAuditadas.includes(hallazgo.categoria)
+      );
+    const gerenciaActiva = asesores.some(
+      (asesor) =>
+        asesor.active !== false &&
+        ["admin", "jefe_ventas"].includes(asesor.role)
+    );
+    const asesorActivo = asesores.some(
+      (asesor) => asesor.active !== false && asesor.role === "asesor"
+    );
+    const metaCompletado = eventosMeta.some(
+      (evento) => evento.status === "COMPLETADO"
+    );
+
+    return [
+      {
+        id: "cartera",
+        label: "Cartera y seguimiento",
+        detalle: "Clientes, duplicados y responsables",
+        listo: !tieneCritico("DATOS", "DUPLICADOS", "SEGUIMIENTO"),
+        categoria: "DATOS" as FiltroCategoria,
+      },
+      {
+        id: "inventario",
+        label: "Inventario comercial",
+        detalle: "Lotes y separaciones consistentes",
+        listo: !tieneCritico("LOTES", "SEPARACIONES"),
+        categoria: "LOTES" as FiltroCategoria,
+      },
+      {
+        id: "cotizaciones",
+        label: "Cotizaciones",
+        detalle: "Propuestas y conversiones trazables",
+        listo: !tieneCritico("COTIZACIONES"),
+        categoria: "COTIZACIONES" as FiltroCategoria,
+      },
+      {
+        id: "expedientes",
+        label: "Cierres documentales",
+        detalle: "Pago, DNI, voucher y separacion",
+        listo: !tieneCritico("EXPEDIENTES"),
+        categoria: "EXPEDIENTES" as FiltroCategoria,
+      },
+      {
+        id: "operacion",
+        label: "Reglas y equipo",
+        detalle: "Configuracion y usuarios activos",
+        listo:
+          Boolean(configuracion) &&
+          gerenciaActiva &&
+          asesorActivo &&
+          !tieneCritico("CONFIGURACION", "PERMISOS"),
+        categoria: "CONFIGURACION" as FiltroCategoria,
+      },
+      {
+        id: "meta",
+        label: "Meta Lead Ads",
+        detalle: "Prueba completa de punta a punta",
+        listo: metaCompletado && !tieneCritico("INTEGRACIONES"),
+        categoria: "INTEGRACIONES" as FiltroCategoria,
+      },
+    ];
+  }, [asesores, configuracion, eventosMeta, hallazgos]);
+
+  const controlesAprobados = controlesLanzamiento.filter(
+    (control) => control.listo
+  ).length;
+  const controlesPendientes =
+    controlesLanzamiento.length - controlesAprobados;
+  const estadoLanzamiento =
+    controlesPendientes > 0 || resumen.criticas > 0
+      ? {
+          etiqueta: "BLOQUEADO",
+          titulo: "Aun no conviene iniciar ventas en produccion",
+          detalle: `${controlesPendientes} controles requieren atencion antes del lanzamiento.`,
+          color: "#8f241b",
+          fondo: "#fff4f2",
+          borde: "#efb9b2",
+        }
+      : resumen.altas > 0
+        ? {
+            etiqueta: "CON OBSERVACIONES",
+            titulo: "El CRM puede operar con ajustes pendientes",
+            detalle: `Quedan ${resumen.altas} hallazgos altos que deben tener responsable y fecha de correccion.`,
+            color: "#7a4b00",
+            fondo: "#fff8e8",
+            borde: "#e8cd86",
+          }
+        : {
+            etiqueta: "LISTO",
+            titulo: "Controles esenciales aprobados",
+            detalle:
+              "El CRM no presenta bloqueos criticos detectados por esta auditoria.",
+            color: "#17633a",
+            fondo: "#eff8f1",
+            borde: "#b9dcc3",
+          };
 
   const categorias: {
     id: FiltroCategoria;
@@ -817,6 +1719,22 @@ export default function CalidadPage() {
     {
       id: "PERMISOS",
       label: "Permisos",
+    },
+    {
+      id: "COTIZACIONES",
+      label: "Cotizaciones",
+    },
+    {
+      id: "EXPEDIENTES",
+      label: "Expedientes",
+    },
+    {
+      id: "INTEGRACIONES",
+      label: "Integraciones",
+    },
+    {
+      id: "CONFIGURACION",
+      label: "Configuracion",
     },
   ];
 
@@ -871,7 +1789,8 @@ export default function CalidadPage() {
             <p style={subtitle}>
               Detecta problemas que pueden costar ventas: datos
               incompletos, duplicados, seguimientos vencidos,
-              separaciones mal registradas y lotes inconsistentes.
+              separaciones, cotizaciones, cierres documentales e
+              integraciones inconsistentes.
             </p>
           </div>
 
@@ -882,6 +1801,53 @@ export default function CalidadPage() {
           >
             Actualizar auditoria
           </button>
+        </div>
+
+        <div
+          style={{
+            ...launchStatus,
+            color: estadoLanzamiento.color,
+            background: estadoLanzamiento.fondo,
+            borderColor: estadoLanzamiento.borde,
+          }}
+        >
+          <div style={launchStatusCopy}>
+            <span style={launchEyebrow}>
+              Preparacion para lanzamiento · {estadoLanzamiento.etiqueta}
+            </span>
+            <h2 style={launchTitle}>{estadoLanzamiento.titulo}</h2>
+            <p style={launchDescription}>{estadoLanzamiento.detalle}</p>
+          </div>
+
+          <div style={launchScore}>
+            <strong>
+              {controlesAprobados}/{controlesLanzamiento.length}
+            </strong>
+            <span>controles aprobados</span>
+          </div>
+        </div>
+
+        <div style={launchChecksGrid}>
+          {controlesLanzamiento.map((control) => (
+            <button
+              key={control.id}
+              type="button"
+              onClick={() => {
+                setSeveridad("TODAS");
+                setCategoria(control.categoria);
+              }}
+              style={{
+                ...launchCheck,
+                ...(control.listo ? launchCheckReady : launchCheckPending),
+              }}
+            >
+              <span style={launchCheckStatus}>
+                {control.listo ? "APROBADO" : "PENDIENTE"}
+              </span>
+              <strong>{control.label}</strong>
+              <small>{control.detalle}</small>
+            </button>
+          ))}
         </div>
 
         <div style={summaryGrid}>
@@ -917,29 +1883,29 @@ export default function CalidadPage() {
 
           <button
             type="button"
-            onClick={() => setCategoria("DUPLICADOS")}
+            onClick={() => setCategoria("COTIZACIONES")}
             style={summaryCardBlue}
           >
-            <span>Duplicados</span>
-            <strong>{resumen.duplicados}</strong>
+            <span>Cotizaciones</span>
+            <strong>{resumen.cotizaciones}</strong>
           </button>
 
           <button
             type="button"
-            onClick={() => setCategoria("LOTES")}
+            onClick={() => setCategoria("EXPEDIENTES")}
             style={summaryCardGreen}
           >
-            <span>Lotes</span>
-            <strong>{resumen.lotes}</strong>
+            <span>Expedientes</span>
+            <strong>{resumen.expedientes}</strong>
           </button>
 
           <button
             type="button"
-            onClick={() => setCategoria("SEPARACIONES")}
+            onClick={() => setCategoria("INTEGRACIONES")}
             style={summaryCardPurple}
           >
-            <span>Separaciones</span>
-            <strong>{resumen.separaciones}</strong>
+            <span>Integraciones</span>
+            <strong>{resumen.integraciones}</strong>
           </button>
         </div>
 
@@ -1095,6 +2061,86 @@ const refreshButton: React.CSSProperties = {
   padding: "0 14px",
   fontWeight: 950,
   cursor: "pointer",
+};
+
+const launchStatus: React.CSSProperties = {
+  border: "1px solid",
+  borderRadius: 8,
+  padding: "16px 18px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 18,
+  flexWrap: "wrap",
+  marginBottom: 12,
+};
+
+const launchStatusCopy: React.CSSProperties = {
+  display: "grid",
+  gap: 4,
+  minWidth: 0,
+};
+
+const launchEyebrow: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 950,
+  letterSpacing: 0,
+};
+
+const launchTitle: React.CSSProperties = {
+  margin: 0,
+  color: "inherit",
+  fontSize: 21,
+  fontWeight: 950,
+};
+
+const launchDescription: React.CSSProperties = {
+  margin: 0,
+  color: "inherit",
+  lineHeight: 1.4,
+};
+
+const launchScore: React.CSSProperties = {
+  minWidth: 126,
+  display: "grid",
+  justifyItems: "end",
+  gap: 2,
+};
+
+const launchChecksGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))",
+  gap: 10,
+  marginBottom: 18,
+};
+
+const launchCheck: React.CSSProperties = {
+  minHeight: 92,
+  border: "1px solid",
+  borderRadius: 8,
+  padding: 12,
+  display: "grid",
+  alignContent: "start",
+  gap: 4,
+  textAlign: "left",
+  cursor: "pointer",
+  color: "#1f2937",
+};
+
+const launchCheckReady: React.CSSProperties = {
+  background: "#f4faf5",
+  borderColor: "#c9e4d0",
+};
+
+const launchCheckPending: React.CSSProperties = {
+  background: "#fff7f5",
+  borderColor: "#efc3bd",
+};
+
+const launchCheckStatus: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 950,
+  color: "#536171",
 };
 
 const summaryGrid: React.CSSProperties = {
