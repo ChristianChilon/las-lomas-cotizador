@@ -334,6 +334,9 @@ const graphGet = async <T>(
   return data;
 };
 
+const metaObjectIdValido = (value: string | null | undefined) =>
+  Boolean(value && /^\d+$/.test(value) && !/^0+$/.test(value));
+
 const extraerEventos = (payload: MetaWebhookPayload): MetaLeadEvent[] => {
   if (payload.object !== "page") return [];
 
@@ -475,7 +478,7 @@ const procesarEvento = async (
     const correo = buscarCampo(campos, ["email", "correo", "correo_electronico"])
       .trim()
       .toLowerCase();
-    const adId = lead.ad_id || evento.adId || null;
+    const adId = [lead.ad_id, evento.adId].find(metaObjectIdValido) || null;
     let ad: MetaAdData = {};
     let adset: MetaNamedObject = {};
     let campaign: MetaNamedObject = {};
@@ -796,7 +799,15 @@ export async function POST(request: Request) {
     );
 
     resultados.forEach((resultado, index) => {
-      if (resultado.status !== "rejected") return;
+      if (resultado.status === "fulfilled") {
+        console.info(
+          resultado.value.deduplicado
+            ? "Meta lead deduplicado."
+            : "Meta lead procesado.",
+          { leadId: eventos[index]?.leadId }
+        );
+        return;
+      }
 
       console.error("No se pudo procesar un lead de Meta:", {
         leadId: eventos[index]?.leadId,
