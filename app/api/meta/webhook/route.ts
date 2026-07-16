@@ -552,7 +552,7 @@ const procesarEvento = async (
         ? actualizacionBase
         : {
             ...actualizacionBase,
-            intencion_compra: null,
+            intencion_compra: "SIN_DEFINIR",
             estado_lead: calificacion.estado_lead,
             proxima_accion: calificacion.proxima_accion,
             estado_cita: calificacion.estado_cita,

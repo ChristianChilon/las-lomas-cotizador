@@ -294,7 +294,7 @@ begin
       'SIN_DEFINIR',
       'SIN_DEFINIR',
       'SIN_DEFINIR',
-      'INFO_GENERAL',
+      'SIN_DEFINIR',
       'SIN_DEFINIR',
       10,
       'FRIO',
