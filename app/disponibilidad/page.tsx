@@ -340,15 +340,25 @@ export default function DisponibilidadPage() {
           <span><small>CUOTAS DESDE</small><strong>S/600</strong></span>
         </div>
 
-        <button
-          type="button"
-          className={styles.themeButton}
-          onClick={alternarModoNoche}
-          aria-label={modoNoche ? "Activar modo dia" : "Activar modo noche"}
-          title={modoNoche ? "Modo dia" : "Modo noche"}
-        >
-          {modoNoche ? "☀" : "☾"}
-        </button>
+        <div className={styles.headerActions}>
+          <Link
+            href="/login"
+            className={styles.crmLink}
+            aria-label="Ingresar al CRM de asesores"
+            title="Ingresar al CRM de asesores"
+          >
+            CRM
+          </Link>
+          <button
+            type="button"
+            className={styles.themeButton}
+            onClick={alternarModoNoche}
+            aria-label={modoNoche ? "Activar modo dia" : "Activar modo noche"}
+            title={modoNoche ? "Modo dia" : "Modo noche"}
+          >
+            {modoNoche ? "\u2600" : "\u263E"}
+          </button>
+        </div>
       </header>
 
       <section className={styles.mapStage} aria-label="Plano de disponibilidad">

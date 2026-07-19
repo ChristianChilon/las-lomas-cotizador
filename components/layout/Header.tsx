@@ -25,21 +25,7 @@ export default function Header({
   };
 
   return (
-    <header
-      className="crm-header"
-      style={{
-        height: 72,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        borderBottom: "1px solid #e5e7eb",
-        background: "#ffffff",
-        padding: "0 28px",
-        position: "sticky",
-        top: 0,
-        zIndex: 10,
-      }}
-    >
+    <header className="crm-header">
       <div className="crm-header-leading">
         <button
           type="button"
@@ -62,13 +48,7 @@ export default function Header({
         </div>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 14,
-        }}
-      >
+      <div className="crm-header-actions">
         <button
           type="button"
           className="crm-theme-button"
@@ -76,29 +56,16 @@ export default function Header({
           aria-label={modoNoche ? "Activar modo dia" : "Activar modo noche"}
           title={modoNoche ? "Modo dia" : "Modo noche"}
         >
-          {modoNoche ? "☀" : "☾"}
+          {modoNoche ? "\u2600" : "\u263E"}
         </button>
 
         <div className="crm-profile-summary">
-          <div
-            className="crm-profile-name"
-            style={{
-              fontWeight: 900,
-              color: "#111827",
-            }}
-          >
+          <div className="crm-profile-name">
             {profile.full_name ||
               profile.email ||
               "Usuario"}
           </div>
-          <div
-            className="crm-profile-role"
-            style={{
-              color: "#6b7280",
-              fontSize: 13,
-              textTransform: "capitalize",
-            }}
-          >
+          <div className="crm-profile-role">
             {profile.role.replace("_", " ")}
           </div>
         </div>
@@ -107,15 +74,6 @@ export default function Header({
           type="button"
           onClick={cerrarSesion}
           className="crm-logout-button"
-          style={{
-            border: "none",
-            borderRadius: 12,
-            padding: "11px 14px",
-            background: "#0b2f24",
-            color: "#ffffff",
-            fontWeight: 800,
-            cursor: "pointer",
-          }}
         >
           Cerrar sesion
         </button>

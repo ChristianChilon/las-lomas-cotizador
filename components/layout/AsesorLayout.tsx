@@ -2,11 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { obtenerPerfilActual } from "../../lib/auth/clientAuth";
-import type { Profile } from "../../lib/crm";
+import { esGerencia, type Profile } from "../../lib/crm";
+
+const RUTAS_EXCLUSIVAS_GERENCIA = [
+  "/asesores/calidad",
+  "/asesores/configuracion",
+  "/asesores/historial",
+  "/asesores/reportes",
+];
 
 type Props = {
   children: React.ReactNode;
@@ -20,6 +27,7 @@ export default function AsesorLayout({
   subtitle,
 }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const [profile, setProfile] =
     useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,7 +95,21 @@ export default function AsesorLayout({
     };
   }, [router]);
 
-  if (loading) {
+  const accesoGerenciaBloqueado = Boolean(
+    profile &&
+      !esGerencia(profile) &&
+      RUTAS_EXCLUSIVAS_GERENCIA.some(
+        (ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`)
+      )
+  );
+
+  useEffect(() => {
+    if (!accesoGerenciaBloqueado) return;
+
+    router.replace("/asesores");
+  }, [accesoGerenciaBloqueado, router]);
+
+  if (loading || accesoGerenciaBloqueado) {
     return (
       <div style={loadingScreen}>
         <Image
@@ -159,7 +181,6 @@ export default function AsesorLayout({
       style={{
         minHeight: "100vh",
         display: "flex",
-        background: "#f4f6f2",
       }}
     >
       <Sidebar
@@ -193,10 +214,10 @@ export default function AsesorLayout({
           }}
         >
           {(title || subtitle) && (
-            <div className="crm-page-heading" style={pageHeader}>
-              {title && <h1 className="crm-page-title" style={titleStyle}>{title}</h1>}
+            <div className="crm-page-heading">
+              {title && <h1 className="crm-page-title">{title}</h1>}
               {subtitle && (
-                <p className="crm-page-subtitle" style={subtitleStyle}>{subtitle}</p>
+                <p className="crm-page-subtitle">{subtitle}</p>
               )}
             </div>
           )}
@@ -206,23 +227,6 @@ export default function AsesorLayout({
     </div>
   );
 }
-
-const pageHeader: React.CSSProperties = {
-  marginBottom: 22,
-};
-
-const titleStyle: React.CSSProperties = {
-  margin: 0,
-  color: "#111827",
-  fontSize: 30,
-  fontWeight: 950,
-};
-
-const subtitleStyle: React.CSSProperties = {
-  margin: "8px 0 0",
-  color: "#6b7280",
-  fontSize: 15,
-};
 
 const loadingScreen: React.CSSProperties = {
   minHeight: "100vh",

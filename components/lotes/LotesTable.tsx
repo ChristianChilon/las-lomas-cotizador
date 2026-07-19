@@ -1001,11 +1001,7 @@ export default function LotesTable() {
 
   const descargarFicha = async () => {
     try {
-      console.log("CLICK DESCARGAR PDF");
-
       const pdf = await obtenerPdfFicha();
-
-      console.log("PDF GENERADO:", pdf);
 
       if (!pdf) {
         console.error("obtenerPdfFicha devolvio null o undefined");

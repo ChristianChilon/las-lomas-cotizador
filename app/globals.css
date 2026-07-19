@@ -295,6 +295,7 @@ select {
 /* CRM shell: responsive navigation and shared night mode */
 .crm-shell {
   width: 100%;
+  background: #f4f6f2;
   color: #111827;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
@@ -317,6 +318,34 @@ select {
   margin-bottom: 28px;
 }
 
+.crm-sidebar-nav {
+  display: grid;
+  gap: 20px;
+}
+
+.crm-sidebar-group {
+  display: grid;
+  gap: 7px;
+}
+
+.crm-sidebar-group-title {
+  padding: 0 8px;
+  color: rgba(217, 234, 223, 0.66);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.crm-sidebar-group-links {
+  display: grid;
+  gap: 7px;
+}
+
+.crm-sidebar-link {
+  line-height: 1.25;
+}
+
 .crm-sidebar-close,
 .crm-menu-button {
   display: none;
@@ -331,6 +360,25 @@ select {
   align-items: center;
   gap: 12px;
   min-width: 0;
+}
+
+.crm-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  padding: 0 28px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.crm-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .crm-header-eyebrow {
@@ -352,6 +400,17 @@ select {
   text-align: right;
 }
 
+.crm-profile-name {
+  color: #111827;
+  font-weight: 900;
+}
+
+.crm-profile-role {
+  color: #6b7280;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
 .crm-theme-button {
   display: grid;
   place-items: center;
@@ -370,6 +429,34 @@ select {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+}
+
+.crm-page-heading {
+  margin-bottom: 22px;
+}
+
+.crm-page-title {
+  margin: 0;
+  color: #111827;
+  font-size: 30px;
+  font-weight: 950;
+}
+
+.crm-page-subtitle {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.crm-logout-button {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #0b2f24;
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .crm-main > * {
@@ -438,11 +525,39 @@ select {
 .crm-night .crm-main [style*="background: white"],
 .crm-night .crm-main [style*="background: rgb(248, 250, 252)"],
 .crm-night .crm-main [style*="background: rgb(247, 248, 245)"],
-.crm-night .crm-main [style*="background: rgb(244, 246, 242)"] {
+.crm-night .crm-main [style*="background: rgb(244, 246, 242)"],
+.crm-night .crm-main [style*="background-color: rgb(255, 255, 255)"],
+.crm-night .crm-main [style*="background-color: white"],
+.crm-night .crm-main [style*="background-color: rgb(251, 252, 250)"],
+.crm-night .crm-main [style*="background-color: rgb(251, 251, 248)"],
+.crm-night .crm-main [style*="background-color: rgb(250, 250, 248)"],
+.crm-night .crm-main [style*="background-color: rgb(248, 250, 252)"],
+.crm-night .crm-main [style*="background-color: rgb(247, 248, 245)"],
+.crm-night .crm-main [style*="background-color: rgb(246, 248, 246)"],
+.crm-night .crm-main [style*="background-color: rgb(245, 247, 244)"],
+.crm-night .crm-main [style*="background-color: rgb(244, 247, 245)"],
+.crm-night .crm-main [style*="background-color: rgb(244, 246, 242)"],
+.crm-night .crm-main [style*="background-color: rgb(238, 242, 236)"],
+.crm-night .crm-main [style*="background-color: rgb(238, 241, 239)"],
+.crm-night .crm-main [style*="background-color: rgb(238, 240, 236)"] {
   border-color: rgba(216, 229, 203, 0.15) !important;
   background: #111d2a !important;
   color: #eaf1e6 !important;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2) !important;
+}
+
+.crm-night .crm-main [style*="color: rgb(17, 24, 39)"],
+.crm-night .crm-main [style*="color: rgb(31, 41, 55)"],
+.crm-night .crm-main [style*="color: rgb(51, 65, 85)"],
+.crm-night .crm-main [style*="color: rgb(55, 65, 81)"] {
+  color: #eef5e9 !important;
+}
+
+.crm-night .crm-main [style*="color: rgb(71, 85, 105)"],
+.crm-night .crm-main [style*="color: rgb(75, 85, 99)"],
+.crm-night .crm-main [style*="color: rgb(100, 116, 139)"],
+.crm-night .crm-main [style*="color: rgb(107, 114, 128)"] {
+  color: #aab8af !important;
 }
 
 .crm-night .crm-main thead,
@@ -1187,7 +1302,7 @@ select {
     font-size: 15px;
   }
 
-  .crm-header > div:last-child {
+  .crm-header-actions {
     gap: 7px !important;
   }
 
