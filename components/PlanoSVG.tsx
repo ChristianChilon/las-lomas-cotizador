@@ -31,8 +31,8 @@ type Props = {
   modoNoche?: boolean;
 };
 
-const PLANO_WIDTH = "999.809px";
-const PLANO_HEIGHT = "1394.93px";
+const PLANO_WIDTH = "998.637px";
+const PLANO_HEIGHT = "1393.841px";
 
 let tooltip: HTMLDivElement | null = null;
 

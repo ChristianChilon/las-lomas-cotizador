@@ -1,5 +1,5 @@
-export const ANCHO_PLANO = 999.809;
-export const ALTO_PLANO = 1394.93;
+export const ANCHO_PLANO = 998.637;
+export const ALTO_PLANO = 1393.841;
 
 export const esPantallaTactil = (ancho: number) => ancho <= 768;
 

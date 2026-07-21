@@ -141,30 +141,45 @@ export default function DisponibilidadPage() {
       return normalizarLotes((await respuesta.json()) as RegistroPublico[]);
     };
 
+    const cargarSupabase = async () => {
+      if (!supabase) return null;
+      const clienteSupabase = supabase;
+
+      const consulta = async () => {
+        const resultadoRpc = await clienteSupabase.rpc(
+          "crm_obtener_lotes_publicos"
+        );
+
+        if (!resultadoRpc.error && resultadoRpc.data) {
+          return resultadoRpc.data as unknown as RegistroPublico[];
+        }
+
+        const resultadoTemporal = await clienteSupabase
+          .from("las_lomas_lotes")
+          .select("id,mz,lote,area,estado,svg_id")
+          .order("id", { ascending: true });
+
+        if (resultadoTemporal.error) throw resultadoTemporal.error;
+
+        return (resultadoTemporal.data || []) as RegistroPublico[];
+      };
+
+      return Promise.race([
+        consulta(),
+        new Promise<never>((_, reject) => {
+          window.setTimeout(
+            () => reject(new Error("Supabase no respondio a tiempo.")),
+            6_000
+          );
+        }),
+      ]);
+    };
+
     const cargar = async (silencioso = false) => {
       if (!silencioso) setCargando(true);
 
       try {
-        let registros: RegistroPublico[] | null = null;
-
-        if (supabase) {
-          const resultadoRpc = await supabase.rpc(
-            "crm_obtener_lotes_publicos"
-          );
-
-          if (!resultadoRpc.error && resultadoRpc.data) {
-            registros = resultadoRpc.data as unknown as RegistroPublico[];
-          } else {
-            const resultadoTemporal = await supabase
-              .from("las_lomas_lotes")
-              .select("id,mz,lote,area,estado,svg_id")
-              .order("id", { ascending: true });
-
-            if (!resultadoTemporal.error) {
-              registros = (resultadoTemporal.data || []) as RegistroPublico[];
-            }
-          }
-        }
+        const registros = await cargarSupabase();
 
         const nuevosLotes = registros?.length
           ? normalizarLotes(registros)
@@ -177,10 +192,21 @@ export default function DisponibilidadPage() {
       } catch (error) {
         console.error(error);
 
-        if (activo) {
-          setErrorCarga(
-            "No pudimos actualizar la disponibilidad. Intenta nuevamente."
-          );
+        try {
+          const respaldo = await cargarRespaldo();
+
+          if (activo) {
+            setLotes(respaldo);
+            setErrorCarga("");
+          }
+        } catch (errorRespaldo) {
+          console.error(errorRespaldo);
+
+          if (activo) {
+            setErrorCarga(
+              "No pudimos actualizar la disponibilidad. Intenta nuevamente."
+            );
+          }
         }
       } finally {
         if (activo && !silencioso) setCargando(false);

@@ -6,9 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "generar-plano": "node scripts/generar-plano-optimizado.js",
-    "generar-lotes": "node scripts/generar-lotes-las-lomas.js"
+    "lint": "eslint"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
