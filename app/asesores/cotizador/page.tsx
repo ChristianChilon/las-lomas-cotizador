@@ -15,6 +15,13 @@ import {
   calcularEscalaEncuadre,
   esPantallaTactil,
 } from "../../../lib/planoViewport";
+import {
+  calcularEscalaMinimaPlano,
+  DURACION_BOTON_PLANO,
+  PASO_BOTON_PLANO,
+  PASO_PINZA_PLANO,
+  PASO_RUEDA_PLANO,
+} from "../../../lib/planoZoom";
 import { supabase } from "../../../lib/supabase";
 
 export type LoteData = {
@@ -804,20 +811,12 @@ Quisiera más información.`;
       <TransformWrapper
         key={`plano-${zoomMovil ? "movil" : "desktop"}-${escalaInicialPlano.toFixed(3)}`}
         initialScale={escalaInicialPlano}
-        minScale={0.1}
-        maxScale={40}
+        minScale={calcularEscalaMinimaPlano(escalaInicialPlano)}
+        maxScale={12}
         centerOnInit
         limitToBounds={false}
-        wheel={{
-          step: zoomMovil
-            ? 0.04
-            : 0.008,
-        }}
-        pinch={{
-          step: zoomMovil
-            ? 4
-            : 1,
-        }}
+        wheel={{ step: PASO_RUEDA_PLANO }}
+        pinch={{ step: PASO_PINZA_PLANO }}
         doubleClick={{
           disabled: true,
         }}
@@ -1275,14 +1274,14 @@ Quisiera más información.`;
               }}
             >
               <button
-                onClick={() => zoomIn(zoomMovil ? 0.35 : 0.2)}
+                onClick={() => zoomIn(PASO_BOTON_PLANO, DURACION_BOTON_PLANO)}
                 style={boton}
               >
                 +
               </button>
 
               <button
-                onClick={() => zoomOut(zoomMovil ? 0.35 : 0.2)}
+                onClick={() => zoomOut(PASO_BOTON_PLANO, DURACION_BOTON_PLANO)}
                 style={boton}
               >
                 −

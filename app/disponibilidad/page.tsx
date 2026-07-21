@@ -12,6 +12,13 @@ import {
   calcularEscalaEncuadre,
   esPantallaTactil,
 } from "../../lib/planoViewport";
+import {
+  calcularEscalaMinimaPlano,
+  DURACION_BOTON_PLANO,
+  PASO_BOTON_PLANO,
+  PASO_PINZA_PLANO,
+  PASO_RUEDA_PLANO,
+} from "../../lib/planoZoom";
 import { supabase } from "../../lib/supabase";
 import styles from "./disponibilidad.module.css";
 
@@ -399,12 +406,12 @@ export default function DisponibilidadPage() {
           <TransformWrapper
             key={`${esMovil ? "movil" : "desktop"}-${escalaInicial.toFixed(3)}`}
             initialScale={escalaInicial}
-            minScale={0.1}
-            maxScale={40}
+            minScale={calcularEscalaMinimaPlano(escalaInicial)}
+            maxScale={12}
             centerOnInit
             limitToBounds={false}
-            wheel={{ step: esMovil ? 0.04 : 0.01 }}
-            pinch={{ step: esMovil ? 4 : 1 }}
+            wheel={{ step: PASO_RUEDA_PLANO }}
+            pinch={{ step: PASO_PINZA_PLANO }}
             doubleClick={{ disabled: true }}
             panning={{ velocityDisabled: true }}
           >
@@ -429,8 +436,8 @@ export default function DisponibilidadPage() {
                 </TransformComponent>
 
                 <div className={styles.mapControls}>
-                  <button type="button" onClick={() => zoomIn(esMovil ? 0.35 : 0.2)} aria-label="Acercar">+</button>
-                  <button type="button" onClick={() => zoomOut(esMovil ? 0.35 : 0.2)} aria-label="Alejar">-</button>
+                  <button type="button" onClick={() => zoomIn(PASO_BOTON_PLANO, DURACION_BOTON_PLANO)} aria-label="Acercar">+</button>
+                  <button type="button" onClick={() => zoomOut(PASO_BOTON_PLANO, DURACION_BOTON_PLANO)} aria-label="Alejar">-</button>
                   <button type="button" onClick={() => resetTransform()} aria-label="Encuadrar plano">Centrar</button>
                   <button type="button" onClick={activarPantallaCompleta} aria-label="Pantalla completa">Expandir</button>
                 </div>
