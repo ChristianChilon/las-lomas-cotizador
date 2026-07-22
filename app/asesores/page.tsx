@@ -1123,6 +1123,7 @@ function MetricCard({
   return (
     <Link
       href={href}
+      className={`crm-metric-card crm-metric-card--${tone}`}
       style={{
         ...metricCard,
         background: colors.bg,

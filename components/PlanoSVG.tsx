@@ -164,46 +164,102 @@ export default function PlanoSVG({
         const obtenerColorEstado = (
           estado: string
         ) => {
+          const paleta = modoNoche
+            ? {
+                disponible: {
+                  fill: "rgba(69,162,101,0.44)",
+                  stroke: "#71D394",
+                },
+                separado: {
+                  fill: "rgba(226,154,43,0.48)",
+                  stroke: "#F2B84F",
+                },
+                negociacion: {
+                  fill: "rgba(145,174,72,0.44)",
+                  stroke: "#B5D46D",
+                },
+                bloqueado: {
+                  fill: "rgba(125,139,158,0.43)",
+                  stroke: "#AAB8CA",
+                },
+                vendido: {
+                  fill: "rgba(211,78,66,0.48)",
+                  stroke: "#F08075",
+                },
+              }
+            : {
+                disponible: {
+                  fill: "rgba(44,119,70,0.40)",
+                  stroke: "#267346",
+                },
+                separado: {
+                  fill: "rgba(205,132,27,0.44)",
+                  stroke: "#B96E08",
+                },
+                negociacion: {
+                  fill: "rgba(111,142,58,0.40)",
+                  stroke: "#58762D",
+                },
+                bloqueado: {
+                  fill: "rgba(89,101,118,0.38)",
+                  stroke: "#525E6F",
+                },
+                vendido: {
+                  fill: "rgba(174,55,44,0.44)",
+                  stroke: "#A33128",
+                },
+              };
+
           switch (estado?.toUpperCase()) {
             case "DISPONIBLE":
-              return {
-                fill: "rgba(47,111,67,0.30)",
-                stroke: "#2F6F43",
-              };
+              return paleta.disponible;
 
             case "SEPARADO":
             case "RESERVADO":
             case "CIERRE_SOLICITADO":
-              return {
-                fill: "rgba(202,137,55,0.36)",
-                stroke: "#C9852E",
-              };
+              return paleta.separado;
 
             case "EN_NEGOCIACION":
-              return {
-                fill: "rgba(104,132,62,0.28)",
-                stroke: "#68843E",
-              };
+              return paleta.negociacion;
 
             case "BLOQUEADO":
-              return {
-                fill: "rgba(90,99,112,0.30)",
-                stroke: "#5A6370",
-              };
+              return paleta.bloqueado;
 
             case "VENDIDO":
-              return {
-                fill: "rgba(159,59,48,0.38)",
-                stroke: "#9F3B30",
-              };
+              return paleta.vendido;
 
             default:
-              return {
-                fill: "rgba(47,111,67,0.24)",
-                stroke: "#2F6F43",
-              };
+              return paleta.disponible;
           }
         };
+
+        const bordeBase = modoNoche
+          ? "#CAD5C8"
+          : "#9B8D82";
+
+        // El SVG trae la rotulacion convertida a glifos <use>.
+        // Se ajusta solo su pintura; la geometria y los IDs permanecen intactos.
+        svgElement
+          .querySelectorAll<SVGUseElement>('use[style*="#6c5353"]')
+          .forEach((glifo) => {
+            glifo.style.fill = modoNoche ? "#F1D5C9" : "#4C3431";
+            glifo.style.stroke = modoNoche
+              ? "rgba(16,20,22,0.92)"
+              : "rgba(250,244,232,0.78)";
+            glifo.style.strokeWidth = modoNoche ? "0.62" : "0.34";
+            glifo.style.paintOrder = "stroke fill";
+          });
+
+        svgElement
+          .querySelectorAll<SVGUseElement>('use[style*="#782121"]')
+          .forEach((glifo) => {
+            glifo.style.fill = modoNoche ? "#FF9A8F" : "#8C251F";
+            glifo.style.stroke = modoNoche
+              ? "rgba(20,18,17,0.68)"
+              : "rgba(255,247,238,0.46)";
+            glifo.style.strokeWidth = modoNoche ? "0.34" : "0.18";
+            glifo.style.paintOrder = "stroke fill";
+          });
 
         const restaurarLote = (
           path: SVGPathElement,
@@ -218,10 +274,10 @@ export default function PlanoSVG({
             color.fill;
 
           path.style.stroke =
-            "#b9ada2";
+            bordeBase;
 
           path.style.strokeWidth =
-            "0.9";
+            "1.05";
 
           path.style.filter = "";
         };
@@ -242,6 +298,14 @@ export default function PlanoSVG({
           const matrizCapa = capaResaltado!.getCTM();
 
           clon.removeAttribute("id");
+
+          const trazado = clon.getAttribute("d")?.trim();
+          if (trazado && !/[zZ]\s*$/.test(trazado)) {
+            clon.setAttribute("d", `${trazado} z`);
+          }
+
+          clon.style.strokeLinejoin = "round";
+          clon.style.strokeLinecap = "round";
 
           if (matrizOrigen && matrizCapa) {
             const matrizRelativa = matrizCapa
@@ -333,10 +397,10 @@ export default function PlanoSVG({
             color.fill;
 
           path.style.stroke =
-            "#b9ada2";
+            bordeBase;
 
           path.style.strokeWidth =
-            "0.9";
+            "1.05";
 
           path.style.transition =
             "fill 0.15s ease, stroke 0.15s ease";
@@ -517,10 +581,10 @@ export default function PlanoSVG({
                 "none";
 
               clon.style.fill =
-                "rgba(255,255,255,0.10)";
+                color.fill;
 
               clon.style.stroke =
-                "#D8B56D";
+                color.stroke;
 
               clon.style.strokeWidth =
                 "2";
@@ -542,7 +606,7 @@ export default function PlanoSVG({
                 "2.5";
 
               path.style.filter =
-                "drop-shadow(0px 0px 4px rgba(216,181,109,.85))";
+                `drop-shadow(0px 0px 4px ${color.stroke})`;
             }
 
             setLoteSeleccionado({

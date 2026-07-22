@@ -601,6 +601,47 @@ select {
   background: #315f47 !important;
 }
 
+.crm-night .crm-main .crm-metric-card {
+  border-color: rgba(216, 229, 203, 0.2) !important;
+  background: #142231 !important;
+  color: #edf4e9 !important;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24) !important;
+}
+
+.crm-night .crm-main .crm-metric-card--blue {
+  border-color: #315a84 !important;
+  background: #122a43 !important;
+  color: #d7eaff !important;
+}
+
+.crm-night .crm-main .crm-metric-card--green {
+  border-color: #2d674c !important;
+  background: #112d24 !important;
+  color: #cef1da !important;
+}
+
+.crm-night .crm-main .crm-metric-card--gold {
+  border-color: #735a27 !important;
+  background: #312817 !important;
+  color: #ffe1a0 !important;
+}
+
+.crm-night .crm-main .crm-metric-card--red {
+  border-color: #74443f !important;
+  background: #321e25 !important;
+  color: #ffd1cb !important;
+}
+
+.crm-night .crm-main .crm-metric-card span,
+.crm-night .crm-main .crm-metric-card strong,
+.crm-night .crm-main .crm-metric-card small {
+  color: inherit !important;
+}
+
+.crm-night .crm-main .crm-metric-card small {
+  opacity: 0.82;
+}
+
 .cotizador-private-loading {
   position: fixed;
   inset: 0;
