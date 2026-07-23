@@ -75,49 +75,72 @@
 
 .references {
   display: grid;
-  grid-template-columns: repeat(4, minmax(102px, 1fr));
+  grid-template-columns: repeat(4, minmax(112px, 1fr));
   align-items: stretch;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid rgba(137, 112, 65, 0.3);
+  border-radius: 7px;
   overflow: hidden;
-  background: var(--surface-strong);
+  background: #f7f1e4;
+  box-shadow: 0 9px 24px rgba(79, 62, 34, 0.12);
 }
 
 .references > span {
-  display: grid;
-  gap: 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   min-height: 52px;
-  padding: 7px 14px;
-  border-right: 1px solid var(--border);
-  align-content: center;
+  padding: 7px 13px;
+  border-right: 1px solid rgba(137, 112, 65, 0.28);
 }
 
 .references > span:last-child {
   border-right: 0;
 }
 
+.references > span > svg {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 auto;
+  color: #c58a23;
+  stroke-width: 2;
+}
+
+.references > span > span,
+.brochureReference a {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
 .references small {
-  color: var(--muted);
+  color: #736b5d;
   font-size: 9px;
   font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .references strong {
-  color: var(--brand);
+  color: #173a29;
   font-size: 16px;
 }
 
 .brochureReference a {
-  color: var(--brand);
-  font-size: 13px;
-  font-weight: 950;
+  color: #173a29;
   text-decoration: none;
+}
+
+.brochureReference a strong {
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.brochureReference a small {
+  text-transform: none;
 }
 
 .brochureReference a:hover,
 .brochureReference a:focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: #f5bd4f;
 }
 
 .headerActions {
@@ -141,12 +164,24 @@
 }
 
 .crmLink {
-  min-width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 76px;
   padding: 0 11px;
   border-radius: 7px;
-  color: var(--brand);
+  border-color: rgba(137, 112, 65, 0.32);
+  background: #f7f1e4;
+  color: #173a29;
   font-size: 11px;
   text-decoration: none;
+}
+
+.crmLink svg {
+  width: 17px;
+  height: 17px;
+  margin-right: 7px;
+  color: #c58a23;
 }
 
 .themeButton {
@@ -180,42 +215,105 @@
   left: 50%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  min-width: 312px;
-  padding: 4px;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  background: var(--surface);
+  width: min(520px, calc(100vw - 32px));
+  min-width: 420px;
+  padding: 6px;
+  border: 1px solid rgba(137, 112, 65, 0.3);
+  border-radius: 999px;
+  background:
+    linear-gradient(110deg, rgba(250, 246, 236, 0.98), rgba(240, 231, 211, 0.97));
   transform: translateX(-50%);
-  box-shadow: 0 9px 24px rgba(15, 29, 18, 0.16);
-  backdrop-filter: blur(16px);
+  box-shadow:
+    0 12px 30px rgba(83, 65, 32, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
 }
 
 .viewSwitcher button {
-  min-height: 38px;
-  padding: 0 14px;
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 18px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 999px;
   background: transparent;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 900;
+  color: #294639;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
   cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.viewSwitcher button svg {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 auto;
+  stroke-width: 1.8;
 }
 
 .viewSwitcher button:hover,
 .viewSwitcher button:focus-visible {
-  color: var(--text);
-  background: rgba(85, 118, 88, 0.08);
+  color: #153728;
+  background: rgba(145, 112, 48, 0.1);
 }
 
 .viewSwitcher .viewActive {
-  background: var(--brand);
-  color: var(--surface-strong);
-  box-shadow: 0 5px 14px rgba(33, 79, 43, 0.22);
+  background: linear-gradient(135deg, #d9a13b, #bc8122);
+  color: #ffffff;
+  box-shadow:
+    0 7px 18px rgba(189, 130, 35, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.night .references,
+.night .crmLink {
+  border-color: rgba(79, 112, 153, 0.55);
+  background: #06152b;
+  box-shadow: 0 9px 24px rgba(3, 15, 35, 0.24);
+}
+
+.night .references > span {
+  border-right-color: rgba(79, 112, 153, 0.5);
+}
+
+.night .references small {
+  color: #b8c4d4;
+}
+
+.night .references strong,
+.night .brochureReference a,
+.night .crmLink {
+  color: #ffffff;
+}
+
+.night .viewSwitcher {
+  border-color: rgba(79, 112, 153, 0.55);
+  background:
+    linear-gradient(110deg, rgba(6, 21, 43, 0.98), rgba(7, 28, 39, 0.97));
+  box-shadow:
+    0 12px 30px rgba(3, 15, 35, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.night .viewSwitcher button {
+  color: #dfe9e5;
+}
+
+.night .viewSwitcher button:hover,
+.night .viewSwitcher button:focus-visible {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .night .viewSwitcher .viewActive {
-  color: #0a1720;
+  color: #ffffff;
 }
 
 .loading,
@@ -899,7 +997,13 @@
   }
 
   .references > span {
+    gap: 6px;
     padding-inline: 8px;
+  }
+
+  .references > span > svg {
+    width: 17px;
+    height: 17px;
   }
 
   .references strong {
@@ -965,6 +1069,10 @@
     font-size: 10px;
   }
 
+  .crmLink svg {
+    display: none;
+  }
+
   .references {
     position: absolute;
     z-index: 2;
@@ -977,8 +1085,14 @@
   }
 
   .references > span {
+    gap: 5px;
     min-height: 44px;
-    padding: 5px 7px;
+    padding: 5px 6px;
+  }
+
+  .references > span > svg {
+    width: 15px;
+    height: 15px;
   }
 
   .references small {
@@ -1012,9 +1126,15 @@
   }
 
   .viewSwitcher button {
-    min-height: 36px;
-    padding-inline: 8px;
-    font-size: 10px;
+    min-height: 40px;
+    gap: 6px;
+    padding-inline: 7px;
+    font-size: 9px;
+  }
+
+  .viewSwitcher button svg {
+    width: 18px;
+    height: 18px;
   }
 
   .legend {

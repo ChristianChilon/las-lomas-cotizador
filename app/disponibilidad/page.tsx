@@ -2,6 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import {
+  CalendarDays,
+  FileText,
+  Map,
+  Satellite,
+  Table2,
+  Tag,
+  UserRound,
+  WalletCards,
+} from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   TransformComponent,
@@ -454,18 +464,28 @@ export default function DisponibilidadPage() {
         </div>
 
         <div className={styles.references} aria-label="Referencias comerciales">
-          <span><small>LOTES DESDE</small><strong>S/24,000</strong></span>
-          <span><small>INICIAL DESDE</small><strong>S/6,000</strong></span>
-          <span><small>CUOTAS DESDE</small><strong>S/600</strong></span>
+          <span>
+            <Tag aria-hidden="true" />
+            <span><small>LOTES DESDE</small><strong>S/24,000</strong></span>
+          </span>
+          <span>
+            <WalletCards aria-hidden="true" />
+            <span><small>INICIAL DESDE</small><strong>S/6,000</strong></span>
+          </span>
+          <span>
+            <CalendarDays aria-hidden="true" />
+            <span><small>CUOTAS DESDE</small><strong>S/600</strong></span>
+          </span>
           <span className={styles.brochureReference}>
-            <small>BROCHURE</small>
+            <FileText aria-hidden="true" />
             <a
               href={BROCHURE_URL}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Abrir brochure de Las Lomas en PDF"
             >
-              VER PDF
+              <strong>VER PDF</strong>
+              <small>Brochure</small>
             </a>
           </span>
         </div>
@@ -477,6 +497,7 @@ export default function DisponibilidadPage() {
             aria-label="Ingresar al CRM de asesores"
             title="Ingresar al CRM de asesores"
           >
+            <UserRound aria-hidden="true" />
             LOGIN
           </Link>
           <button
@@ -502,11 +523,11 @@ export default function DisponibilidadPage() {
         <nav className={styles.viewSwitcher} aria-label="Vistas de disponibilidad">
           {(
             [
-              ["mapa", "Mapa"],
-              ["tabla", "Tabla"],
-              ["ubicacion", "Ubicacion"],
+              ["mapa", "Plano", Map],
+              ["ubicacion", "Satélite", Satellite],
+              ["tabla", "Tabla", Table2],
             ] as const
-          ).map(([vistaId, etiqueta]) => (
+          ).map(([vistaId, etiqueta, Icono]) => (
             <button
               key={vistaId}
               type="button"
@@ -514,7 +535,8 @@ export default function DisponibilidadPage() {
               onClick={() => setVista(vistaId)}
               aria-pressed={vista === vistaId}
             >
-              {etiqueta}
+              <Icono aria-hidden="true" />
+              <span>{etiqueta}</span>
             </button>
           ))}
         </nav>
