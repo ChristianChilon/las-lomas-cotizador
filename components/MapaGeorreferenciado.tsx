@@ -285,16 +285,18 @@ export default function MapaGeorreferenciado({
             }).addTo(mapa);
 
             if (loteActual) {
-              capa.bindTooltip(contenidoRotulo(loteActual), {
-                permanent: true,
-                direction: "center",
-                className: styles.lotLabel,
-                opacity: 1,
-              });
+              capa.eachLayer((layer) => {
+                layer.bindTooltip(contenidoRotulo(loteActual), {
+                  permanent: true,
+                  direction: "center",
+                  className: styles.lotLabel,
+                  opacity: 1,
+                });
 
-              if (mapa.getZoom() < ZOOM_ROTULOS) {
-                capa.closeTooltip();
-              }
+                if (mapa.getZoom() < ZOOM_ROTULOS) {
+                  layer.closeTooltip();
+                }
+              });
             }
 
             capa.on("mouseover", () => {
@@ -312,7 +314,7 @@ export default function MapaGeorreferenciado({
                 fillOpacity: 0.82,
                 weight: 2.4,
               });
-              capa.openTooltip();
+              capa.eachLayer((layer) => layer.openTooltip());
             });
             capa.on("mouseout", () => {
               const lote = lotesRef.current.find(
@@ -321,7 +323,7 @@ export default function MapaGeorreferenciado({
               if (!lote) return;
 
               if (mapa.getZoom() < ZOOM_ROTULOS) {
-                capa.closeTooltip();
+                capa.eachLayer((layer) => layer.closeTooltip());
               }
               capa.setStyle(
                 obtenerEstilo(
@@ -377,11 +379,9 @@ export default function MapaGeorreferenciado({
         const actualizarRotulos = () => {
           const mostrar = mapa.getZoom() >= ZOOM_ROTULOS;
           capasLotes.forEach((capa) => {
-            if (mostrar) {
-              capa.openTooltip();
-            } else {
-              capa.closeTooltip();
-            }
+            capa.eachLayer((layer) =>
+              mostrar ? layer.openTooltip() : layer.closeTooltip()
+            );
           });
         };
         mapa.on("zoomend", actualizarRotulos);
@@ -427,7 +427,24 @@ export default function MapaGeorreferenciado({
 
       const seleccionado = lote.id === seleccionActivaId;
       capa.setStyle(obtenerEstilo(lote.estado, seleccionado, modoNoche));
-      capa.setTooltipContent(contenidoRotulo(lote));
+      capa.eachLayer((layer) => {
+        if (layer.getTooltip()) {
+          layer.setTooltipContent(contenidoRotulo(lote));
+        } else {
+          layer.bindTooltip(contenidoRotulo(lote), {
+            permanent: true,
+            direction: "center",
+            className: styles.lotLabel,
+            opacity: 1,
+          });
+        }
+
+        if ((mapRef.current?.getZoom() || 0) >= ZOOM_ROTULOS) {
+          layer.openTooltip();
+        } else {
+          layer.closeTooltip();
+        }
+      });
 
       if (seleccionado) {
         capa.bringToFront();
