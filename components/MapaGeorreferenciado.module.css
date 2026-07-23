@@ -1,0 +1,268 @@
+.shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 460px;
+  overflow: hidden;
+  background: #d9ded6;
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+}
+
+.planOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: none !important;
+  opacity: 0.82;
+  pointer-events: none;
+  transform-origin: 0 0;
+  filter: saturate(0.94) contrast(1.04);
+  user-select: none;
+}
+
+.loading,
+.error {
+  position: absolute;
+  z-index: 700;
+  top: 16px;
+  left: 50%;
+  max-width: calc(100% - 32px);
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 7px;
+  background: rgba(12, 24, 20, 0.82);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 850;
+  text-align: center;
+  transform: translateX(-50%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(10px);
+}
+
+.error {
+  border-color: rgba(255, 183, 173, 0.5);
+  color: #ffe0dc;
+}
+
+.mapActions {
+  position: absolute;
+  z-index: 650;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  gap: 7px;
+}
+
+.mapActions button {
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 7px;
+  background: rgba(12, 24, 20, 0.8);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(10px);
+}
+
+.mapActions button:hover,
+.mapActions button:focus-visible {
+  background: rgba(39, 87, 52, 0.92);
+}
+
+.legend {
+  position: absolute;
+  z-index: 650;
+  right: 14px;
+  bottom: 28px;
+  display: grid;
+  gap: 6px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 7px;
+  background: rgba(12, 24, 20, 0.8);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(10px);
+}
+
+.legend span {
+  display: grid;
+  grid-template-columns: 10px auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.legend i {
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 2px;
+}
+
+.available {
+  background: rgba(47, 131, 72, 0.78);
+}
+
+.reserved {
+  background: rgba(211, 139, 36, 0.82);
+}
+
+.sold {
+  background: rgba(175, 57, 47, 0.82);
+}
+
+.popupContent {
+  display: grid;
+  gap: 5px;
+  min-width: 176px;
+  color: #17211b;
+}
+
+.popupContent strong {
+  font-size: 14px;
+}
+
+.popupContent span {
+  color: #59645d;
+  font-size: 11px;
+}
+
+.popupStatus {
+  justify-self: start;
+  margin: 2px 0 4px;
+  padding: 4px 7px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.popupButton {
+  min-height: 35px;
+  border: 0;
+  border-radius: 6px;
+  background: #315f37;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.tooltip {
+  border: 1px solid rgba(255, 255, 255, 0.32) !important;
+  background: rgba(12, 24, 20, 0.88) !important;
+  color: #ffffff !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.22) !important;
+}
+
+.tooltip::before {
+  border-top-color: rgba(12, 24, 20, 0.88) !important;
+}
+
+.lotLabel {
+  min-width: 42px;
+  margin: 0 !important;
+  padding: 2px 3px !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: 3px !important;
+  background: rgba(9, 22, 15, 0.82) !important;
+  color: #ffffff !important;
+  font-size: 7px !important;
+  line-height: 1.08 !important;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28) !important;
+  pointer-events: none !important;
+}
+
+.lotLabel strong,
+.lotLabel span {
+  display: block;
+}
+
+.lotLabel strong {
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+
+.lotLabel span {
+  margin-top: 1px;
+  color: #dce9df;
+  font-size: 6px;
+  font-weight: 750;
+}
+
+.lotLabel::before {
+  display: none !important;
+}
+
+.shell :global(.leaflet-container) {
+  width: 100%;
+  height: 100%;
+  background: #d9ded6;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.shell :global(.leaflet-control-attribution) {
+  max-width: calc(100% - 12px);
+  background: rgba(255, 255, 255, 0.8);
+  color: #354039;
+  font-size: 8px;
+}
+
+.shell :global(.leaflet-control-attribution a) {
+  color: #315f37;
+}
+
+.shell :global(.leaflet-bar) {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 7px;
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.22);
+}
+
+.shell :global(.leaflet-bar a) {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(12, 24, 20, 0.84);
+  color: #ffffff;
+}
+
+.shell :global(.leaflet-bar a:hover),
+.shell :global(.leaflet-bar a:focus) {
+  background: rgba(39, 87, 52, 0.94);
+  color: #ffffff;
+}
+
+@media (max-width: 700px) {
+  .shell {
+    min-height: 440px;
+  }
+
+  .mapActions {
+    top: 10px;
+    right: 10px;
+  }
+
+  .mapActions button {
+    min-height: 34px;
+    padding-inline: 9px;
+  }
+
+  .legend {
+    right: 10px;
+    bottom: 24px;
+  }
+}

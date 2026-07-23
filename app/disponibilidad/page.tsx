@@ -7,6 +7,7 @@ import {
   TransformComponent,
   TransformWrapper,
 } from "react-zoom-pan-pinch";
+import MapaGeorreferenciado from "../../components/MapaGeorreferenciado";
 import PlanoSVG from "../../components/PlanoSVG";
 import {
   calcularEscalaEncuadre,
@@ -50,6 +51,11 @@ type LoteSeleccionado = {
 };
 
 type EstadoEnvio = "LISTO" | "ENVIANDO" | "ENVIADO" | "ERROR";
+type VistaPublica = "mapa" | "tabla" | "ubicacion";
+type CampoOrden = "mz" | "lote" | "area" | "estado";
+
+const BROCHURE_URL = "/brochure-las-lomas-web.pdf";
+const GOOGLE_MAPS_URL = "https://maps.app.goo.gl/2JP1uF2zUReByyYM7";
 
 const normalizarEstado = (estado: string | null) => {
   const valor = (estado || "DISPONIBLE").trim().toUpperCase();
@@ -83,10 +89,28 @@ const estadoClase = (estado: string) => {
   return styles.statusAvailable;
 };
 
+const convertirLoteSeleccionado = (lote: LotePublico): LoteSeleccionado => ({
+  id: lote.id,
+  nombre: `MZ ${lote.mz} - LOTE ${lote.lote}`,
+  area: `${Number(lote.area).toLocaleString("es-PE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} m2`,
+  precio: "",
+  estado: lote.estado,
+});
+
 export default function DisponibilidadPage() {
   const [lotes, setLotes] = useState<LotePublico[]>([]);
   const [loteSeleccionado, setLoteSeleccionado] =
     useState<LoteSeleccionado | null>(null);
+  const [loteUbicado, setLoteUbicado] = useState<LotePublico | null>(null);
+  const [vista, setVista] = useState<VistaPublica>("mapa");
+  const [busqueda, setBusqueda] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("TODOS");
+  const [campoOrden, setCampoOrden] = useState<CampoOrden>("mz");
+  const [direccionOrden, setDireccionOrden] =
+    useState<"asc" | "desc">("asc");
   const [escalaInicial, setEscalaInicial] = useState(0.5);
   const [esMovil, setEsMovil] = useState(false);
   const [modoNoche, setModoNoche] = useState(false);
@@ -222,10 +246,26 @@ export default function DisponibilidadPage() {
 
     void cargar();
     const intervalo = window.setInterval(() => void cargar(true), 20_000);
+    const canal = supabase
+      ?.channel("visor_publico_lotes_realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "las_lomas_lotes",
+        },
+        () => void cargar(true)
+      )
+      .subscribe();
 
     return () => {
       activo = false;
       window.clearInterval(intervalo);
+
+      if (canal && supabase) {
+        void supabase.removeChannel(canal);
+      }
     };
   }, []);
 
@@ -237,6 +277,52 @@ export default function DisponibilidadPage() {
     }),
     [lotes]
   );
+
+  const lotesFiltrados = useMemo(() => {
+    const texto = busqueda
+      .trim()
+      .toLowerCase()
+      .replace(/[-\s]/g, "")
+      .replace(/^([a-z])0+/i, "$1");
+
+    return [...lotes]
+      .filter(
+        (lote) =>
+          filtroEstado === "TODOS" || lote.estado === filtroEstado
+      )
+      .filter((lote) => {
+        if (!texto) return true;
+
+        const codigo = `${lote.mz}${Number(lote.lote)}`
+          .toLowerCase()
+          .replace(/[-\s]/g, "");
+
+        return codigo === texto || lote.mz.toLowerCase() === texto;
+      })
+      .sort((primero, segundo) => {
+        const valorPrimero = primero[campoOrden];
+        const valorSegundo = segundo[campoOrden];
+        const comparacion =
+          typeof valorPrimero === "string" && typeof valorSegundo === "string"
+            ? valorPrimero.localeCompare(valorSegundo, "es", {
+                numeric: true,
+                sensitivity: "base",
+              })
+            : Number(valorPrimero) - Number(valorSegundo);
+
+        return direccionOrden === "asc" ? comparacion : -comparacion;
+      });
+  }, [busqueda, campoOrden, direccionOrden, filtroEstado, lotes]);
+
+  const ordenarPor = (campo: CampoOrden) => {
+    if (campo === campoOrden) {
+      setDireccionOrden((actual) => (actual === "asc" ? "desc" : "asc"));
+      return;
+    }
+
+    setCampoOrden(campo);
+    setDireccionOrden("asc");
+  };
 
   const alternarModoNoche = () => {
     setModoNoche((actual) => {
@@ -371,6 +457,17 @@ export default function DisponibilidadPage() {
           <span><small>LOTES DESDE</small><strong>S/24,000</strong></span>
           <span><small>INICIAL DESDE</small><strong>S/6,000</strong></span>
           <span><small>CUOTAS DESDE</small><strong>S/600</strong></span>
+          <span className={styles.brochureReference}>
+            <small>BROCHURE</small>
+            <a
+              href={BROCHURE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Abrir brochure de Las Lomas en PDF"
+            >
+              VER PDF
+            </a>
+          </span>
         </div>
 
         <div className={styles.headerActions}>
@@ -380,7 +477,7 @@ export default function DisponibilidadPage() {
             aria-label="Ingresar al CRM de asesores"
             title="Ingresar al CRM de asesores"
           >
-            CRM
+            LOGIN
           </Link>
           <button
             type="button"
@@ -402,6 +499,26 @@ export default function DisponibilidadPage() {
           <div className={styles.loadError} role="alert">{errorCarga}</div>
         )}
 
+        <nav className={styles.viewSwitcher} aria-label="Vistas de disponibilidad">
+          {(
+            [
+              ["mapa", "Mapa"],
+              ["tabla", "Tabla"],
+              ["ubicacion", "Ubicacion"],
+            ] as const
+          ).map(([vistaId, etiqueta]) => (
+            <button
+              key={vistaId}
+              type="button"
+              className={vista === vistaId ? styles.viewActive : ""}
+              onClick={() => setVista(vistaId)}
+              aria-pressed={vista === vistaId}
+            >
+              {etiqueta}
+            </button>
+          ))}
+        </nav>
+
         <div className={styles.transformRoot}>
           <TransformWrapper
             key={`${esMovil ? "movil" : "desktop"}-${escalaInicial.toFixed(3)}`}
@@ -415,44 +532,223 @@ export default function DisponibilidadPage() {
             doubleClick={{ disabled: true }}
             panning={{ velocityDisabled: true }}
           >
-            {({ zoomIn, zoomOut, resetTransform }) => (
-              <>
-                <TransformComponent
-                  wrapperStyle={{
-                    width: "100%",
-                    height: "100%",
-                    cursor: "grab",
-                  }}
-                >
-                  <PlanoSVG
-                    lotes={lotes}
-                    loteUbicado={null}
-                    setLoteSeleccionado={setLoteSeleccionado}
-                    seleccionActivaId={loteSeleccionado?.id ?? null}
-                    mostrarArea
-                    mostrarPrecio={false}
-                    modoNoche={modoNoche}
-                  />
-                </TransformComponent>
+            {({ zoomIn, zoomOut, resetTransform, zoomToElement }) => {
+              const abrirLoteEnMapa = (lote: LotePublico) => {
+                setLoteSeleccionado(convertirLoteSeleccionado(lote));
+                setLoteUbicado({ ...lote });
+                setVista("mapa");
 
-                <div className={styles.mapControls}>
-                  <button type="button" onClick={() => zoomIn(PASO_BOTON_PLANO, DURACION_BOTON_PLANO)} aria-label="Acercar">+</button>
-                  <button type="button" onClick={() => zoomOut(PASO_BOTON_PLANO, DURACION_BOTON_PLANO)} aria-label="Alejar">-</button>
-                  <button type="button" onClick={() => resetTransform()} aria-label="Encuadrar plano">Centrar</button>
-                  <button type="button" onClick={activarPantallaCompleta} aria-label="Pantalla completa">Expandir</button>
-                </div>
-              </>
-            )}
+                window.setTimeout(() => {
+                  zoomToElement(lote.svg_id, 3, 700);
+                }, 500);
+              };
+
+              return (
+                <>
+                  {vista === "mapa" && (
+                    <>
+                      <TransformComponent
+                        wrapperStyle={{
+                          width: "100%",
+                          height: "100%",
+                          cursor: "grab",
+                        }}
+                      >
+                        <PlanoSVG
+                          lotes={lotes}
+                          loteUbicado={loteUbicado}
+                          setLoteSeleccionado={setLoteSeleccionado}
+                          seleccionActivaId={loteSeleccionado?.id ?? null}
+                          mostrarArea
+                          mostrarPrecio={false}
+                          modoNoche={modoNoche}
+                        />
+                      </TransformComponent>
+
+                      <div className={styles.mapControls}>
+                        <button type="button" onClick={() => zoomIn(PASO_BOTON_PLANO, DURACION_BOTON_PLANO)} aria-label="Acercar">+</button>
+                        <button type="button" onClick={() => zoomOut(PASO_BOTON_PLANO, DURACION_BOTON_PLANO)} aria-label="Alejar">-</button>
+                        <button type="button" onClick={() => resetTransform()} aria-label="Encuadrar plano">Centrar</button>
+                        <button type="button" onClick={activarPantallaCompleta} aria-label="Pantalla completa">Expandir</button>
+                      </div>
+                    </>
+                  )}
+
+                  {vista === "tabla" && (
+                    <section className={styles.tableView} aria-label="Tabla publica de lotes">
+                      <div className={styles.tableToolbar}>
+                        <label>
+                          <span>BUSCAR LOTE</span>
+                          <input
+                            type="search"
+                            value={busqueda}
+                            onChange={(event) => setBusqueda(event.target.value)}
+                            placeholder="Ej. A-12"
+                          />
+                        </label>
+
+                        <label>
+                          <span>ESTADO</span>
+                          <select
+                            value={filtroEstado}
+                            onChange={(event) => setFiltroEstado(event.target.value)}
+                          >
+                            <option value="TODOS">Todos</option>
+                            <option value="DISPONIBLE">Disponibles</option>
+                            <option value="SEPARADO">Separados</option>
+                            <option value="VENDIDO">Vendidos</option>
+                          </select>
+                        </label>
+
+                        <div className={styles.tableCount} aria-live="polite">
+                          <strong>{lotesFiltrados.length}</strong>
+                          <span>lotes encontrados</span>
+                        </div>
+                      </div>
+
+                      <div className={styles.tableScroll}>
+                        <table className={styles.lotsTable}>
+                          <thead>
+                            <tr>
+                              {(
+                                [
+                                  ["mz", "MZ"],
+                                  ["lote", "LOTE"],
+                                  ["area", "AREA"],
+                                  ["estado", "ESTADO"],
+                                ] as const
+                              ).map(([campo, etiqueta]) => (
+                                <th key={campo}>
+                                  <button type="button" onClick={() => ordenarPor(campo)}>
+                                    {etiqueta}
+                                    {campoOrden === campo && (
+                                      <span aria-hidden="true">
+                                        {direccionOrden === "asc" ? " ▲" : " ▼"}
+                                      </span>
+                                    )}
+                                  </button>
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {lotesFiltrados.map((lote) => (
+                              <tr
+                                key={lote.id}
+                                className={
+                                  loteSeleccionado?.id === lote.id
+                                    ? styles.selectedRow
+                                    : ""
+                                }
+                                onClick={() => abrirLoteEnMapa(lote)}
+                                onKeyDown={(event) => {
+                                  if (event.key === "Enter" || event.key === " ") {
+                                    event.preventDefault();
+                                    abrirLoteEnMapa(lote);
+                                  }
+                                }}
+                                tabIndex={0}
+                                aria-label={`Ver MZ ${lote.mz}, lote ${lote.lote} en el mapa`}
+                              >
+                                <td>{lote.mz}</td>
+                                <td>{lote.lote}</td>
+                                <td>
+                                  {Number(lote.area).toLocaleString("es-PE", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}{" "}
+                                  m2
+                                </td>
+                                <td>
+                                  <span className={`${styles.tableStatus} ${estadoClase(lote.estado)}`}>
+                                    {lote.estado}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+
+                        {lotesFiltrados.length === 0 && (
+                          <div className={styles.emptyTable}>
+                            No encontramos lotes con esos filtros.
+                          </div>
+                        )}
+                      </div>
+                    </section>
+                  )}
+
+                  {vista === "ubicacion" && (
+                    <section className={styles.locationView} aria-label="Ubicacion del proyecto">
+                      <div className={styles.locationCopy}>
+                        <small>LAS LOMAS DE MALABRIGO</small>
+                        <h2>Explora el proyecto sobre el terreno</h2>
+                        <p>
+                          Recorre la vista satelital, consulta los 213 lotes y
+                          revisa que hay alrededor del proyecto. Toca cualquier
+                          lote para ver su estado y regresar a su posicion exacta
+                          en el plano interactivo.
+                        </p>
+                        <div className={styles.locationSummary}>
+                          <span>
+                            <strong>{resumen.disponibles}</strong>
+                            disponibles
+                          </span>
+                          <span>
+                            <strong>{resumen.separados}</strong>
+                            separados
+                          </span>
+                          <span>
+                            <strong>{resumen.vendidos}</strong>
+                            vendidos
+                          </span>
+                        </div>
+                        <a
+                          href={GOOGLE_MAPS_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.mapsButton}
+                        >
+                          Como llegar en Google Maps
+                        </a>
+                        <span>
+                          Perimetro y lotes georreferenciados desde el plano
+                          tecnico. La visualizacion es informativa y no reemplaza
+                          la documentacion registral o catastral.
+                        </span>
+                      </div>
+
+                      <div className={styles.mapEmbed}>
+                        <MapaGeorreferenciado
+                          lotes={lotes}
+                          seleccionActivaId={loteSeleccionado?.id ?? null}
+                          modoNoche={modoNoche}
+                          onSeleccionarLote={(lote) => {
+                            setLoteSeleccionado(
+                              convertirLoteSeleccionado(lote)
+                            );
+                            setLoteUbicado({ ...lote });
+                          }}
+                          onVerEnPlano={abrirLoteEnMapa}
+                        />
+                      </div>
+                    </section>
+                  )}
+                </>
+              );
+            }}
           </TransformWrapper>
         </div>
 
-        <aside className={styles.legend} aria-label="Estados de lotes">
-          <span><i className={styles.availableDot} />Disponibles <strong>{resumen.disponibles}</strong></span>
-          <span><i className={styles.reservedDot} />Separados <strong>{resumen.separados}</strong></span>
-          <span><i className={styles.soldDot} />Vendidos <strong>{resumen.vendidos}</strong></span>
-        </aside>
+        {vista === "mapa" && (
+          <aside className={styles.legend} aria-label="Estados de lotes">
+            <span><i className={styles.availableDot} />Disponibles <strong>{resumen.disponibles}</strong></span>
+            <span><i className={styles.reservedDot} />Separados <strong>{resumen.separados}</strong></span>
+            <span><i className={styles.soldDot} />Vendidos <strong>{resumen.vendidos}</strong></span>
+          </aside>
+        )}
 
-        {loteSeleccionado && (
+        {vista === "mapa" && loteSeleccionado && (
           <aside className={styles.lotPanel} aria-live="polite">
             <button
               type="button"
@@ -483,9 +779,11 @@ export default function DisponibilidadPage() {
           </aside>
         )}
 
-        <p className={styles.disclaimer}>
-          Montos referenciales sujetos al lote, modalidad de pago y evaluacion comercial.
-        </p>
+        {vista === "mapa" && (
+          <p className={styles.disclaimer}>
+            Montos referenciales sujetos al lote, modalidad de pago y evaluacion comercial.
+          </p>
+        )}
       </section>
 
       {mostrarFormulario && loteSeleccionado && (

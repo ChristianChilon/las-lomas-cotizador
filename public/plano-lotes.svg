@@ -5582,7 +5582,7 @@
      fill="#767676"
      fill-opacity="1"
      id="g893"
-     transform="translate(-46.160156,-73.260312)"
+     transform="translate(-56.160156,-63.260312)"
      style="fill:#ffff00">
     <use
        xlink:href="#glyph-10-0"
@@ -5637,7 +5637,7 @@
      fill="#767676"
      fill-opacity="1"
      id="g903"
-     transform="translate(-46.160156,-73.260312)"
+     transform="translate(-56.160156,-63.260312)"
      style="fill:#ffff00">
     <use
        xlink:href="#glyph-11-0"
@@ -5789,97 +5789,6 @@
        x="500.80276"
        y="243.52322"
        id="use923"
-       style="fill:#6c5353;fill-opacity:1" />
-  </g>
-  <g
-     fill="#767676"
-     fill-opacity="1"
-     id="g937"
-     transform="translate(-46.160156,-73.260312)"
-     style="fill:#ffff00">
-    <use
-       xlink:href="#glyph-12-0"
-       x="674.84003"
-       y="404.76001"
-       id="use924"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-1"
-       x="677.73804"
-       y="407.46146"
-       id="use925"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-2"
-       x="678.94592"
-       y="408.5874"
-       id="use926"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-3"
-       x="682.08295"
-       y="411.51163"
-       id="use927"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-4"
-       x="683.29083"
-       y="412.63757"
-       id="use928"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-2"
-       x="686.42786"
-       y="415.5618"
-       id="use929"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-5"
-       x="689.56488"
-       y="418.48602"
-       id="use930"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-5"
-       x="692.7019"
-       y="421.41025"
-       id="use931"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-6"
-       x="695.83893"
-       y="424.33444"
-       id="use932"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-7"
-       x="699.21924"
-       y="427.48547"
-       id="use933"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-2"
-       x="701.87396"
-       y="429.96014"
-       id="use934"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-8"
-       x="705.01099"
-       y="432.88437"
-       id="use935"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-9"
-       x="708.14801"
-       y="435.80856"
-       id="use936"
-       style="fill:#6c5353;fill-opacity:1" />
-    <use
-       xlink:href="#glyph-12-10"
-       x="710.8028"
-       y="438.28323"
-       id="use937"
        style="fill:#6c5353;fill-opacity:1" />
   </g>
   <path
