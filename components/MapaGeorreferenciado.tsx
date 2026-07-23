@@ -67,17 +67,6 @@ const FONDO_PLANO = {
   ],
 };
 
-const ZOOM_ROTULOS = 19;
-
-const formatearArea = (area: number) =>
-  Number(area).toLocaleString("es-PE", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-
-const contenidoRotulo = (lote: LoteMapa) =>
-  `<strong>MZ ${lote.mz} · L${lote.lote}</strong><span>${formatearArea(lote.area)} m²</span>`;
-
 const obtenerEstilo = (
   estado: string,
   seleccionado: boolean,
@@ -212,12 +201,24 @@ export default function MapaGeorreferenciado({
         paneFondo.style.pointerEvents = "none";
 
         const fondoPlano = document.createElement("img");
-        fondoPlano.src = "/plano-base.webp";
+        fondoPlano.src = "/plano-fondo-mapa.webp";
         fondoPlano.alt = "";
         fondoPlano.className = styles.planOverlay;
         fondoPlano.style.width = `${FONDO_PLANO.ancho}px`;
         fondoPlano.style.height = `${FONDO_PLANO.alto}px`;
         paneFondo.appendChild(fondoPlano);
+
+        const paneSvg = mapa.createPane("svg-plano-las-lomas");
+        paneSvg.style.zIndex = "450";
+        paneSvg.style.pointerEvents = "none";
+
+        const svgPlano = document.createElement("img");
+        svgPlano.src = "/plano-lotes.svg";
+        svgPlano.alt = "";
+        svgPlano.className = styles.svgOverlay;
+        svgPlano.style.width = `${FONDO_PLANO.ancho}px`;
+        svgPlano.style.height = `${FONDO_PLANO.alto}px`;
+        paneSvg.appendChild(svgPlano);
 
         const ubicarFondoPlano = () => {
           const superiorIzquierda = mapa.latLngToLayerPoint(
@@ -239,10 +240,13 @@ export default function MapaGeorreferenciado({
           const d =
             (inferiorIzquierda.y - superiorIzquierda.y) / FONDO_PLANO.alto;
 
-          fondoPlano.style.transform = `matrix(${a}, ${b}, ${c}, ${d}, ${superiorIzquierda.x}, ${superiorIzquierda.y})`;
+          const transformacion = `matrix(${a}, ${b}, ${c}, ${d}, ${superiorIzquierda.x}, ${superiorIzquierda.y})`;
+          fondoPlano.style.transform = transformacion;
+          svgPlano.style.transform = transformacion;
         };
 
         fondoPlano.addEventListener("load", ubicarFondoPlano, { once: true });
+        svgPlano.addEventListener("load", ubicarFondoPlano, { once: true });
         mapa.on("zoomend moveend resize viewreset", ubicarFondoPlano);
         ubicarFondoPlano();
 
@@ -251,8 +255,13 @@ export default function MapaGeorreferenciado({
         );
         if (!perimetro) throw new Error("El archivo no contiene el perimetro.");
 
+        const panePerimetro = mapa.createPane("perimetro-las-lomas");
+        panePerimetro.style.zIndex = "470";
+        panePerimetro.style.pointerEvents = "none";
+
         const capaPerimetro = L.geoJSON(perimetro as GeoJsonObject, {
           interactive: false,
+          pane: "perimetro-las-lomas",
           style: {
             color: "#ffffff",
             fillColor: "#315f37",
@@ -284,21 +293,6 @@ export default function MapaGeorreferenciado({
               ),
             }).addTo(mapa);
 
-            if (loteActual) {
-              capa.eachLayer((layer) => {
-                layer.bindTooltip(contenidoRotulo(loteActual), {
-                  permanent: true,
-                  direction: "center",
-                  className: styles.lotLabel,
-                  opacity: 1,
-                });
-
-                if (mapa.getZoom() < ZOOM_ROTULOS) {
-                  layer.closeTooltip();
-                }
-              });
-            }
-
             capa.on("mouseover", () => {
               const lote = lotesRef.current.find(
                 (actual) => actual.svg_id === svgId
@@ -314,7 +308,6 @@ export default function MapaGeorreferenciado({
                 fillOpacity: 0.82,
                 weight: 2.4,
               });
-              capa.eachLayer((layer) => layer.openTooltip());
             });
             capa.on("mouseout", () => {
               const lote = lotesRef.current.find(
@@ -322,9 +315,6 @@ export default function MapaGeorreferenciado({
               );
               if (!lote) return;
 
-              if (mapa.getZoom() < ZOOM_ROTULOS) {
-                capa.eachLayer((layer) => layer.closeTooltip());
-              }
               capa.setStyle(
                 obtenerEstilo(
                   lote.estado,
@@ -347,9 +337,6 @@ export default function MapaGeorreferenciado({
               const titulo = document.createElement("strong");
               titulo.textContent = `MZ ${lote.mz} - LOTE ${lote.lote}`;
 
-              const area = document.createElement("span");
-              area.textContent = `${formatearArea(lote.area)} m²`;
-
               const estado = document.createElement("span");
               estado.className = styles.popupStatus;
               estado.textContent = lote.estado;
@@ -362,7 +349,7 @@ export default function MapaGeorreferenciado({
                 verEnPlanoRef.current(lote)
               );
 
-              contenido.append(titulo, area, estado, boton);
+              contenido.append(titulo, estado, boton);
               L.popup({
                 closeButton: true,
                 maxWidth: 260,
@@ -376,23 +363,12 @@ export default function MapaGeorreferenciado({
             capasLotes.set(svgId, capa);
           });
 
-        const actualizarRotulos = () => {
-          const mostrar = mapa.getZoom() >= ZOOM_ROTULOS;
-          capasLotes.forEach((capa) => {
-            capa.eachLayer((layer) =>
-              mostrar ? layer.openTooltip() : layer.closeTooltip()
-            );
-          });
-        };
-        mapa.on("zoomend", actualizarRotulos);
-
         if (boundsRef.current?.isValid()) {
           mapa.fitBounds(boundsRef.current, {
             padding: [32, 32],
             maxZoom: 18.5,
           });
         }
-        actualizarRotulos();
         capaPerimetro.bringToFront();
         window.setTimeout(() => mapa.invalidateSize({ pan: false }), 120);
       } catch (error) {
@@ -427,24 +403,6 @@ export default function MapaGeorreferenciado({
 
       const seleccionado = lote.id === seleccionActivaId;
       capa.setStyle(obtenerEstilo(lote.estado, seleccionado, modoNoche));
-      capa.eachLayer((layer) => {
-        if (layer.getTooltip()) {
-          layer.setTooltipContent(contenidoRotulo(lote));
-        } else {
-          layer.bindTooltip(contenidoRotulo(lote), {
-            permanent: true,
-            direction: "center",
-            className: styles.lotLabel,
-            opacity: 1,
-          });
-        }
-
-        if ((mapRef.current?.getZoom() || 0) >= ZOOM_ROTULOS) {
-          layer.openTooltip();
-        } else {
-          layer.closeTooltip();
-        }
-      });
 
       if (seleccionado) {
         capa.bringToFront();
