@@ -37,6 +37,30 @@ type ColeccionGeografica = {
   }>;
 };
 
+type PropiedadesEntorno = {
+  kind: "ruta" | "punto";
+  id: string;
+  label: string;
+  tiempo?: string;
+};
+
+type ColeccionEntorno = {
+  type: "FeatureCollection";
+  features: Array<{
+    type: "Feature";
+    properties: PropiedadesEntorno;
+    geometry:
+      | {
+          type: "LineString";
+          coordinates: number[][];
+        }
+      | {
+          type: "Point";
+          coordinates: number[];
+        };
+  }>;
+};
+
 type Props = {
   lotes: LoteMapa[];
   seleccionActivaId?: number | null;
@@ -113,6 +137,7 @@ export default function MapaGeorreferenciado({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const boundsRef = useRef<LatLngBounds | null>(null);
+  const environmentBoundsRef = useRef<LatLngBounds | null>(null);
   const lotLayersRef = useRef<Map<string, LeafletGeoJSON>>(new Map());
   const perimeterLayerRef = useRef<LeafletGeoJSON | null>(null);
   const lotesRef = useRef(lotes);
@@ -142,16 +167,19 @@ export default function MapaGeorreferenciado({
       if (!containerRef.current || mapRef.current) return;
 
       try {
-        const [leafletModule, respuesta] = await Promise.all([
+        const [leafletModule, respuesta, respuestaEntorno] = await Promise.all([
           import("leaflet"),
           fetch("/las-lomas-georef.json", { cache: "force-cache" }),
+          fetch("/entorno-las-lomas.json", { cache: "force-cache" }),
         ]);
 
-        if (!respuesta.ok) {
+        if (!respuesta.ok || !respuestaEntorno.ok) {
           throw new Error("No se pudo cargar la geometria georreferenciada.");
         }
 
         const datos = (await respuesta.json()) as ColeccionGeografica;
+        const datosEntorno =
+          (await respuestaEntorno.json()) as ColeccionEntorno;
         if (!activo || !containerRef.current) return;
 
         const L = leafletModule.default;
@@ -195,6 +223,108 @@ export default function MapaGeorreferenciado({
           }
         });
         imagenSatelital.addTo(mapa);
+
+        const paneRutas = mapa.createPane("rutas-entorno-las-lomas");
+        paneRutas.style.zIndex = "360";
+
+        const panePuntos = mapa.createPane("puntos-entorno-las-lomas");
+        panePuntos.style.zIndex = "480";
+
+        const rutas = {
+          type: "FeatureCollection",
+          features: datosEntorno.features.filter(
+            (feature) => feature.properties.kind === "ruta"
+          ),
+        } as GeoJsonObject;
+        const puntos = {
+          type: "FeatureCollection",
+          features: datosEntorno.features.filter(
+            (feature) => feature.properties.kind === "punto"
+          ),
+        } as GeoJsonObject;
+        const coloresRuta: Record<string, string> = {
+          RUTA_PUERTO_MALABRIGO: "#f2b63e",
+          RUTA_ALTERNA: "#59d8c8",
+          OTROS_PROYECTOS1: "#ff8a4c",
+          RUTA_TRUJILLO: "#5aa8ff",
+        };
+
+        L.geoJSON(rutas, {
+          interactive: false,
+          pane: "rutas-entorno-las-lomas",
+          style: {
+            color: "#081811",
+            opacity: 0.62,
+            weight: 7,
+          },
+        }).addTo(mapa);
+
+        const capaRutas = L.geoJSON(rutas, {
+          pane: "rutas-entorno-las-lomas",
+          style: (feature) => ({
+            color:
+              coloresRuta[String(feature?.properties?.id)] || "#f2b63e",
+            opacity: 0.96,
+            weight: 3.5,
+          }),
+          onEachFeature: (feature, layer) => {
+            layer.bindTooltip(String(feature.properties?.label || "Ruta"), {
+              sticky: true,
+              direction: "top",
+              className: styles.routeTooltip,
+              opacity: 1,
+            });
+          },
+        }).addTo(mapa);
+
+        const capaPuntos = L.geoJSON(puntos, {
+          pane: "puntos-entorno-las-lomas",
+          pointToLayer: (feature, latlng) => {
+            const esProyecto =
+              feature.properties?.id === "LAS LOMAS DE MALABRIGO";
+            return L.circleMarker(latlng, {
+              pane: "puntos-entorno-las-lomas",
+              radius: esProyecto ? 7 : 5.5,
+              color: "#ffffff",
+              fillColor: esProyecto ? "#d69a2d" : "#173f2b",
+              fillOpacity: 1,
+              opacity: 1,
+              weight: esProyecto ? 2.5 : 2,
+            });
+          },
+          onEachFeature: (feature, layer) => {
+            const propiedades = feature.properties as PropiedadesEntorno;
+            const tiempo = propiedades.tiempo?.trim();
+            const contenido = `<strong>${propiedades.label}</strong>${
+              tiempo ? `<span>${tiempo}</span>` : ""
+            }`;
+            const esProyecto =
+              propiedades.id === "LAS LOMAS DE MALABRIGO";
+
+            layer.bindTooltip(contenido, {
+              permanent: true,
+              direction: "top",
+              offset: [0, -5],
+              className: esProyecto
+                ? `${styles.placeLabel} ${styles.projectLabel}`
+                : styles.placeLabel,
+              opacity: 1,
+            });
+            layer.bindPopup(contenido, {
+              closeButton: true,
+              className: styles.placePopup,
+              maxWidth: 220,
+            });
+          },
+        }).addTo(mapa);
+
+        const limitesEntorno = L.featureGroup([
+          capaRutas,
+          capaPuntos,
+        ]).getBounds();
+        if (limitesEntorno.isValid()) {
+          environmentBoundsRef.current = limitesEntorno;
+        }
 
         const paneFondo = mapa.createPane("fondo-plano-las-lomas");
         paneFondo.style.zIndex = "350";
@@ -387,6 +517,7 @@ export default function MapaGeorreferenciado({
       capasLotes.clear();
       perimeterLayerRef.current = null;
       boundsRef.current = null;
+      environmentBoundsRef.current = null;
       mapRef.current?.remove();
       mapRef.current = null;
     };
@@ -440,6 +571,14 @@ export default function MapaGeorreferenciado({
     });
   };
 
+  const verRutas = () => {
+    if (!mapRef.current || !environmentBoundsRef.current?.isValid()) return;
+
+    mapRef.current.fitBounds(environmentBoundsRef.current, {
+      padding: [36, 36],
+    });
+  };
+
   return (
     <div className={styles.shell}>
       <div
@@ -463,6 +602,9 @@ export default function MapaGeorreferenciado({
         </button>
         <button type="button" onClick={verEntorno}>
           Ver entorno
+        </button>
+        <button type="button" onClick={verRutas}>
+          Rutas
         </button>
       </div>
 
