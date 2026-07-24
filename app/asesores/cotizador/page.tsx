@@ -609,7 +609,7 @@ Quisiera más información.`;
   const thTabla = {
     ...th,
     background: modoNoche
-      ? "#172433"
+      ? "#24272b"
       : th.background,
     color: modoNoche
       ? "#dbeac7"
@@ -1366,7 +1366,7 @@ Quisiera más información.`;
                   overflowY: "auto",
 
                   background: modoNoche
-                    ? "#0b1421"
+                    ? "#17191c"
                     : "white",
 
                   borderRadius: 20,
@@ -1391,7 +1391,7 @@ Quisiera más información.`;
                   width: "100%",
                   boxSizing: "border-box",
                   background: modoNoche
-                    ? "linear-gradient(180deg,#1d2b2f,#111d2c)"
+                    ? "linear-gradient(180deg,#292c30,#1b1d20)"
                     : "#fdf6e3",
                   borderBottom: modoNoche
                     ? "1px solid rgba(216,229,203,.16)"
@@ -1649,7 +1649,7 @@ Quisiera más información.`;
                     width: "100%",
                     borderCollapse: "collapse",
                     background: modoNoche
-                      ? "#0b1421"
+                      ? "#17191c"
                       : "white",
                     borderRadius: 12,
                     margin: 0,
@@ -1662,7 +1662,7 @@ Quisiera más información.`;
                     <tr
                       style={{
                         background: modoNoche
-                          ? "#172433"
+                          ? "#24272b"
                           : "#f5f5f5",
                       }}
                     >
@@ -1876,10 +1876,10 @@ Quisiera más información.`;
                                 : "#e9f7d9"
                               : index % 2 === 0
                                 ? modoNoche
-                                  ? "#111b29"
+                                  ? "#1f2226"
                                   : "#ffffff"
                                 : modoNoche
-                                  ? "#0d1724"
+                                  ? "#191b1e"
                                   : "#fafaf5",
 
                           borderBottom:

@@ -93,7 +93,7 @@ select {
 }
 
 .modo-noche .tabla-lotes th {
-  background: #172433 !important;
+  background: #24272b !important;
   color: #dbeac7 !important;
 }
 
@@ -470,14 +470,14 @@ select {
 }
 
 .crm-night {
-  background: #07111f !important;
+  background: #111315 !important;
   color: #edf4e9;
   color-scheme: dark;
 }
 
 .crm-night .crm-header {
   border-color: rgba(216, 229, 203, 0.14) !important;
-  background: #0d1825 !important;
+  background: #1b1d20 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
 }
 
@@ -494,13 +494,13 @@ select {
 
 .crm-night .crm-theme-button {
   border-color: rgba(216, 229, 203, 0.18);
-  background: #162536;
+  background: #26292d;
   color: #e8f1df;
 }
 
 .crm-night .crm-main {
   min-height: calc(100vh - 72px);
-  background: #07111f;
+  background: #111315;
   color: #edf4e9;
 }
 
@@ -541,7 +541,7 @@ select {
 .crm-night .crm-main [style*="background-color: rgb(238, 241, 239)"],
 .crm-night .crm-main [style*="background-color: rgb(238, 240, 236)"] {
   border-color: rgba(216, 229, 203, 0.15) !important;
-  background: #111d2a !important;
+  background: #1b1e21 !important;
   color: #eaf1e6 !important;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2) !important;
 }
@@ -571,19 +571,19 @@ select {
 .crm-night .crm-main tr,
 .crm-night .crm-main td {
   border-color: rgba(216, 229, 203, 0.11) !important;
-  background-color: #101b28 !important;
+  background-color: #1b1e21 !important;
   color: #e8efe5 !important;
 }
 
 .crm-night .crm-main tbody tr:nth-child(even) td {
-  background-color: #0d1824 !important;
+  background-color: #17191c !important;
 }
 
 .crm-night .crm-main input,
 .crm-night .crm-main select,
 .crm-night .crm-main textarea {
   border-color: rgba(216, 229, 203, 0.2) !important;
-  background-color: #162536 !important;
+  background-color: #292c30 !important;
   color: #f1f5f0 !important;
   color-scheme: dark !important;
 }
@@ -603,7 +603,7 @@ select {
 
 .crm-night .crm-main .crm-metric-card {
   border-color: rgba(216, 229, 203, 0.2) !important;
-  background: #142231 !important;
+  background: #202327 !important;
   color: #edf4e9 !important;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24) !important;
 }
@@ -805,7 +805,7 @@ select {
 
 .crm-night .crm-header {
   border-color: rgba(248, 244, 236, 0.14) !important;
-  background: rgba(5, 24, 61, 0.82) !important;
+  background: rgba(27, 29, 32, 0.86) !important;
   box-shadow: 0 8px 26px rgba(0, 4, 18, 0.3);
 }
 
@@ -818,7 +818,7 @@ select {
 .crm-night .crm-main {
   background:
     radial-gradient(circle at 96% 0%, rgba(187, 149, 13, 0.08), transparent 28%),
-    var(--komodo-blue);
+    #111315;
 }
 
 .crm-night .crm-page-heading {
@@ -830,14 +830,14 @@ select {
 .crm-night .crm-main [style*="background: rgb(255, 255, 255)"],
 .crm-night .crm-main [style*="background-color: rgb(255, 255, 255)"] {
   border-color: rgba(248, 244, 236, 0.15) !important;
-  background: #061b46 !important;
+  background: #1b1e21 !important;
   color: var(--komodo-ivory) !important;
 }
 
 .crm-night .crm-main thead,
 .crm-night .crm-main th {
   border-color: rgba(248, 244, 236, 0.14) !important;
-  background: #0b285d !important;
+  background: #292c30 !important;
   color: #f3e7b9 !important;
 }
 
@@ -845,19 +845,19 @@ select {
 .crm-night .crm-main tr,
 .crm-night .crm-main td {
   border-color: rgba(248, 244, 236, 0.1) !important;
-  background-color: #061b46 !important;
+  background-color: #1b1e21 !important;
   color: #f3f1ec !important;
 }
 
 .crm-night .crm-main tbody tr:nth-child(even) td {
-  background-color: #04173d !important;
+  background-color: #17191c !important;
 }
 
 .crm-night .crm-main input,
 .crm-night .crm-main select,
 .crm-night .crm-main textarea {
   border-color: rgba(248, 244, 236, 0.19) !important;
-  background-color: #0b285d !important;
+  background-color: #292c30 !important;
   color: var(--komodo-ivory) !important;
 }
 
@@ -933,13 +933,13 @@ select {
 }
 
 .crm-login-night {
-  background: #07111f !important;
+  background: #111315 !important;
 }
 
 .crm-login-night .crm-login-card,
 .crm-login-night .crm-login-body {
   border-color: rgba(216, 229, 203, 0.16) !important;
-  background: #101d2a !important;
+  background: #1b1e21 !important;
   color: #edf4e9 !important;
 }
 
@@ -954,7 +954,7 @@ select {
 
 .crm-login-night .crm-login-body > form > label > div {
   border-color: rgba(216, 229, 203, 0.2) !important;
-  background: #162536 !important;
+  background: #292c30 !important;
 }
 
 .crm-login-night input {
@@ -964,7 +964,7 @@ select {
 
 .crm-login-night .crm-login-theme {
   border-color: rgba(216, 229, 203, 0.18);
-  background: #162536;
+  background: #292c30;
   color: #dcebd0;
 }
 
@@ -1395,14 +1395,14 @@ select {
 
 .crm-night .expediente-modal {
   border-color: rgba(216, 229, 203, 0.16);
-  background: #101d2a;
+  background: #1b1e21;
   color: #eef4ec;
 }
 
 .crm-night .expediente-header,
 .crm-night .expediente-footer {
   border-color: rgba(216, 229, 203, 0.13);
-  background: #0c1824;
+  background: #17191c;
 }
 
 .crm-night .expediente-header h2,
@@ -1436,20 +1436,20 @@ select {
 .crm-night .expediente-icon-button,
 .crm-night .expediente-document-actions button {
   border-color: rgba(216, 229, 203, 0.18);
-  background: #162536;
+  background: #292c30;
   color: #f1f5f0;
 }
 
 .crm-night .expediente-modal input:disabled,
 .crm-night .expediente-modal select:disabled,
 .crm-night .expediente-modal textarea:disabled {
-  background: #111f2d;
+  background: #202327;
   color: #9ead9f;
 }
 
 .crm-night .expediente-document-row {
   border-color: rgba(216, 229, 203, 0.14);
-  background: #132230;
+  background: #202327;
 }
 
 .crm-night .expediente-document-state {
@@ -1464,7 +1464,7 @@ select {
 
 .crm-night .expediente-button--ghost {
   border-color: rgba(216, 229, 203, 0.18);
-  background: #162536;
+  background: #292c30;
   color: #e7eee8;
 }
 
@@ -1551,7 +1551,7 @@ select {
 
   .crm-night .crm-menu-button {
     border-color: rgba(216, 229, 203, 0.18);
-    background: #162536;
+    background: #292c30;
   }
 
   .crm-night .crm-menu-button span {

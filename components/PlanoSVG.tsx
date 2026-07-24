@@ -693,7 +693,7 @@ export default function PlanoSVG({
         position: "relative",
         width: PLANO_WIDTH,
         height: PLANO_HEIGHT,
-        background: modoNoche ? "#07111f" : "#ffffff",
+        background: modoNoche ? "#111315" : "#ffffff",
       }}
     >
       <Image
