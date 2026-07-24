@@ -111,7 +111,11 @@ export default function PlanoSVG({
           tooltip.style.display = "none";
 
           tooltip.style.backdropFilter =
-            "blur(18px) saturate(130%)";
+            "blur(6px) saturate(115%)";
+          tooltip.style.setProperty(
+            "-webkit-backdrop-filter",
+            "blur(6px) saturate(115%)"
+          );
 
           tooltip.style.padding =
             "10px 12px";
@@ -143,8 +147,8 @@ export default function PlanoSVG({
         }
 
         tooltip.style.background = modoNoche
-          ? "rgba(27,29,32,.76)"
-          : "rgba(248,244,236,.72)";
+          ? "rgba(27,29,32,.66)"
+          : "rgba(248,244,236,.58)";
         tooltip.style.color = modoNoche
           ? "#f3f7ef"
           : "#17211b";
