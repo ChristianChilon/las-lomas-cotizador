@@ -4,9 +4,9 @@
   --komodo-ivory: #f8f4ec;
   --viewer-bg: #f8f4ec;
   --viewer-text: #00133e;
-  --glass-surface: rgba(255, 255, 255, 0.62);
-  --glass-surface-hover: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.78);
+  --glass-surface: rgba(255, 255, 255, 0.8);
+  --glass-surface-hover: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.88);
   --glass-shadow: 0 8px 28px rgba(0, 19, 62, 0.14);
   position: fixed;
   inset: 0;
@@ -34,9 +34,9 @@
 .night {
   --viewer-bg: #111315;
   --viewer-text: #f8f4ec;
-  --glass-surface: rgba(27, 29, 32, 0.7);
-  --glass-surface-hover: rgba(39, 42, 46, 0.86);
-  --glass-border: rgba(248, 244, 236, 0.2);
+  --glass-surface: rgba(27, 29, 32, 0.82);
+  --glass-surface-hover: rgba(43, 46, 50, 0.92);
+  --glass-border: rgba(248, 244, 236, 0.24);
   --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.34);
 }
 
@@ -112,7 +112,7 @@
 }
 
 .availabilityCard {
-  border-radius: 14px;
+  border-radius: 16px;
 }
 
 .availabilityCard > div:last-child {

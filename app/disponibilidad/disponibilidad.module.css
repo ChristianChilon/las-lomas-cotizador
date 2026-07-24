@@ -8,9 +8,9 @@
   --komodo-blue: #00133e;
   --komodo-gold: #bb950d;
   --komodo-ivory: #f8f4ec;
-  --glass-surface: rgba(255, 255, 255, 0.62);
-  --glass-surface-hover: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.78);
+  --glass-surface: rgba(255, 255, 255, 0.8);
+  --glass-surface-hover: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.88);
   --glass-shadow: 0 8px 28px rgba(0, 19, 62, 0.14);
   position: fixed;
   inset: 0;
@@ -31,9 +31,9 @@
   --text: #f8f4ec;
   --muted: #bbb8b1;
   --brand: #d6ad1f;
-  --glass-surface: rgba(27, 29, 32, 0.7);
-  --glass-surface-hover: rgba(39, 42, 46, 0.86);
-  --glass-border: rgba(248, 244, 236, 0.2);
+  --glass-surface: rgba(27, 29, 32, 0.82);
+  --glass-surface-hover: rgba(43, 46, 50, 0.92);
+  --glass-border: rgba(248, 244, 236, 0.24);
   --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.34);
   background: #111315;
 }
@@ -714,7 +714,7 @@
   padding: 13px;
   border: 1px solid var(--glass-border);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.78);
   color: var(--text);
   transform: translateY(-50%);
   box-shadow: 0 12px 32px rgba(0, 19, 62, 0.12);
@@ -723,7 +723,7 @@
 }
 
 .night .legend {
-  background: rgba(27, 29, 32, 0.68);
+  background: rgba(27, 29, 32, 0.82);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
 }
 
@@ -764,12 +764,17 @@
   width: min(310px, calc(100vw - 32px));
   padding: 18px;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.86);
   color: var(--text);
   transform: translateY(-50%);
   box-shadow: 0 16px 36px rgba(15, 29, 18, 0.18);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(20px) saturate(130%);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
+}
+
+.night .lotPanel {
+  background: rgba(27, 29, 32, 0.88);
 }
 
 .lotPanel > small {

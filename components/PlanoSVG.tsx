@@ -111,19 +111,19 @@ export default function PlanoSVG({
           tooltip.style.display = "none";
 
           tooltip.style.backdropFilter =
-            "blur(12px)";
+            "blur(18px) saturate(130%)";
 
           tooltip.style.padding =
-            "4px 6px";
+            "10px 12px";
 
           tooltip.style.borderRadius =
-            "8px";
+            "14px";
 
           tooltip.style.border =
-            "1px solid rgba(255,255,255,.35)";
+            "1px solid rgba(255,255,255,.82)";
 
           tooltip.style.boxShadow =
-            "0 8px 30px rgba(0,0,0,.18)";
+            "0 12px 30px rgba(0,0,0,.20)";
 
           tooltip.style.zIndex =
             "999999";
@@ -143,14 +143,14 @@ export default function PlanoSVG({
         }
 
         tooltip.style.background = modoNoche
-          ? "rgba(10,21,33,.90)"
-          : "rgba(255,255,255,.82)";
+          ? "rgba(27,29,32,.88)"
+          : "rgba(248,244,236,.86)";
         tooltip.style.color = modoNoche
           ? "#f3f7ef"
           : "#17211b";
         tooltip.style.borderColor = modoNoche
-          ? "rgba(216,229,203,.28)"
-          : "rgba(255,255,255,.72)";
+          ? "rgba(248,244,236,.26)"
+          : "rgba(255,255,255,.90)";
 
         let loteActivo: SVGPathElement | null = null;
         let loteClon: SVGPathElement | null = null;
