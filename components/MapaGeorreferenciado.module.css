@@ -182,7 +182,8 @@
 }
 
 .placeLabel strong,
-.placeLabel span {
+.placeLabel span,
+.placeLabel small {
   display: block;
 }
 
@@ -199,8 +200,32 @@
   font-weight: 900;
 }
 
+.placeLabel small {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .placeLabel::before {
   border-top-color: rgba(8, 25, 18, 0.9) !important;
+}
+
+.galleryPlaceLabel {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.galleryPlaceLabel:hover {
+  border-color: rgba(255, 223, 153, 0.92) !important;
+  filter: brightness(1.08);
+}
+
+.galleryPoint {
+  cursor: pointer;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.62));
 }
 
 .projectLabel {

@@ -11,6 +11,9 @@ import type {
 } from "leaflet";
 import type { GeoJsonObject } from "geojson";
 import { useEffect, useRef, useState } from "react";
+import GaleriaEntorno, {
+  type DestinoGaleria,
+} from "./GaleriaEntorno";
 import styles from "./MapaGeorreferenciado.module.css";
 
 type LoteMapa = {
@@ -85,6 +88,11 @@ const CENTRO_PROYECTO: [number, number] = [
   -79.41193114804025,
 ];
 
+const GALERIAS_POR_PUNTO: Partial<Record<string, DestinoGaleria>> = {
+  "LAS LOMAS DE MALABRIGO": "las-lomas",
+  "PLAYA MALABRIGO": "playa-malabrigo",
+};
+
 const FONDO_PLANO = {
   ancho: 998.637,
   alto: 1393.841,
@@ -157,6 +165,8 @@ export default function MapaGeorreferenciado({
   const seleccionIdRef = useRef(seleccionActivaId);
   const [cargandoMapa, setCargandoMapa] = useState(true);
   const [errorMapa, setErrorMapa] = useState("");
+  const [galeriaActiva, setGaleriaActiva] =
+    useState<DestinoGaleria | null>(null);
 
   useEffect(() => {
     lotesRef.current = lotes;
@@ -292,39 +302,56 @@ export default function MapaGeorreferenciado({
           pointToLayer: (feature, latlng) => {
             const esProyecto =
               feature.properties?.id === "LAS LOMAS DE MALABRIGO";
+            const tieneGaleria = Boolean(
+              GALERIAS_POR_PUNTO[String(feature.properties?.id)]
+            );
             return L.circleMarker(latlng, {
               pane: "puntos-entorno-las-lomas",
-              radius: esProyecto ? 7 : 5.5,
+              radius: tieneGaleria ? 7.5 : 5.5,
               color: "#ffffff",
               fillColor: esProyecto ? "#d69a2d" : "#173f2b",
               fillOpacity: 1,
               opacity: 1,
-              weight: esProyecto ? 2.5 : 2,
+              weight: tieneGaleria ? 2.5 : 2,
+              className: tieneGaleria ? styles.galleryPoint : undefined,
             });
           },
           onEachFeature: (feature, layer) => {
             const propiedades = feature.properties as PropiedadesEntorno;
             const tiempo = propiedades.tiempo?.trim();
+            const destinoGaleria = GALERIAS_POR_PUNTO[propiedades.id];
             const contenido = `<strong>${propiedades.label}</strong>${
               tiempo ? `<span>${tiempo}</span>` : ""
-            }`;
+            }${destinoGaleria ? "<small>Ver fotos</small>" : ""}`;
             const esProyecto =
               propiedades.id === "LAS LOMAS DE MALABRIGO";
 
             layer.bindTooltip(contenido, {
               permanent: true,
+              interactive: Boolean(destinoGaleria),
               direction: "top",
               offset: [0, -5],
-              className: esProyecto
-                ? `${styles.placeLabel} ${styles.projectLabel}`
-                : styles.placeLabel,
+              className: [
+                styles.placeLabel,
+                esProyecto ? styles.projectLabel : "",
+                destinoGaleria ? styles.galleryPlaceLabel : "",
+              ]
+                .filter(Boolean)
+                .join(" "),
               opacity: 1,
             });
-            layer.bindPopup(contenido, {
-              closeButton: true,
-              className: styles.placePopup,
-              maxWidth: 220,
-            });
+            if (destinoGaleria) {
+              layer.on("click", () => {
+                mapa.closePopup();
+                setGaleriaActiva(destinoGaleria);
+              });
+            } else {
+              layer.bindPopup(contenido, {
+                closeButton: true,
+                className: styles.placePopup,
+                maxWidth: 220,
+              });
+            }
           },
         }).addTo(mapa);
 
@@ -617,6 +644,14 @@ export default function MapaGeorreferenciado({
         <span><i className={styles.reserved} />Separado</span>
         <span><i className={styles.sold} />Vendido</span>
       </div>
+
+      {galeriaActiva && (
+        <GaleriaEntorno
+          destino={galeriaActiva}
+          modoNoche={modoNoche}
+          onCerrar={() => setGaleriaActiva(null)}
+        />
+      )}
     </div>
   );
 }
