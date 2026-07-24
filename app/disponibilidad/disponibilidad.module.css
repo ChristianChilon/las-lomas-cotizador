@@ -1,14 +1,21 @@
 .page {
   --surface: rgba(255, 255, 255, 0.92);
   --surface-strong: #ffffff;
-  --border: rgba(57, 82, 61, 0.2);
-  --text: #15231a;
-  --muted: #66736b;
-  --brand: #315f37;
+  --border: rgba(0, 19, 62, 0.16);
+  --text: #00133e;
+  --muted: #626a78;
+  --brand: #00133e;
+  --komodo-blue: #00133e;
+  --komodo-gold: #bb950d;
+  --komodo-ivory: #f8f4ec;
+  --glass-surface: rgba(255, 255, 255, 0.62);
+  --glass-surface-hover: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.78);
+  --glass-shadow: 0 8px 28px rgba(0, 19, 62, 0.14);
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: #edf1eb;
+  background: var(--komodo-ivory);
   color: var(--text);
 }
 
@@ -18,13 +25,17 @@
 }
 
 .night {
-  --surface: rgba(11, 24, 36, 0.92);
-  --surface-strong: #101d2a;
-  --border: rgba(211, 226, 199, 0.2);
-  --text: #f0f5eb;
-  --muted: #acb9ae;
-  --brand: #add17f;
-  background: #07111f;
+  --surface: rgba(0, 15, 48, 0.92);
+  --surface-strong: #061b46;
+  --border: rgba(248, 244, 236, 0.18);
+  --text: #f8f4ec;
+  --muted: #c4c1ba;
+  --brand: #d6ad1f;
+  --glass-surface: rgba(5, 24, 61, 0.66);
+  --glass-surface-hover: rgba(12, 37, 78, 0.84);
+  --glass-border: rgba(248, 244, 236, 0.2);
+  --glass-shadow: 0 10px 30px rgba(0, 4, 18, 0.34);
+  background: var(--komodo-blue);
 }
 
 .header {
@@ -196,6 +207,24 @@
   inset: 84px 0 0;
   overflow: hidden;
   background: inherit;
+  isolation: isolate;
+}
+
+.mapStage::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-image: url("/branding/komodo-watermark.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: min(70vw, 1100px) auto;
+  content: "";
+  opacity: 0.035;
+  pointer-events: none;
+}
+
+.night .mapStage::before {
+  opacity: 0.05;
 }
 
 .transformRoot,
@@ -206,6 +235,7 @@
 
 .transformRoot {
   position: relative;
+  z-index: 1;
 }
 
 .viewSwitcher {
@@ -218,15 +248,13 @@
   width: min(320px, calc(100vw - 24px));
   min-width: 300px;
   padding: 3px;
-  border: 1px solid rgba(137, 112, 65, 0.3);
+  border: 1px solid var(--glass-border);
   border-radius: 999px;
-  background:
-    linear-gradient(110deg, rgba(250, 246, 236, 0.98), rgba(240, 231, 211, 0.97));
+  background: var(--glass-surface);
   transform: translateX(-50%);
-  box-shadow:
-    0 12px 30px rgba(83, 65, 32, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(18px);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
 }
 
 .viewSwitcher button {
@@ -239,7 +267,7 @@
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: #294639;
+  color: var(--komodo-blue);
   font-size: 9px;
   font-weight: 850;
   letter-spacing: 0.035em;
@@ -248,7 +276,8 @@
   transition:
     background 160ms ease,
     color 160ms ease,
-    transform 160ms ease;
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .viewSwitcher button svg {
@@ -260,15 +289,15 @@
 
 .viewSwitcher button:hover,
 .viewSwitcher button:focus-visible {
-  color: #153728;
-  background: rgba(145, 112, 48, 0.1);
+  color: var(--komodo-blue);
+  background: rgba(187, 149, 13, 0.1);
 }
 
 .viewSwitcher .viewActive {
-  background: linear-gradient(135deg, #d9a13b, #bc8122);
+  background: linear-gradient(135deg, #cda916, var(--komodo-gold));
   color: #ffffff;
   box-shadow:
-    0 7px 18px rgba(189, 130, 35, 0.32),
+    0 7px 18px rgba(187, 149, 13, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
@@ -294,12 +323,9 @@
 }
 
 .night .viewSwitcher {
-  border-color: rgba(79, 112, 153, 0.55);
-  background:
-    linear-gradient(110deg, rgba(6, 21, 43, 0.98), rgba(7, 28, 39, 0.97));
-  box-shadow:
-    0 12px 30px rgba(3, 15, 35, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: var(--glass-border);
+  background: var(--glass-surface);
+  box-shadow: var(--glass-shadow);
 }
 
 .night .viewSwitcher button {
@@ -344,23 +370,45 @@
   left: 50%;
   bottom: 22px;
   display: flex;
-  gap: 7px;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   transform: translateX(-50%);
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .mapControls button {
   min-width: 42px;
   height: 42px;
   padding: 0 12px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 7px;
-  background: rgba(20, 30, 26, 0.76);
-  color: #ffffff;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--glass-surface);
+  color: var(--komodo-blue);
   font-size: 13px;
   font-weight: 900;
   cursor: pointer;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 19, 62, 0.16);
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  transition:
+    background 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.mapControls button:hover,
+.mapControls button:focus-visible {
+  background: var(--glass-surface-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 19, 62, 0.2);
+}
+
+.night .mapControls button {
+  color: var(--komodo-ivory);
+  box-shadow: 0 8px 24px rgba(0, 4, 18, 0.3);
 }
 
 .mapControls button:first-child,
@@ -376,9 +424,9 @@
   grid-template-rows: auto minmax(0, 1fr);
   gap: 14px;
   padding: 74px 22px 22px;
-  background-color: #edf1eb;
+  background-color: var(--komodo-ivory);
   background-image:
-    radial-gradient(circle at 80% 0%, rgba(110, 150, 96, 0.12), transparent 34%);
+    radial-gradient(circle at 80% 0%, rgba(187, 149, 13, 0.1), transparent 34%);
 }
 
 .tableToolbar {
@@ -552,9 +600,9 @@
   gap: 18px;
   padding: 74px 22px 22px;
   overflow: auto;
-  background-color: #edf1eb;
+  background-color: var(--komodo-ivory);
   background-image:
-    radial-gradient(circle at 15% 18%, rgba(111, 156, 96, 0.16), transparent 32%);
+    radial-gradient(circle at 15% 18%, rgba(187, 149, 13, 0.1), transparent 32%);
 }
 
 .night .tableView,
@@ -663,13 +711,19 @@
   gap: 10px;
   width: 168px;
   padding: 13px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.58);
   color: var(--text);
   transform: translateY(-50%);
-  box-shadow: 0 12px 30px rgba(15, 29, 18, 0.15);
-  backdrop-filter: blur(16px);
+  box-shadow: 0 12px 32px rgba(0, 19, 62, 0.12);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+}
+
+.night .legend {
+  background: rgba(5, 24, 61, 0.62);
+  box-shadow: 0 12px 32px rgba(0, 4, 18, 0.3);
 }
 
 .legend span {

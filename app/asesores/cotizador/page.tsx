@@ -23,6 +23,7 @@ import {
   PASO_RUEDA_PLANO,
 } from "../../../lib/planoZoom";
 import { supabase } from "../../../lib/supabase";
+import styles from "./cotizador.module.css";
 
 export type LoteData = {
   id: number;
@@ -641,16 +642,9 @@ Quisiera más información.`;
 
   return (
     <main
-      className={modoNoche ? "modo-noche" : ""}
-      style={{
-        width: "100vw",
-        height: "100vh",
-        background:
-          modoNoche
-          ? "#07111f"
-          : "#f0f0f0",
-        overflow: "hidden",
-      }}
+      className={`${styles.privateViewer} ${
+        modoNoche ? `modo-noche ${styles.night}` : ""
+      }`}
     >
       {errorLotes && (
         <div className="cotizador-private-error" role="alert">
@@ -696,113 +690,26 @@ Quisiera más información.`;
       </div>
 
       <div
-        className="vista-switch-control"
-        style={{
-          position: "fixed",
-
-          top: 4,
-
-          left: "50%",
-
-          transform:
-            "translateX(-50%)",
-
-          zIndex: 9999,
-
-          display: "flex",
-
-          gap: 5,
-
-          padding: 7,
-
-          borderRadius: 999,
-
-          background:
-            "linear-gradient(180deg,#fff8e6,#f5e6b8)",
-
-          backdropFilter:
-            "blur(18px)",
-
-          WebkitBackdropFilter:
-            "blur(8px)",
-
-          border:
-            "1px solid rgba(210,170,80,.35)",
-
-          boxShadow:
-            "0 6px 20px rgba(180,140,40,.18)",
-        }}
+        className={`vista-switch-control ${styles.viewSwitcher}`}
       >
         <button
-          className="vista-switch-button"
+          className={`vista-switch-button ${styles.viewButton} ${
+            vista === "mapa" ? styles.viewActive : ""
+          }`}
           onClick={() =>
             setVista("mapa")
           }
-          style={{
-            border: "none",
-
-            padding:
-              "0px 18px",
-
-            height: 38,
-
-            borderRadius: 999,
-
-            cursor: "pointer",
-
-            background:
-              vista === "mapa"
-                ? "linear-gradient(180deg,#7ea84d,#5f8238)"
-                : "transparent",
-
-            color:
-              vista === "mapa"
-                ? "#ffffff"
-                : "#6d5a22",
-
-            fontWeight: 600,
-
-            fontSize: 13,
-
-            letterSpacing: ".4px",
-          }}
         >
-          MAPA
+          PLANO
         </button>
 
         <button
-          className="vista-switch-button"
+          className={`vista-switch-button ${styles.viewButton} ${
+            vista === "tabla" ? styles.viewActive : ""
+          }`}
           onClick={() =>
             setVista("tabla")
           }
-          style={{
-            border: "none",
-
-            padding:
-              "0px 18px",
-
-            height: 38,
-
-            borderRadius: 999,
-
-            cursor: "pointer",
-
-            background:
-              vista === "tabla"
-                ? "linear-gradient(180deg,#7ea84d,#5f8238)"
-                : "transparent",
-
-            color:
-              vista === "tabla"
-                ? "#ffffff"
-                : "#6d5a22",
-
-            fontWeight: 600,
-
-            fontSize: 13,
-
-            letterSpacing: ".4px",
-          }}
         >
           TABLA
         </button>
@@ -851,7 +758,7 @@ Quisiera más información.`;
             }}
           >
             <div
-              className="modo-toggle-control"
+              className={`modo-toggle-control ${styles.themeToggle}`}
               onClick={alternarModoNoche}
               role="button"
               aria-label={modoNoche ? "Activar modo dia" : "Activar modo noche"}
@@ -863,11 +770,6 @@ Quisiera más información.`;
 
                 borderRadius: 999,
 
-                background:
-                  modoNoche
-                    ? "#1f2937"
-                    : "#b9c3ab",
-
                 cursor: "pointer",
 
                 position: "relative",
@@ -875,8 +777,6 @@ Quisiera más información.`;
                 transition:
                   "all .3s ease",
 
-                boxShadow:
-                  "0 6px 20px rgba(0,0,0,.18)",
               }}
             >
               <div
@@ -920,7 +820,7 @@ Quisiera más información.`;
             </div>
 
             <button
-              className="asesor-login-button"
+              className={`asesor-login-button ${styles.utilityButton}`}
               type="button"
               onClick={() => {
                 window.location.href = "/asesores";
@@ -933,17 +833,10 @@ Quisiera más información.`;
                 minWidth: 38,
                 padding: 0,
                 borderRadius: 999,
-                border:
-                  "1px solid rgba(210,170,80,.35)",
-                background:
-                  "linear-gradient(180deg,#fff8e6,#f5e6b8)",
-                color: "#4f3d18",
                 cursor: "pointer",
                 fontSize: 17,
                 fontWeight: 800,
                 letterSpacing: ".2px",
-                boxShadow:
-                  "0 6px 18px rgba(0,0,0,.16)",
               }}
             >
               👤
@@ -954,6 +847,7 @@ Quisiera más información.`;
             !mostrarResumen && (
 
             <div
+              className={styles.availabilityPeek}
               onMouseEnter={() =>
                 setMostrarResumen(true)
               }
@@ -988,15 +882,6 @@ Quisiera más información.`;
                 height: 110,
 
                 borderRadius: 999,
-
-                background:
-                  "rgba(255,255,255,.15)",
-
-                backdropFilter:
-                  "blur(12px)",
-
-                border:
-                  "1px solid rgba(255,255,255,.25)",
 
                 display: "flex",
 
@@ -1050,6 +935,7 @@ Quisiera más información.`;
             mostrarResumen && (
 
               <div
+                className={styles.availabilityCard}
                 onMouseEnter={() =>
                   setMostrarResumen(true)
                 }
@@ -1088,28 +974,9 @@ Quisiera más información.`;
 
                   zIndex: 9999,
 
-                  background:
-                    "rgba(255, 255, 255, 0.58)",
-
-                  backdropFilter:
-                    "blur(18px)",
-
-                  WebkitBackdropFilter:
-                    "blur(18px)",
-
-                  borderRadius: 30,
-
                   padding: "20px",
 
                   minWidth: 180,
-
-                  boxShadow:
-                    mostrarResumen
-                      ? "0 25px 50px rgba(0,0,0,.22)"
-                      : "0 15px 30px rgba(0,0,0,.12)",
-
-                  border:
-                    "1px solid rgba(255,190,120,.35)",
                 }}
               >
                 <div
@@ -1259,30 +1126,20 @@ Quisiera más información.`;
 
             {vista === "mapa" && (
             <div
-              style={{
-                position: "fixed",
-                bottom: 25,
-                left: "50%",
-                transform:
-                  "translateX(-50%)",
-                zIndex: 9999,
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-
-              }}
+              className={styles.mapControls}
             >
               <button
                 onClick={() => zoomIn(PASO_BOTON_PLANO, DURACION_BOTON_PLANO)}
-                style={boton}
+                className={styles.mapButton}
+                aria-label="Acercar"
               >
                 +
               </button>
 
               <button
                 onClick={() => zoomOut(PASO_BOTON_PLANO, DURACION_BOTON_PLANO)}
-                style={boton}
+                className={styles.mapButton}
+                aria-label="Alejar"
               >
                 −
               </button>
@@ -1291,14 +1148,9 @@ Quisiera más información.`;
                 onClick={() =>
                   resetTransform()
                 }
-                style={{
-                  ...boton,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: 0,
-                }}
+                className={styles.mapButton}
                 title="Restablecer vista"
+                aria-label="Centrar plano"
               >
                 <svg
                   width="18"
@@ -1311,25 +1163,25 @@ Quisiera más información.`;
                 >
                   <path
                     d="M12 5V3"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.4"
                     strokeLinecap="round"
                   />
                   <path
                     d="M12 21V19"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.4"
                     strokeLinecap="round"
                   />
                   <path
                     d="M5 12H3"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.4"
                     strokeLinecap="round"
                   />
                   <path
                     d="M21 12H19"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.4"
                     strokeLinecap="round"
                   />
@@ -1337,14 +1189,14 @@ Quisiera más información.`;
                     cx="12"
                     cy="12"
                     r="5"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.4"
                   />
                   <circle
                     cx="12"
                     cy="12"
                     r="1.4"
-                    fill="white"
+                    fill="currentColor"
                   />
                 </svg>
               </button>
@@ -1353,13 +1205,8 @@ Quisiera más información.`;
                 type="button"
                 onClick={activarPantallaCompleta}
                 title="Pantalla completa"
-                style={{
-                  ...boton,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: 0,
-                }}
+                className={styles.mapButton}
+                aria-label="Expandir plano"
               >
                 <svg
                   width="15"
@@ -1372,14 +1219,14 @@ Quisiera más información.`;
                 >
                   <path
                     d="M8 3H3V8"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                   <path
                     d="M3 3L9 9"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -1387,14 +1234,14 @@ Quisiera más información.`;
 
                   <path
                     d="M16 3H21V8"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                   <path
                     d="M21 3L15 9"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -1402,14 +1249,14 @@ Quisiera más información.`;
 
                   <path
                     d="M8 21H3V16"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                   <path
                     d="M3 21L9 15"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -1417,14 +1264,14 @@ Quisiera más información.`;
 
                   <path
                     d="M16 21H21V16"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                   <path
                     d="M21 21L15 15"
-                    stroke="white"
+                    stroke="currentColor"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -2819,20 +2666,6 @@ Quisiera más información.`;
   </main>
   );
 }
-
-const boton: React.CSSProperties = {
-  width: 35,
-  height: 35,
-  border: "none",
-  borderRadius: 12,
-  background: "rgba(119, 114, 114, 0.85)",
-  cursor: "pointer",
-  fontSize: 20,
-  fontWeight: "bold",
-  color: "#ffffff",
-  boxShadow:
-    "0 6px 20px rgba(0,0,0,0.25)",
-};
 
 const th: React.CSSProperties = {
   padding: "12px 14px",

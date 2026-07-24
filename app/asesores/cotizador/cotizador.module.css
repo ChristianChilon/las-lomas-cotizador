@@ -1,0 +1,202 @@
+.privateViewer {
+  --komodo-blue: #00133e;
+  --komodo-gold: #bb950d;
+  --komodo-ivory: #f8f4ec;
+  --viewer-bg: #f8f4ec;
+  --viewer-text: #00133e;
+  --glass-surface: rgba(255, 255, 255, 0.62);
+  --glass-surface-hover: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.78);
+  --glass-shadow: 0 8px 28px rgba(0, 19, 62, 0.14);
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--viewer-bg);
+  color: var(--viewer-text);
+  isolation: isolate;
+}
+
+.privateViewer::before {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  background-image: url("/branding/komodo-watermark.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: min(70vw, 1100px) auto;
+  content: "";
+  opacity: 0.035;
+  pointer-events: none;
+}
+
+.privateViewer > div {
+  position: relative;
+  z-index: 1;
+}
+
+.night {
+  --viewer-bg: #00133e;
+  --viewer-text: #f8f4ec;
+  --glass-surface: rgba(5, 24, 61, 0.66);
+  --glass-surface-hover: rgba(12, 37, 78, 0.84);
+  --glass-border: rgba(248, 244, 236, 0.2);
+  --glass-shadow: 0 10px 30px rgba(0, 4, 18, 0.34);
+}
+
+.night::before {
+  opacity: 0.05;
+}
+
+.viewSwitcher {
+  position: fixed;
+  z-index: 9999;
+  top: 4px;
+  left: 50%;
+  display: flex;
+  gap: 5px;
+  padding: 7px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--glass-surface);
+  transform: translateX(-50%);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+}
+
+.viewButton {
+  height: 38px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--komodo-blue);
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.night .viewButton {
+  color: var(--komodo-ivory);
+}
+
+.viewButton:hover,
+.viewButton:focus-visible {
+  background: rgba(187, 149, 13, 0.1);
+}
+
+.viewActive,
+.night .viewActive {
+  background: linear-gradient(135deg, #cda916, var(--komodo-gold));
+  color: #ffffff;
+  box-shadow:
+    0 7px 18px rgba(187, 149, 13, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.availabilityPeek,
+.availabilityCard {
+  border: 1px solid var(--glass-border);
+  background: var(--glass-surface);
+  box-shadow: 0 12px 32px rgba(0, 19, 62, 0.12);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+}
+
+.availabilityPeek {
+  border-radius: 999px;
+}
+
+.availabilityCard {
+  border-radius: 14px;
+}
+
+.availabilityCard > div:last-child {
+  border-top-color: var(--glass-border) !important;
+  color: var(--viewer-text) !important;
+}
+
+.night .availabilityPeek,
+.night .availabilityCard {
+  box-shadow: 0 12px 32px rgba(0, 4, 18, 0.3);
+}
+
+.themeToggle,
+.utilityButton {
+  border: 1px solid var(--glass-border) !important;
+  background: var(--glass-surface) !important;
+  color: var(--viewer-text) !important;
+  box-shadow: var(--glass-shadow) !important;
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+}
+
+.mapControls {
+  position: fixed;
+  z-index: 9999;
+  bottom: 25px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transform: translateX(-50%);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.mapButton {
+  display: grid;
+  min-width: 35px;
+  width: 35px;
+  height: 35px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--glass-surface);
+  color: var(--komodo-blue);
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 19, 62, 0.16);
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  transition:
+    background 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.mapButton:hover,
+.mapButton:focus-visible {
+  background: var(--glass-surface-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 19, 62, 0.2);
+}
+
+.night .mapButton {
+  color: var(--komodo-ivory);
+  box-shadow: 0 8px 24px rgba(0, 4, 18, 0.3);
+}
+
+@media (max-width: 768px) {
+  .privateViewer::before {
+    background-size: min(88vw, 680px) auto;
+  }
+
+  .mapControls {
+    bottom: 18px;
+    gap: 8px;
+  }
+}

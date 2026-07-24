@@ -128,27 +128,9 @@ export default function Sidebar({ profile, open = false, onClose }: Props) {
   return (
     <aside
       className={`crm-sidebar ${open ? "is-open" : ""}`}
-      style={{
-        width: 260,
-        minHeight: "100vh",
-        background:
-          "linear-gradient(180deg,#0b2f24,#08251d)",
-        color: "#fff",
-        padding: 22,
-        position: "sticky",
-        top: 0,
-        height: "100vh",
-        overflowY: "auto",
-      }}
     >
       <div className="crm-sidebar-heading">
-        <div
-          style={{
-            fontSize: 20,
-            fontWeight: 900,
-            letterSpacing: ".4px",
-          }}
-        >
+        <div className="crm-sidebar-brand">
           Las Lomas CRM
         </div>
         <button
@@ -178,18 +160,7 @@ export default function Sidebar({ profile, open = false, onClose }: Props) {
                     key={link.href}
                     href={link.href}
                     onClick={onClose}
-                    className="crm-sidebar-link"
-                    style={{
-                      textDecoration: "none",
-                      color: active ? "#0b2f24" : "#d9eadf",
-                      background: active
-                        ? "#f5e6b8"
-                        : "rgba(255,255,255,.06)",
-                      border: "1px solid rgba(255,255,255,.08)",
-                      borderRadius: 8,
-                      padding: "11px 13px",
-                      fontWeight: 800,
-                    }}
+                    className={`crm-sidebar-link ${active ? "is-active" : ""}`}
                   >
                     {label}
                   </Link>

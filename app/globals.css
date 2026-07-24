@@ -642,6 +642,242 @@ select {
   opacity: 0.82;
 }
 
+/* Komodo visual system for the CRM shell. */
+.crm-shell {
+  --komodo-blue: #00133e;
+  --komodo-blue-soft: #092557;
+  --komodo-gold: #bb950d;
+  --komodo-ivory: #f8f4ec;
+  --komodo-border: rgba(0, 19, 62, 0.13);
+  background:
+    radial-gradient(circle at 88% 0%, rgba(187, 149, 13, 0.08), transparent 30%),
+    var(--komodo-ivory);
+}
+
+.crm-sidebar {
+  position: sticky;
+  top: 0;
+  width: 260px;
+  height: 100vh;
+  min-height: 100vh;
+  padding: 22px;
+  overflow-y: auto;
+  border-right: 1px solid rgba(248, 244, 236, 0.13);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(187, 149, 13, 0.14), transparent 28%),
+    linear-gradient(180deg, #001b53 0%, var(--komodo-blue) 54%, #000d2c 100%);
+  color: var(--komodo-ivory);
+  box-shadow: 10px 0 34px rgba(0, 10, 34, 0.16);
+}
+
+.crm-sidebar-brand {
+  color: var(--komodo-ivory);
+  font-size: 20px;
+  font-weight: 950;
+  letter-spacing: 0.025em;
+}
+
+.crm-sidebar-brand::after {
+  display: block;
+  width: 42px;
+  height: 3px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: var(--komodo-gold);
+  content: "";
+}
+
+.crm-sidebar-group-title {
+  color: rgba(248, 244, 236, 0.56);
+}
+
+.crm-sidebar-link {
+  padding: 11px 13px;
+  border: 1px solid rgba(248, 244, 236, 0.09);
+  border-radius: 9px;
+  background: rgba(248, 244, 236, 0.055);
+  color: rgba(248, 244, 236, 0.82);
+  font-weight: 800;
+  text-decoration: none;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.crm-sidebar-link:hover,
+.crm-sidebar-link:focus-visible {
+  border-color: rgba(248, 244, 236, 0.2);
+  background: rgba(248, 244, 236, 0.1);
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+.crm-sidebar-link.is-active {
+  border-color: rgba(255, 255, 255, 0.26);
+  background: linear-gradient(135deg, #cda916, var(--komodo-gold));
+  color: var(--komodo-blue);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.crm-header {
+  border-bottom-color: var(--komodo-border);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 26px rgba(0, 19, 62, 0.07);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+}
+
+.crm-header-eyebrow {
+  color: #777167;
+}
+
+.crm-header-title,
+.crm-profile-name,
+.crm-page-title {
+  color: var(--komodo-blue);
+}
+
+.crm-theme-button {
+  border-color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--komodo-blue);
+  box-shadow: 0 7px 20px rgba(0, 19, 62, 0.12);
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+}
+
+.crm-logout-button {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: var(--komodo-blue);
+  box-shadow: 0 8px 20px rgba(0, 19, 62, 0.18);
+}
+
+.crm-main {
+  min-height: calc(100vh - 72px);
+  background:
+    radial-gradient(circle at 96% 0%, rgba(187, 149, 13, 0.075), transparent 26%),
+    var(--komodo-ivory);
+}
+
+.crm-page-heading {
+  padding-left: 15px;
+  border-left: 3px solid var(--komodo-gold);
+}
+
+.crm-page-subtitle {
+  color: #6d6b68;
+}
+
+.crm-shell:not(.crm-night) .crm-main article,
+.crm-shell:not(.crm-night) .crm-main table {
+  border-color: var(--komodo-border) !important;
+  box-shadow: 0 12px 30px rgba(0, 19, 62, 0.07);
+}
+
+.crm-shell:not(.crm-night) .crm-main th {
+  border-color: rgba(0, 19, 62, 0.11) !important;
+  background: #f1eadb !important;
+  color: var(--komodo-blue) !important;
+}
+
+.crm-shell:not(.crm-night) .crm-main input:focus,
+.crm-shell:not(.crm-night) .crm-main select:focus,
+.crm-shell:not(.crm-night) .crm-main textarea:focus {
+  border-color: var(--komodo-gold) !important;
+  outline: 3px solid rgba(187, 149, 13, 0.12) !important;
+  outline-offset: 0;
+}
+
+.crm-shell:not(.crm-night) .crm-main button[style*="background: rgb(47, 125, 70)"],
+.crm-shell:not(.crm-night) .crm-main a[style*="background: rgb(47, 125, 70)"] {
+  border-color: var(--komodo-blue) !important;
+  background: var(--komodo-blue) !important;
+  color: #ffffff !important;
+}
+
+.crm-night {
+  background: var(--komodo-blue) !important;
+}
+
+.crm-night .crm-header {
+  border-color: rgba(248, 244, 236, 0.14) !important;
+  background: rgba(5, 24, 61, 0.82) !important;
+  box-shadow: 0 8px 26px rgba(0, 4, 18, 0.3);
+}
+
+.crm-night .crm-theme-button {
+  border-color: rgba(248, 244, 236, 0.2);
+  background: rgba(248, 244, 236, 0.08);
+  color: var(--komodo-ivory);
+}
+
+.crm-night .crm-main {
+  background:
+    radial-gradient(circle at 96% 0%, rgba(187, 149, 13, 0.08), transparent 28%),
+    var(--komodo-blue);
+}
+
+.crm-night .crm-page-heading {
+  border-left-color: var(--komodo-gold);
+}
+
+.crm-night .crm-main article,
+.crm-night .crm-main table,
+.crm-night .crm-main [style*="background: rgb(255, 255, 255)"],
+.crm-night .crm-main [style*="background-color: rgb(255, 255, 255)"] {
+  border-color: rgba(248, 244, 236, 0.15) !important;
+  background: #061b46 !important;
+  color: var(--komodo-ivory) !important;
+}
+
+.crm-night .crm-main thead,
+.crm-night .crm-main th {
+  border-color: rgba(248, 244, 236, 0.14) !important;
+  background: #0b285d !important;
+  color: #f3e7b9 !important;
+}
+
+.crm-night .crm-main tbody,
+.crm-night .crm-main tr,
+.crm-night .crm-main td {
+  border-color: rgba(248, 244, 236, 0.1) !important;
+  background-color: #061b46 !important;
+  color: #f3f1ec !important;
+}
+
+.crm-night .crm-main tbody tr:nth-child(even) td {
+  background-color: #04173d !important;
+}
+
+.crm-night .crm-main input,
+.crm-night .crm-main select,
+.crm-night .crm-main textarea {
+  border-color: rgba(248, 244, 236, 0.19) !important;
+  background-color: #0b285d !important;
+  color: var(--komodo-ivory) !important;
+}
+
+.crm-night .crm-main a {
+  color: #e0bd3e;
+}
+
+.crm-night .crm-logout-button {
+  border-color: rgba(248, 244, 236, 0.18);
+  background: var(--komodo-gold) !important;
+  color: var(--komodo-blue);
+}
+
+.crm-night .crm-main button[style*="background: rgb(47, 125, 70)"],
+.crm-night .crm-main a[style*="background: rgb(47, 125, 70)"] {
+  border-color: var(--komodo-gold) !important;
+  background: var(--komodo-gold) !important;
+  color: var(--komodo-blue) !important;
+}
+
 .cotizador-private-loading {
   position: fixed;
   inset: 0;
