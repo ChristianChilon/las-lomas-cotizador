@@ -8,8 +8,8 @@
   --komodo-blue: #00133e;
   --komodo-gold: #bb950d;
   --komodo-ivory: #f8f4ec;
-  --glass-surface: rgba(255, 255, 255, 0.8);
-  --glass-surface-hover: rgba(255, 255, 255, 0.92);
+  --glass-surface: rgba(255, 255, 255, 0.85);
+  --glass-surface-hover: rgba(255, 255, 255, 0.95);
   --glass-border: rgba(255, 255, 255, 0.88);
   --glass-shadow: 0 8px 28px rgba(0, 19, 62, 0.14);
   position: fixed;
@@ -31,8 +31,8 @@
   --text: #f8f4ec;
   --muted: #bbb8b1;
   --brand: #d6ad1f;
-  --glass-surface: rgba(27, 29, 32, 0.82);
-  --glass-surface-hover: rgba(43, 46, 50, 0.92);
+  --glass-surface: rgba(27, 29, 32, 0.87);
+  --glass-surface-hover: rgba(43, 46, 50, 0.95);
   --glass-border: rgba(248, 244, 236, 0.24);
   --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.34);
   background: #111315;

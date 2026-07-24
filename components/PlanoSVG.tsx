@@ -143,14 +143,14 @@ export default function PlanoSVG({
         }
 
         tooltip.style.background = modoNoche
-          ? "rgba(27,29,32,.88)"
-          : "rgba(248,244,236,.86)";
+          ? "rgba(27,29,32,.76)"
+          : "rgba(248,244,236,.72)";
         tooltip.style.color = modoNoche
           ? "#f3f7ef"
           : "#17211b";
         tooltip.style.borderColor = modoNoche
-          ? "rgba(248,244,236,.26)"
-          : "rgba(255,255,255,.90)";
+          ? "rgba(248,244,236,.30)"
+          : "rgba(255,255,255,.78)";
 
         let loteActivo: SVGPathElement | null = null;
         let loteClon: SVGPathElement | null = null;
