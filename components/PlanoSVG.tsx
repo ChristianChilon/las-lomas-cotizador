@@ -147,8 +147,8 @@ export default function PlanoSVG({
         }
 
         tooltip.style.background = modoNoche
-          ? "rgba(27,29,32,.66)"
-          : "rgba(248,244,236,.58)";
+          ? "rgba(27,29,32,.60)"
+          : "rgba(248,244,236,.52)";
         tooltip.style.color = modoNoche
           ? "#f3f7ef"
           : "#17211b";
