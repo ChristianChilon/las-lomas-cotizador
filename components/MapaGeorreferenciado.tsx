@@ -137,7 +137,6 @@ export default function MapaGeorreferenciado({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const boundsRef = useRef<LatLngBounds | null>(null);
-  const environmentBoundsRef = useRef<LatLngBounds | null>(null);
   const lotLayersRef = useRef<Map<string, LeafletGeoJSON>>(new Map());
   const perimeterLayerRef = useRef<LeafletGeoJSON | null>(null);
   const lotesRef = useRef(lotes);
@@ -259,7 +258,7 @@ export default function MapaGeorreferenciado({
           },
         }).addTo(mapa);
 
-        const capaRutas = L.geoJSON(rutas, {
+        L.geoJSON(rutas, {
           pane: "rutas-entorno-las-lomas",
           style: (feature) => ({
             color:
@@ -277,7 +276,7 @@ export default function MapaGeorreferenciado({
           },
         }).addTo(mapa);
 
-        const capaPuntos = L.geoJSON(puntos, {
+        L.geoJSON(puntos, {
           pane: "puntos-entorno-las-lomas",
           pointToLayer: (feature, latlng) => {
             const esProyecto =
@@ -317,14 +316,6 @@ export default function MapaGeorreferenciado({
             });
           },
         }).addTo(mapa);
-
-        const limitesEntorno = L.featureGroup([
-          capaRutas,
-          capaPuntos,
-        ]).getBounds();
-        if (limitesEntorno.isValid()) {
-          environmentBoundsRef.current = limitesEntorno;
-        }
 
         const paneFondo = mapa.createPane("fondo-plano-las-lomas");
         paneFondo.style.zIndex = "350";
@@ -517,7 +508,6 @@ export default function MapaGeorreferenciado({
       capasLotes.clear();
       perimeterLayerRef.current = null;
       boundsRef.current = null;
-      environmentBoundsRef.current = null;
       mapRef.current?.remove();
       mapRef.current = null;
     };
@@ -571,14 +561,6 @@ export default function MapaGeorreferenciado({
     });
   };
 
-  const verRutas = () => {
-    if (!mapRef.current || !environmentBoundsRef.current?.isValid()) return;
-
-    mapRef.current.fitBounds(environmentBoundsRef.current, {
-      padding: [36, 36],
-    });
-  };
-
   return (
     <div className={styles.shell}>
       <div
@@ -602,9 +584,6 @@ export default function MapaGeorreferenciado({
         </button>
         <button type="button" onClick={verEntorno}>
           Ver entorno
-        </button>
-        <button type="button" onClick={verRutas}>
-          Rutas
         </button>
       </div>
 
