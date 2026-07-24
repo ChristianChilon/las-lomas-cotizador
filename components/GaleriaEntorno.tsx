@@ -6,7 +6,10 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import styles from "./GaleriaEntorno.module.css";
 
-export type DestinoGaleria = "las-lomas" | "playa-malabrigo";
+export type DestinoGaleria =
+  | "las-lomas"
+  | "playa-malabrigo"
+  | "paijan";
 
 type FotoGaleria = {
   src: string;
@@ -122,6 +125,23 @@ const GALERIAS: Record<DestinoGaleria, ConfiguracionGaleria> = {
           {
             src: "/galeria/playa-malabrigo/04.webp",
             alt: "Paseo costero de Playa Malabrigo",
+          },
+        ],
+      },
+    ],
+  },
+  paijan: {
+    titulo: "Paiján",
+    contexto: "A 15 minutos del proyecto",
+    categoriaInicial: "paijan",
+    categorias: [
+      {
+        id: "paijan",
+        label: "Paiján",
+        fotos: [
+          {
+            src: "/galeria/paijan/01.webp",
+            alt: "Vista de la Plaza de Armas de Paiján",
           },
         ],
       },

@@ -91,6 +91,7 @@ const CENTRO_PROYECTO: [number, number] = [
 const GALERIAS_POR_PUNTO: Partial<Record<string, DestinoGaleria>> = {
   "LAS LOMAS DE MALABRIGO": "las-lomas",
   "PLAYA MALABRIGO": "playa-malabrigo",
+  PAIJAN: "paijan",
 };
 
 const FONDO_PLANO = {
@@ -307,7 +308,7 @@ export default function MapaGeorreferenciado({
             );
             return L.circleMarker(latlng, {
               pane: "puntos-entorno-las-lomas",
-              radius: tieneGaleria ? 7.5 : 5.5,
+              radius: tieneGaleria ? 8.5 : 5.5,
               color: "#ffffff",
               fillColor: esProyecto ? "#d69a2d" : "#173f2b",
               fillOpacity: 1,
@@ -341,10 +342,12 @@ export default function MapaGeorreferenciado({
               opacity: 1,
             });
             if (destinoGaleria) {
-              layer.on("click", () => {
+              const abrirGaleria = () => {
                 mapa.closePopup();
                 setGaleriaActiva(destinoGaleria);
-              });
+              };
+              layer.on("click", abrirGaleria);
+              layer.getTooltip()?.on("click", abrirGaleria);
             } else {
               layer.bindPopup(contenido, {
                 closeButton: true,
