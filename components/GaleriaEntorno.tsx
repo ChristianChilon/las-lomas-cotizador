@@ -236,7 +236,9 @@ export default function GaleriaEntorno({
       }}
     >
       <section
-        className={styles.dialog}
+        className={`${styles.dialog} ${
+          galeria.categorias.length === 1 ? styles.singleCategory : ""
+        }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="titulo-galeria-entorno"

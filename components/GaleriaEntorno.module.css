@@ -27,6 +27,10 @@
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.52);
 }
 
+.singleCategory {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -322,6 +326,16 @@
 
   .stage {
     grid-column: 2;
+    grid-row: 2;
+  }
+
+  .singleCategory {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .singleCategory .stage {
+    grid-column: 1;
     grid-row: 2;
   }
 }
