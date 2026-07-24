@@ -2,9 +2,12 @@
 
 import type {
   GeoJSON as LeafletGeoJSON,
+  LatLngExpression,
   LatLngBounds,
   Map as LeafletMap,
   PathOptions,
+  Point,
+  ZoomAnimEvent,
 } from "leaflet";
 import type { GeoJsonObject } from "geojson";
 import { useEffect, useRef, useState } from "react";
@@ -67,6 +70,14 @@ type Props = {
   modoNoche?: boolean;
   onSeleccionarLote: (lote: LoteMapa) => void;
   onVerEnPlano: (lote: LoteMapa) => void;
+};
+
+type MapaConProyeccionAnimada = LeafletMap & {
+  _latLngToNewLayerPoint: (
+    latlng: LatLngExpression,
+    zoom: number,
+    center: LatLngExpression
+  ) => Point;
 };
 
 const CENTRO_PROYECTO: [number, number] = [
@@ -324,7 +335,7 @@ export default function MapaGeorreferenciado({
         const fondoPlano = document.createElement("img");
         fondoPlano.src = "/plano-fondo-mapa.webp";
         fondoPlano.alt = "";
-        fondoPlano.className = styles.planOverlay;
+        fondoPlano.className = `${styles.planOverlay} leaflet-zoom-animated`;
         fondoPlano.style.width = `${FONDO_PLANO.ancho}px`;
         fondoPlano.style.height = `${FONDO_PLANO.alto}px`;
         paneFondo.appendChild(fondoPlano);
@@ -336,21 +347,17 @@ export default function MapaGeorreferenciado({
         const svgPlano = document.createElement("img");
         svgPlano.src = "/plano-lotes.svg";
         svgPlano.alt = "";
-        svgPlano.className = styles.svgOverlay;
+        svgPlano.className = `${styles.svgOverlay} leaflet-zoom-animated`;
         svgPlano.style.width = `${FONDO_PLANO.ancho}px`;
         svgPlano.style.height = `${FONDO_PLANO.alto}px`;
         paneSvg.appendChild(svgPlano);
 
-        const ubicarFondoPlano = () => {
-          const superiorIzquierda = mapa.latLngToLayerPoint(
-            FONDO_PLANO.superiorIzquierda
-          );
-          const superiorDerecha = mapa.latLngToLayerPoint(
-            FONDO_PLANO.superiorDerecha
-          );
-          const inferiorIzquierda = mapa.latLngToLayerPoint(
-            FONDO_PLANO.inferiorIzquierda
-          );
+        const aplicarTransformacionPlano = (
+          proyectar: (coordenadas: LatLngExpression) => Point
+        ) => {
+          const superiorIzquierda = proyectar(FONDO_PLANO.superiorIzquierda);
+          const superiorDerecha = proyectar(FONDO_PLANO.superiorDerecha);
+          const inferiorIzquierda = proyectar(FONDO_PLANO.inferiorIzquierda);
 
           const a =
             (superiorDerecha.x - superiorIzquierda.x) / FONDO_PLANO.ancho;
@@ -366,9 +373,27 @@ export default function MapaGeorreferenciado({
           svgPlano.style.transform = transformacion;
         };
 
+        const ubicarFondoPlano = () => {
+          aplicarTransformacionPlano((coordenadas) =>
+            mapa.latLngToLayerPoint(coordenadas)
+          );
+        };
+
+        const animarFondoPlano = (evento: ZoomAnimEvent) => {
+          const mapaAnimado = mapa as MapaConProyeccionAnimada;
+          aplicarTransformacionPlano((coordenadas) =>
+            mapaAnimado._latLngToNewLayerPoint(
+              coordenadas,
+              evento.zoom,
+              evento.center
+            )
+          );
+        };
+
         fondoPlano.addEventListener("load", ubicarFondoPlano, { once: true });
         svgPlano.addEventListener("load", ubicarFondoPlano, { once: true });
-        mapa.on("zoomend moveend resize viewreset", ubicarFondoPlano);
+        mapa.on("zoom moveend resize viewreset", ubicarFondoPlano);
+        mapa.on("zoomanim", animarFondoPlano);
         ubicarFondoPlano();
 
         const perimetro = datos.features.find(

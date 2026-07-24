@@ -21,6 +21,8 @@
   pointer-events: none;
   transform-origin: 0 0;
   user-select: none;
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 .planOverlay {
