@@ -59,7 +59,7 @@
 .mapActions {
   position: absolute;
   z-index: 650;
-  top: 14px;
+  top: var(--map-actions-top, 14px);
   right: 14px;
   display: flex;
   gap: 7px;
