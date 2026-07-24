@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import styles from "./GaleriaEntorno.module.css";
 
 export type DestinoGaleria = "las-lomas" | "playa-malabrigo";
@@ -20,6 +21,7 @@ type CategoriaGaleria = {
 
 type ConfiguracionGaleria = {
   titulo: string;
+  contexto: string;
   categoriaInicial: string;
   categorias: CategoriaGaleria[];
 };
@@ -27,6 +29,7 @@ type ConfiguracionGaleria = {
 const GALERIAS: Record<DestinoGaleria, ConfiguracionGaleria> = {
   "las-lomas": {
     titulo: "Las Lomas de Malabrigo",
+    contexto: "El proyecto",
     categoriaInicial: "portico",
     categorias: [
       {
@@ -97,6 +100,7 @@ const GALERIAS: Record<DestinoGaleria, ConfiguracionGaleria> = {
   },
   "playa-malabrigo": {
     titulo: "Playa Malabrigo",
+    contexto: "A 4 minutos del proyecto",
     categoriaInicial: "playa",
     categorias: [
       {
@@ -203,7 +207,7 @@ export default function GaleriaEntorno({
     moverFoto(diferencia < 0 ? 1 : -1);
   };
 
-  return (
+  return createPortal(
     <div
       className={`${styles.overlay} ${modoNoche ? styles.night : ""}`}
       role="presentation"
@@ -219,7 +223,7 @@ export default function GaleriaEntorno({
       >
         <header className={styles.header}>
           <div>
-            <span className={styles.eyebrow}>Galería de fotos</span>
+            <span className={styles.eyebrow}>{galeria.contexto}</span>
             <h2 id="titulo-galeria-entorno">{galeria.titulo}</h2>
           </div>
           <button
@@ -260,6 +264,16 @@ export default function GaleriaEntorno({
           onTouchEnd={finalizarToque}
         >
           <Image
+            key={`fondo-${categoria.fotos[fotoActiva].src}`}
+            src={categoria.fotos[fotoActiva].src}
+            alt=""
+            fill
+            sizes="100vw"
+            className={styles.photoBackdrop}
+            aria-hidden="true"
+            draggable={false}
+          />
+          <Image
             key={categoria.fotos[fotoActiva].src}
             src={categoria.fotos[fotoActiva].src}
             alt={categoria.fotos[fotoActiva].alt}
@@ -298,6 +312,7 @@ export default function GaleriaEntorno({
           </figcaption>
         </figure>
       </section>
-    </div>
+    </div>,
+    document.body
   );
 }
