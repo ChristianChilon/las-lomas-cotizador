@@ -10,6 +10,7 @@ import {
 } from "react-zoom-pan-pinch";
 
 import PlanoSVG from "../../../components/PlanoSVG";
+import MapaGeorreferenciado from "../../../components/MapaGeorreferenciado";
 import { obtenerPerfilActual } from "../../../lib/auth/clientAuth";
 import {
   calcularEscalaEncuadre,
@@ -155,7 +156,7 @@ export default function Home() {
   ] = useState(false);
 
   const [vista, setVista] =
-    useState<"mapa" | "tabla">(
+    useState<"mapa" | "ubicacion" | "tabla">(
       "mapa"
     );
 
@@ -701,6 +702,17 @@ Quisiera más información.`;
           }
         >
           PLANO
+        </button>
+
+        <button
+          className={`vista-switch-button ${styles.viewButton} ${
+            vista === "ubicacion" ? styles.viewActive : ""
+          }`}
+          onClick={() =>
+            setVista("ubicacion")
+          }
+        >
+          SATÉLITE
         </button>
 
         <button
@@ -1301,6 +1313,44 @@ Quisiera más información.`;
                   modoNoche={modoNoche}
                 />
               </TransformComponent>
+            )}
+
+            {vista === "ubicacion" && (
+              <section
+                className={styles.satelliteView}
+                aria-label="Mapa satelital del proyecto"
+              >
+                <MapaGeorreferenciado
+                  lotes={lotes}
+                  seleccionActivaId={loteSeleccionado?.id ?? null}
+                  modoNoche={modoNoche}
+                  onSeleccionarLote={(lote) => {
+                    setLoteSeleccionado({
+                      id: lote.id,
+                      nombre: `MZ ${lote.mz} - Lote ${lote.lote}`,
+                      area: lote.area,
+                      precio: lote.precio,
+                      estado: lote.estado,
+                    });
+                    setLoteUbicado({ ...lote });
+                  }}
+                  onVerEnPlano={(lote) => {
+                    setLoteSeleccionado({
+                      id: lote.id,
+                      nombre: `MZ ${lote.mz} - Lote ${lote.lote}`,
+                      area: lote.area,
+                      precio: lote.precio,
+                      estado: lote.estado,
+                    });
+                    setLoteUbicado({ ...lote });
+                    setVista("mapa");
+
+                    window.setTimeout(() => {
+                      zoomToElement(lote.svg_id, 3, 700);
+                    }, 500);
+                  }}
+                />
+              </section>
             )}
 
             {vista === "tabla" && (

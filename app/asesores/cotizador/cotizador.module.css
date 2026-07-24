@@ -31,11 +31,6 @@
   pointer-events: none;
 }
 
-.privateViewer > div {
-  position: relative;
-  z-index: 1;
-}
-
 .night {
   --viewer-bg: #00133e;
   --viewer-text: #f8f4ec;
@@ -188,6 +183,14 @@
 .night .mapButton {
   color: var(--komodo-ivory);
   box-shadow: 0 8px 24px rgba(0, 4, 18, 0.3);
+}
+
+.satelliteView {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  background: #d9ded6;
 }
 
 @media (max-width: 768px) {
